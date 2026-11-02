@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { Phone, Share2, Check, ArrowLeft, AlertCircle } from 'lucide-react'
+import { format } from 'date-fns'
 import Layout from '../components/layout/Layout'
 import PhotoGallery from '../components/gallery/PhotoGallery'
 import SpecsGrid from '../components/detail/SpecsGrid'
 import AmenitiesList from '../components/detail/AmenitiesList'
 import MapPlaceholder from '../components/detail/MapPlaceholder'
+import AvailabilityCalendar from '../components/booking/AvailabilityCalendar'
 import { useAuditoriumDetail } from '../hooks/useAuditoriumDetail'
 import { useAuth } from '../contexts/AuthContext'
-import { formatCurrency } from '../lib/utils'
+import { formatCurrency, cn } from '../lib/utils'
 import type { Auditorium, City } from '../lib/types'
 
 interface JoinedAuditorium extends Auditorium {
@@ -29,6 +31,9 @@ export default function AuditoriumDetailPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [copied, setCopied] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedPrice, setSelectedPrice] = useState<number>(0)
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
 
   const handleShare = async () => {
     try {
@@ -40,16 +45,6 @@ export default function AuditoriumDetailPage() {
     }
   }
 
-  const handleBookNow = () => {
-    if (!user) {
-      navigate('/auth/login', { state: { returnUrl: location.pathname } })
-    } else {
-      const widget = document.getElementById('booking-section')
-      if (widget) {
-        widget.scrollIntoView({ behavior: 'smooth' })
-      }
-    }
-  }
 
   // Loading Skeleton State
   if (isLoading) {
@@ -195,15 +190,68 @@ export default function AuditoriumDetailPage() {
                 <p className="text-xs text-gray-500 mt-1">30% advance on booking</p>
               </div>
 
+              {/* Availability Calendar */}
+              <AvailabilityCalendar
+                auditoriumId={auditorium.id}
+                basePricePerDay={auditorium.base_price_per_day}
+                selectedDate={selectedDate}
+                onDateSelect={(date, price) => {
+                  setSelectedDate(date)
+                  setSelectedPrice(price)
+                }}
+              />
+
+              {/* Selected Date Summary */}
+              {selectedDate && (
+                <div className="bg-brand-accent/50 border border-brand-primary/20 rounded-xl p-3.5 space-y-1.5 text-sm">
+                  <div className="flex justify-between items-center text-gray-700">
+                    <span className="text-xs font-semibold text-gray-500 uppercase">Selected</span>
+                    <span className="font-semibold text-gray-900">
+                      {format(selectedDate, 'EEEE, d MMM yyyy')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-gray-700">
+                    <span className="text-xs font-semibold text-gray-500 uppercase">Total</span>
+                    <span className="font-bold text-brand-primary">
+                      {formatCurrency(selectedPrice)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-gray-700 border-t border-brand-primary/10 pt-1.5">
+                    <span className="text-xs font-semibold text-gray-500 uppercase">Advance (30%)</span>
+                    <span className="font-bold text-brand-dark">
+                      {formatCurrency(selectedPrice * 0.3)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* Action Buttons */}
-              <div className="space-y-2.5 pt-2">
+              <div className="space-y-2.5 pt-1">
                 <button
                   type="button"
-                  onClick={handleBookNow}
-                  className="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-brand-primary hover:bg-brand-primary/95 shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+                  disabled={!selectedDate}
+                  onClick={() => {
+                    if (!selectedDate) return
+                    if (!user) {
+                      navigate('/auth/login', { state: { returnUrl: location.pathname } })
+                    } else {
+                      setIsBookingModalOpen(true)
+                    }
+                  }}
+                  className={cn(
+                    'w-full py-3.5 px-4 rounded-xl font-bold text-white shadow-md transition-all',
+                    selectedDate
+                      ? 'bg-brand-primary hover:bg-brand-primary/95 hover:shadow-lg active:scale-[0.98] cursor-pointer'
+                      : 'bg-gray-300 cursor-not-allowed shadow-none'
+                  )}
                 >
-                  Book Now
+                  Book This Date
                 </button>
+
+                {/* Booking modal placeholder for Plan 3.3 */}
+                {isBookingModalOpen && (
+                  <div className="sr-only" aria-hidden="true">Booking modal open</div>
+                )}
 
                 <button
                   type="button"
