@@ -35,9 +35,11 @@ Project directory: `c:\Users\ABHI\OneDrive\Documents\WEDS\wed-app`
 
 ## Completed in Phase 1
 - Plan 1.1: Vite + React + Tailwind + Dependencies Scaffold (Commits: 8bbda7e, 802ade0)
+- Plan 1.2: Database schema migration and RLS policies (Commit: 3bb1079)
+- Plan 1.3: Supabase client, AuthContext, Types & Routing Skeleton (Commits: 3bb1079, 6379f3f)
 
 ## Next Action
-Execute Phase 1, Plan 2 (Supabase schema) or Plan 3 (Supabase Client + Types)
+Phase 1 complete! Ready for Phase 2 (Customer Discovery & Booking Flow).
 
 ## User Setup Required Before Execution
 1. Create Supabase project at supabase.com → get URL + anon key
