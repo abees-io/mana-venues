@@ -2,7 +2,7 @@ export type Role = 'customer' | 'vendor' | 'admin'
 export type PricingSlotStatus = 'available' | 'booked' | 'blocked'
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled'
 
-export interface Profile {
+export type Profile = {
   id: string
   full_name: string
   email: string
@@ -12,7 +12,7 @@ export interface Profile {
   created_at: string
 }
 
-export interface City {
+export type City = {
   id: string
   name: string
   slug: string
@@ -21,7 +21,7 @@ export interface City {
   created_at: string
 }
 
-export interface Auditorium {
+export type Auditorium = {
   id: string
   owner_id: string | null
   city_id: string | null
@@ -40,7 +40,7 @@ export interface Auditorium {
   created_at: string
 }
 
-export interface PricingSlot {
+export type PricingSlot = {
   id: string
   auditorium_id: string
   date: string
@@ -48,7 +48,7 @@ export interface PricingSlot {
   status: PricingSlotStatus
 }
 
-export interface Booking {
+export type Booking = {
   id: string
   customer_id: string | null
   auditorium_id: string | null
@@ -61,7 +61,7 @@ export interface Booking {
   created_at: string
 }
 
-export interface NewBooking {
+export type NewBooking = {
   id?: string
   customer_id?: string | null
   auditorium_id?: string | null
@@ -74,7 +74,7 @@ export interface NewBooking {
   created_at?: string
 }
 
-export interface UpdateBooking {
+export type UpdateBooking = {
   id?: string
   customer_id?: string | null
   auditorium_id?: string | null
@@ -87,7 +87,7 @@ export interface UpdateBooking {
   created_at?: string
 }
 
-export interface NewAuditorium {
+export type NewAuditorium = {
   id?: string
   owner_id?: string | null
   city_id?: string | null
@@ -106,7 +106,7 @@ export interface NewAuditorium {
   created_at?: string
 }
 
-export interface UpdateAuditorium {
+export type UpdateAuditorium = {
   id?: string
   owner_id?: string | null
   city_id?: string | null
@@ -125,7 +125,7 @@ export interface UpdateAuditorium {
   created_at?: string
 }
 
-export interface NewProfile {
+export type NewProfile = {
   id: string
   email: string
   full_name?: string
@@ -135,14 +135,14 @@ export interface NewProfile {
   created_at?: string
 }
 
-export interface UpdateProfile {
+export type UpdateProfile = {
   full_name?: string
   phone?: string | null
   role?: Role
   avatar_url?: string | null
 }
 
-export interface NewCity {
+export type NewCity = {
   id?: string
   name: string
   slug: string
@@ -151,7 +151,7 @@ export interface NewCity {
   created_at?: string
 }
 
-export interface NewPricingSlot {
+export type NewPricingSlot = {
   id?: string
   auditorium_id: string
   date: string

@@ -34,7 +34,7 @@ export function useAuditoriums(citySlug?: string | null, filters?: Partial<Filte
 
       const { data, error } = await query
       if (error) throw error
-      return (data ?? []) as (Auditorium & { cities: { id: string; name: string; slug: string; state: string } | null })[]
+      return (data ?? []) as unknown as (Auditorium & { cities: { id: string; name: string; slug: string; state: string } | null })[]
     },
     staleTime: 5 * 60 * 1000,
   })
