@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { MapPin, X, Check, RefreshCw } from 'lucide-react'
 import { useCities } from '../../hooks/useCities'
 import { useCityStore } from '../../store/cityStore'
@@ -13,7 +14,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
   const { data: cities, isLoading, isError, refetch } = useCities()
   const { selectedCity, setCity } = useCityStore()
 
-  // Close on Escape key press
+  // Close on Escape key press and prevent body scroll
   useEffect(() => {
     if (!isOpen) return
 
@@ -23,8 +24,14 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       }
     }
 
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = originalOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
   }, [isOpen, onClose])
 
   if (!isOpen) return null
@@ -38,28 +45,28 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
     onClose()
   }
 
-  return (
+  const modalContent = (
     <div
       onClick={onClose}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-200"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="location-modal-title"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative transform transition-all duration-200 ease-out translate-y-0 opacity-100"
+        className="bg-white rounded-2xl p-5 sm:p-6 max-w-sm w-full mx-auto shadow-2xl relative my-auto animate-in fade-in zoom-in-95 duration-150 border border-gray-100"
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-brand-accent flex items-center justify-center text-brand-primary">
+        <div className="flex items-center justify-between pb-3.5 border-b border-gray-100 mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-brand-accent flex items-center justify-center text-brand-primary shrink-0">
               <MapPin className="w-4 h-4" />
             </div>
             <div>
               <h2
                 id="location-modal-title"
-                className="text-lg font-bold text-brand-dark"
+                className="text-base sm:text-lg font-bold text-brand-dark"
               >
                 Choose Your City
               </h2>
@@ -69,7 +76,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors shrink-0"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -77,15 +84,15 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
         </div>
 
         {/* Modal Content */}
-        <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
           {isLoading && (
-            <div className="space-y-3 py-2">
+            <div className="space-y-2.5 py-2">
               {[1, 2, 3].map((n) => (
                 <div
                   key={n}
                   className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 animate-pulse"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gray-200" />
+                  <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0" />
                   <div className="flex-1 space-y-1.5">
                     <div className="w-24 h-4 bg-gray-200 rounded" />
                     <div className="w-16 h-3 bg-gray-200 rounded" />
@@ -127,11 +134,11 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
                   onClick={() => handleSelectCity(city)}
                   className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all ${
                     isSelected
-                      ? 'bg-brand-accent border border-brand-primary/30 text-brand-primary'
+                      ? 'bg-brand-accent border border-brand-primary/30 text-brand-primary font-semibold'
                       : 'hover:bg-gray-50 text-gray-800 border border-transparent'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                         isSelected
@@ -141,13 +148,13 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
                     >
                       <MapPin className="w-4 h-4" />
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold">{city.name}</p>
-                      <p className="text-xs text-gray-400">{city.state}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate">{city.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{city.state}</p>
                     </div>
                   </div>
                   {isSelected && (
-                    <Check className="w-4 h-4 text-brand-primary shrink-0" />
+                    <Check className="w-4 h-4 text-brand-primary shrink-0 ml-2" />
                   )}
                 </button>
               )
@@ -156,4 +163,9 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       </div>
     </div>
   )
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body)
+  }
+  return modalContent
 }

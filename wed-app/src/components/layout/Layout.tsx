@@ -8,7 +8,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-brand-accent flex flex-col">
+    <div className="min-h-screen bg-brand-accent flex flex-col w-full overflow-x-hidden">
       <Header />
       <main className="flex-1 pb-16 md:pb-0">{children}</main>
       <BottomNav />
