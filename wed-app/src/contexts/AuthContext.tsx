@@ -19,7 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, currentUser?: User | null) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -28,7 +28,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .single()
 
       if (error) {
-        console.warn('Error fetching profile:', error.message)
+        console.warn('Profile not found, attempting self-heal:', error.message)
+        const targetUser = currentUser || user
+        if (targetUser) {
+          const { data: createdProfile } = await supabase
+            .from('profiles')
+            .upsert({
+              id: userId,
+              email: targetUser.email || '',
+              full_name: (targetUser.user_metadata?.full_name as string) || '',
+              phone: (targetUser.user_metadata?.phone as string) || null,
+              role: 'customer',
+            })
+            .select()
+            .single()
+
+          if (createdProfile) {
+            setProfile(createdProfile as Profile)
+            return
+          }
+        }
         setProfile(null)
       } else {
         setProfile(data as Profile)
@@ -47,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!isMounted) return
       if (session?.user) {
         setUser(session.user)
-        fetchProfile(session.user.id).finally(() => {
+        fetchProfile(session.user.id, session.user).finally(() => {
           if (isMounted) setLoading(false)
         })
       } else {
@@ -64,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!isMounted) return
       if (session?.user) {
         setUser(session.user)
-        await fetchProfile(session.user.id)
+        await fetchProfile(session.user.id, session.user)
       } else {
         setUser(null)
         setProfile(null)

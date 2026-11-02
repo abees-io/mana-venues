@@ -23,3 +23,4 @@
 ## Verification
 - `npx cap sync` executed and finished in 0.21s with all 3 plugins synchronized
 - Android platform files verified in `wed-app/android/`
+

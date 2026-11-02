@@ -8,4 +8,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Check .env.local')
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
+// Clean URL in case user copied the PostgREST /rest/v1 endpoint directly
+const cleanUrl = supabaseUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '')
+
+export const supabase = createClient<Database>(cleanUrl, supabaseAnonKey)

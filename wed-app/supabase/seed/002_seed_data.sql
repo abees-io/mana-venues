@@ -227,3 +227,4 @@ ON CONFLICT (auditorium_id, date) DO UPDATE
 SET 
   custom_price = EXCLUDED.custom_price,
   status = EXCLUDED.status;
+
