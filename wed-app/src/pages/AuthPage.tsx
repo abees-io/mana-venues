@@ -1,0 +1,176 @@
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+
+interface AuthFormData {
+  email: string
+  password: string
+  fullName?: string
+  phone?: string
+}
+
+export default function AuthPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { signIn, signUp } = useAuth()
+
+  const isRegisterRoute = location.pathname.includes('/register')
+  const [isRegister, setIsRegister] = useState(isRegisterRoute)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<AuthFormData>()
+
+  const toggleMode = () => {
+    setErrorMsg(null)
+    setIsRegister((prev) => !prev)
+    reset()
+  }
+
+  const onSubmit = async (data: AuthFormData) => {
+    setErrorMsg(null)
+    setIsSubmitting(true)
+    try {
+      if (isRegister) {
+        await signUp(data.email, data.password, data.fullName || '', data.phone || '')
+      } else {
+        await signIn(data.email, data.password)
+      }
+      const fromLocation = (location.state as { from?: { pathname: string } })?.from?.pathname
+      navigate(fromLocation || '/', { replace: true })
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setErrorMsg(err.message)
+      } else {
+        setErrorMsg('An unexpected authentication error occurred.')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-accent flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-brand-primary/10">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-brand-primary">WedBook</h1>
+          <p className="text-brand-dark/70 mt-1">
+            {isRegister ? 'Create your WedBook account' : 'Welcome back to WedBook'}
+          </p>
+        </div>
+
+        {errorMsg && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
+            {errorMsg}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {isRegister && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-brand-dark mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Rahul Nair"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
+                  {...register('fullName', {
+                    required: isRegister ? 'Full name is required' : false,
+                  })}
+                />
+                {errors.fullName && (
+                  <p className="text-xs text-red-500 mt-1">{errors.fullName.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-brand-dark mb-1">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  placeholder="e.g. +91 98765 43210"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
+                  {...register('phone')}
+                />
+              </div>
+            </>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-brand-dark mb-1">
+              Email Address
+            </label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
+              {...register('email', {
+                required: 'Email is required',
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: 'Enter a valid email address',
+                },
+              })}
+            />
+            {errors.email && (
+              <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-brand-dark mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
+              {...register('password', {
+                required: 'Password is required',
+                minLength: {
+                  value: 6,
+                  message: 'Password must be at least 6 characters',
+                },
+              })}
+            />
+            {errors.password && (
+              <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting
+              ? 'Please wait...'
+              : isRegister
+              ? 'Create Account'
+              : 'Sign In'}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center text-sm text-brand-dark/70">
+          {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
+          <button
+            type="button"
+            onClick={toggleMode}
+            className="text-brand-primary font-semibold hover:underline"
+          >
+            {isRegister ? 'Sign In' : 'Sign Up'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
