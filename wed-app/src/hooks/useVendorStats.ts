@@ -70,3 +70,4 @@ export function useVendorStats(vendorId?: string) {
     staleTime: 2 * 60 * 1000,
   })
 }
+

@@ -46,3 +46,4 @@ export function useVendorBookings(auditoriumIds: string[], showAll: boolean = fa
     staleTime: 2 * 60 * 1000,
   })
 }
+

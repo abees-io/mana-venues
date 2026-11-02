@@ -100,3 +100,4 @@ export function VendorBookingsList({ bookings }: VendorBookingsListProps) {
 }
 
 export default VendorBookingsList
+
