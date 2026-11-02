@@ -8,9 +8,10 @@ import SpecsGrid from '../components/detail/SpecsGrid'
 import AmenitiesList from '../components/detail/AmenitiesList'
 import MapPlaceholder from '../components/detail/MapPlaceholder'
 import AvailabilityCalendar from '../components/booking/AvailabilityCalendar'
+import BookingModal from '../components/booking/BookingModal'
 import { useAuditoriumDetail } from '../hooks/useAuditoriumDetail'
 import { useAuth } from '../contexts/AuthContext'
-import { formatCurrency, cn } from '../lib/utils'
+import { formatCurrency, calculateAdvance, cn } from '../lib/utils'
 import type { Auditorium, City } from '../lib/types'
 
 interface JoinedAuditorium extends Auditorium {
@@ -219,7 +220,7 @@ export default function AuditoriumDetailPage() {
                   <div className="flex justify-between items-center text-gray-700 border-t border-brand-primary/10 pt-1.5">
                     <span className="text-xs font-semibold text-gray-500 uppercase">Advance (30%)</span>
                     <span className="font-bold text-brand-dark">
-                      {formatCurrency(selectedPrice * 0.3)}
+                      {formatCurrency(calculateAdvance(selectedPrice, 0.3))}
                     </span>
                   </div>
                 </div>
@@ -247,11 +248,6 @@ export default function AuditoriumDetailPage() {
                 >
                   Book This Date
                 </button>
-
-                {/* Booking modal placeholder for Plan 3.3 */}
-                {isBookingModalOpen && (
-                  <div className="sr-only" aria-hidden="true">Booking modal open</div>
-                )}
 
                 <button
                   type="button"
@@ -299,6 +295,20 @@ export default function AuditoriumDetailPage() {
           </div>
         </div>
       </div>
+
+      {isBookingModalOpen && selectedDate && (
+        <BookingModal
+          isOpen={isBookingModalOpen}
+          onClose={() => setIsBookingModalOpen(false)}
+          auditorium={{
+            id: auditorium.id,
+            title: auditorium.title,
+            base_price_per_day: auditorium.base_price_per_day,
+          }}
+          date={selectedDate}
+          totalPrice={selectedPrice}
+        />
+      )}
     </Layout>
   )
 }
