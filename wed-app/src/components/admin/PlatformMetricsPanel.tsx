@@ -97,7 +97,7 @@ export function PlatformMetricsPanel({ metrics }: PlatformMetricsPanelProps) {
             <p className="text-2xl font-bold text-brand-primary mt-1">
               {formatCurrency(metrics.platformCommission)}
             </p>
-            <p className="text-xs text-amber-700/80 mt-1">Net revenue retained by WedBook</p>
+            <p className="text-xs text-amber-700/80 mt-1">Net revenue retained by MANA Venues</p>
           </div>
 
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">

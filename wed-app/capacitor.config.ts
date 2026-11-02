@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.wedbook.booking',
-  appName: 'WedBook',
+  appId: 'com.manavenues.booking',
+  appName: 'MANA Venues',
   webDir: 'dist',
   plugins: {
     SplashScreen: {

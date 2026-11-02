@@ -61,9 +61,22 @@ export default function AuthPage() {
       <div className="flex-1 flex items-center justify-center p-4 py-8">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-brand-primary/10">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-brand-primary">WedBook</h1>
-          <p className="text-brand-dark/70 mt-1">
-            {isRegister ? 'Create your WedBook account' : 'Welcome back to WedBook'}
+          <img
+            src="/logo.png"
+            alt="MANA Venues"
+            className="h-16 w-auto object-contain mx-auto mb-3"
+          />
+          <h1
+            className="text-2xl font-bold text-brand-primary tracking-widest"
+            style={{ fontFamily: "'Cinzel', serif", letterSpacing: '0.18em' }}
+          >
+            MANA <span className="text-brand-secondary">VENUES</span>
+          </h1>
+          <p className="text-brand-dark/70 text-xs sm:text-sm mt-1 font-medium" style={{ fontFamily: "'Cinzel', serif" }}>
+            Grand venues for your big days
+          </p>
+          <p className="text-gray-500 text-xs sm:text-sm mt-3">
+            {isRegister ? 'Create your account to get started' : 'Welcome back — sign in to continue'}
           </p>
         </div>
 

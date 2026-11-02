@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Heart, MapPin, Search, ChevronDown, User, LogOut } from 'lucide-react'
+import { MapPin, Search, ChevronDown, User, LogOut } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
 import LocationModal from '../modals/LocationModal'
@@ -54,12 +54,17 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Left: Logo + City Selector */}
         <div className="flex items-center gap-3 sm:gap-6">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
-              <Heart className="w-4 h-4 fill-white" />
-            </div>
-            <span className="text-xl font-bold text-brand-primary tracking-tight">
-              WedBook
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <img
+              src="/logo.png"
+              alt="MANA Venues"
+              className="h-9 w-auto object-contain group-hover:scale-105 transition-transform"
+            />
+            <span
+              className="text-lg font-bold tracking-widest text-brand-primary leading-tight hidden sm:block"
+              style={{ fontFamily: "'Cinzel', serif", letterSpacing: '0.15em' }}
+            >
+              MANA <span className="text-brand-secondary">VENUES</span>
             </span>
           </Link>
 

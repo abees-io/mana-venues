@@ -92,7 +92,7 @@ export function useCreateBooking() {
           key: import.meta.env.VITE_RAZORPAY_KEY_ID as string,
           amount: Math.round(payload.advanceAmount * 100), // paise
           currency: 'INR',
-          name: 'WedBook',
+          name: 'MANA Venues',
           description: `Booking: ${payload.auditoriumTitle}`,
           prefill: {
             name: profile.full_name || '',

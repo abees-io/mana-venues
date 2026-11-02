@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm --prefix wed-app run build",
+  "outputDirectory": "wed-app/dist",
+  "installCommand": "npm --prefix wed-app install",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

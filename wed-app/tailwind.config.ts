@@ -17,6 +17,7 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+        cinzel: ["'Cinzel'", 'serif'],
       },
     },
   },

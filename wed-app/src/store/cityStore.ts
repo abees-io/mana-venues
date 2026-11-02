@@ -21,7 +21,7 @@ export const useCityStore = create<CityStore>()(
       clearCity: () => set({ selectedCity: null }),
     }),
     {
-      name: 'wedbook_city',
+      name: 'manavenues_city',
     }
   )
 )

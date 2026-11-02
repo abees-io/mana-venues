@@ -116,9 +116,11 @@ export default function HomePage() {
             <span>Kerala's Premier Wedding Hall Discovery</span>
           </div>
 
-          <h1 className="hero-animate text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Find Your Perfect <br className="hidden sm:inline" />
-            <span className="text-brand-secondary">Wedding Venue</span>
+          <h1 className="hero-animate text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight"
+            style={{ fontFamily: "'Cinzel', serif" }}
+          >
+            Grand Venues for Your <br className="hidden sm:inline" />
+            <span className="text-brand-secondary">Big Days</span>
           </h1>
 
           <p className="hero-animate text-base sm:text-lg text-pink-100/90 max-w-2xl mx-auto font-light">

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">WedBook</string>
-    <string name="title_activity_main">WedBook</string>
-    <string name="package_name">com.wedbook.booking</string>
-    <string name="custom_url_scheme">com.wedbook.booking</string>
+    <string name="app_name">MANA Venues</string>
+    <string name="title_activity_main">MANA Venues</string>
+    <string name="package_name">com.MANA Venues.booking</string>
+    <string name="custom_url_scheme">com.MANA Venues.booking</string>
 </resources>

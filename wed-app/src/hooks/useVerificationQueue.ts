@@ -54,7 +54,7 @@ export function useVerificationQueue() {
       console.log(
         `[WhatsApp/SMS Gateway] Venue Verified! Sent confirmation to ${
           vendorPhone || 'vendor'
-        }: "Congratulations! Your venue '${title}' is now approved and live on WedBook."`
+        }: "Congratulations! Your venue '${title}' is now approved and live on MANA Venues."`
       )
     },
     onSuccess: () => {
@@ -87,7 +87,7 @@ export function useVerificationQueue() {
       console.log(
         `[WhatsApp/SMS Gateway] Venue Needs Revision. Sent notification to ${
           vendorPhone || 'vendor'
-        }: "WedBook update on '${title}': Action required - ${reason}"`
+        }: "MANA Venues update on '${title}': Action required - ${reason}"`
       )
     },
     onSuccess: () => {
