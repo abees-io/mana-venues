@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import Layout from '../components/layout/Layout'
 
 interface AuthFormData {
   email: string
@@ -56,8 +57,9 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-accent flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-brand-primary/10">
+    <Layout>
+      <div className="flex-1 flex items-center justify-center p-4 py-8">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-brand-primary/10">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-brand-primary">WedBook</h1>
           <p className="text-brand-dark/70 mt-1">
@@ -171,6 +173,7 @@ export default function AuthPage() {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   )
 }
