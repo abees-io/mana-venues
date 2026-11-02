@@ -94,3 +94,4 @@ export function useManagePricingSlots(auditoriumId: string) {
       blockDateRangeMutation.isPending,
   }
 }
+

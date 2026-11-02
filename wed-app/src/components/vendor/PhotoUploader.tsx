@@ -186,3 +186,4 @@ export function PhotoUploader({ auditoriumId, existingPhotos, onUpdate }: PhotoU
 }
 
 export default PhotoUploader
+

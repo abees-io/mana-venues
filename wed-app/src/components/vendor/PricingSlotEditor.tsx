@@ -296,3 +296,4 @@ export function PricingSlotEditor({ auditoriumId, basePricePerDay }: PricingSlot
 }
 
 export default PricingSlotEditor
+

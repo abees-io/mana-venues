@@ -245,3 +245,4 @@ export function AuditoriumVerificationCard({
 }
 
 export default AuditoriumVerificationCard
+
