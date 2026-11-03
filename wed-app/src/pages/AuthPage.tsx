@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import Layout from '../components/layout/Layout'
 
@@ -18,6 +19,7 @@ export default function AuthPage() {
 
   const isRegisterRoute = location.pathname.includes('/register')
   const [isRegister, setIsRegister] = useState(isRegisterRoute)
+  const [showPassword, setShowPassword] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -58,7 +60,7 @@ export default function AuthPage() {
       if (err instanceof Error) {
         setErrorMsg(err.message)
       } else {
-        setErrorMsg('An unexpected authentication error occurred.')
+        setErrorMsg('An unexpected error occurred. Please try again.')
       }
     } finally {
       setIsSubmitting(false)
@@ -67,144 +69,145 @@ export default function AuthPage() {
 
   return (
     <Layout>
-      <div className="flex-1 flex items-center justify-center p-4 py-8">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-brand-primary/10">
-        <div className="text-center mb-8">
-          <img
-            src="/logo.png"
-            alt="MANA Venues"
-            className="h-16 w-auto object-contain mx-auto mb-3"
-          />
-          <h1
-            className="text-2xl font-bold text-brand-primary tracking-widest"
-            style={{ fontFamily: "'Cinzel', serif", letterSpacing: '0.18em' }}
-          >
-            MANA <span className="text-brand-secondary">VENUES</span>
-          </h1>
-          <p
-            className="text-xs uppercase tracking-[0.14em] text-brand-dark/70 font-semibold mt-1"
-            style={{ fontFamily: "'Cinzel', serif" }}
-          >
-            Grand venues for your big days
-          </p>
-          <p className="text-gray-500 text-xs sm:text-sm mt-3">
-            {isRegister ? 'Create your account to get started' : 'Welcome back — sign in to continue'}
-          </p>
-        </div>
-
-        {successMsg && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-800 text-sm rounded-lg flex items-center gap-2">
-            <span>✓</span>
-            <p>{successMsg}</p>
+      <div className="max-w-md mx-auto px-4 py-12 sm:py-16">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-brand-dark">
+              {isRegister ? 'Create an Account' : 'Welcome Back'}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              {isRegister
+                ? 'Join to book venues and save your favorites'
+                : 'Sign in to access your bookings and profile'}
+            </p>
           </div>
-        )}
 
-        {errorMsg && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
-            {errorMsg}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {isRegister && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-brand-dark mb-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Rahul Nair"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
-                  {...register('fullName', {
-                    required: isRegister ? 'Full name is required' : false,
-                  })}
-                />
-                {errors.fullName && (
-                  <p className="text-xs text-red-500 mt-1">{errors.fullName.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-brand-dark mb-1">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  placeholder="e.g. +91 98765 43210"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
-                  {...register('phone')}
-                />
-              </div>
-            </>
+          {errorMsg && (
+            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              {errorMsg}
+            </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-brand-dark mb-1">
-              Email Address
-            </label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
-              {...register('email', {
-                required: 'Email is required',
-                pattern: {
-                  value: /\S+@\S+\.\S+/,
-                  message: 'Enter a valid email address',
-                },
-              })}
-            />
-            {errors.email && (
-              <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+          {successMsg && (
+            <div className="mb-4 p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
+              {successMsg}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {isRegister && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-brand-dark mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="John Doe"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
+                    {...register('fullName', {
+                      required: isRegister ? 'Full name is required' : false,
+                    })}
+                  />
+                  {errors.fullName && (
+                    <p className="text-xs text-red-500 mt-1">{errors.fullName.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-dark mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="+91 9876543210"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
+                    {...register('phone')}
+                  />
+                </div>
+              </>
             )}
+
+            <div>
+              <label className="block text-sm font-medium text-brand-dark mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /\S+@\S+\.\S+/,
+                    message: 'Enter a valid email address',
+                  },
+                })}
+              />
+              {errors.email && (
+                <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-brand-dark mb-1">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
+                  {...register('password', {
+                    required: 'Password is required',
+                    minLength: {
+                      value: 6,
+                      message: 'Password must be at least 6 characters',
+                    },
+                  })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-dark focus:outline-none transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting
+                ? 'Please wait...'
+                : isRegister
+                ? 'Create Account'
+                : 'Sign In'}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center text-sm text-brand-dark/70">
+            {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
+            <button
+              type="button"
+              onClick={toggleMode}
+              className="text-brand-primary font-semibold hover:underline"
+            >
+              {isRegister ? 'Sign In' : 'Sign Up'}
+            </button>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-brand-dark mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
-              {...register('password', {
-                required: 'Password is required',
-                minLength: {
-                  value: 6,
-                  message: 'Password must be at least 6 characters',
-                },
-              })}
-            />
-            {errors.password && (
-              <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting
-              ? 'Please wait...'
-              : isRegister
-              ? 'Create Account'
-              : 'Sign In'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-sm text-brand-dark/70">
-          {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
-          <button
-            type="button"
-            onClick={toggleMode}
-            className="text-brand-primary font-semibold hover:underline"
-          >
-            {isRegister ? 'Sign In' : 'Sign Up'}
-          </button>
         </div>
-      </div>
       </div>
     </Layout>
   )
