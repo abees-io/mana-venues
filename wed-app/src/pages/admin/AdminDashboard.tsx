@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useAdminMetrics } from '../../hooks/useAdminMetrics'
 import { PlatformMetricsPanel } from '../../components/admin/PlatformMetricsPanel'
+import { AdminManageEntities } from '../../components/admin/AdminManageEntities'
 import Layout from '../../components/layout/Layout'
 
 export function AdminDashboard() {
@@ -17,7 +18,7 @@ export function AdminDashboard() {
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold text-gray-900">Admin Control Center</h1>
@@ -26,7 +27,7 @@ export function AdminDashboard() {
               </span>
             </div>
             <p className="text-sm text-gray-500 mt-1">
-              Platform-wide performance, financial revenue shares, and auditorium verification
+              Add venues, onboard new cities, and track platform metrics
             </p>
           </div>
 
@@ -50,6 +51,9 @@ export function AdminDashboard() {
             </button>
           </div>
         </div>
+
+        {/* Action Controls: Add New Venue & Add New City */}
+        <AdminManageEntities />
 
         {/* Quick Navigation Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
