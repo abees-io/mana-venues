@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Sparkles } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -10,7 +9,7 @@ const MARQUEE_ITEMS = [
   '100% VERIFIED WEDDING AUDITORIUMS',
   'HERITAGE CONVENTION CENTRES',
   'DIRECT TRANSPARENT RATES',
-  'KERALA’S PREMIER CELEBRATION SPACES',
+  'KERALA\'S PREMIER CELEBRATION SPACES',
   'SEAMLESS ADVANCE BOOKING',
   'LUXURY BALLROOMS & BANQUETS',
   'ZERO BROKERAGE & DIRECT RESERVATION',
@@ -23,32 +22,30 @@ export default function ScrollAnimatedSection() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // 2. Editorial Title reveal on scroll
       if (titleRef.current) {
         gsap.from(titleRef.current, {
-          y: 45,
+          y: 35,
           opacity: 0,
-          duration: 1,
+          duration: 0.9,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: titleRef.current,
-            start: 'top 85%',
+            start: 'top 88%',
             toggleActions: 'play none none reverse',
           },
         })
       }
 
-      // 3. Description reveal on scroll
       if (descRef.current) {
         gsap.from(descRef.current, {
-          y: 35,
+          y: 25,
           opacity: 0,
-          duration: 0.9,
+          duration: 0.8,
           delay: 0.15,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: descRef.current,
-            start: 'top 88%',
+            start: 'top 90%',
             toggleActions: 'play none none reverse',
           },
         })
@@ -59,58 +56,64 @@ export default function ScrollAnimatedSection() {
   }, [])
 
   return (
-    <div ref={sectionRef} className="w-full overflow-hidden">
-      {/* 1. INFINITE RUNNING TEXT TICKER (MARQUEE RIBBON) */}
-      <div className="bg-[#15050C] border-y border-brand-secondary/30 py-3.5 sm:py-4.5 overflow-hidden shadow-lg relative">
-        {/* Subtle gold gradient edge masks */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-[#15050C] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-[#15050C] to-transparent z-10 pointer-events-none" />
+    <div ref={sectionRef} className="w-full">
+      {/* ── STATIC TICKER RIBBON ─────────────────────────── */}
+      <div className="bg-brand-dark border-y border-brand-secondary/20 py-3 overflow-hidden relative">
+        {/* Edge masks */}
+        <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-20 bg-gradient-to-r from-brand-dark to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-20 bg-gradient-to-l from-brand-dark to-transparent z-10 pointer-events-none" />
 
         <div className="flex whitespace-nowrap">
-          {/* Loop items twice for seamless infinite effect */}
           {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((text, idx) => (
-            <div key={idx} className="inline-flex items-center gap-6 px-4">
+            <div key={idx} className="inline-flex items-center gap-5 px-4">
               <span
-                className="text-xs sm:text-sm md:text-base font-semibold tracking-[0.2em] text-pink-100/90 uppercase hover:text-brand-secondary transition-colors"
+                className="text-[10px] sm:text-xs font-medium tracking-[0.22em] text-neutral-400 uppercase"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 {text}
               </span>
-              <span className="text-brand-secondary text-xs sm:text-sm">✦</span>
+              <span className="text-brand-secondary text-[10px]">✦</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* 2. EDITORIAL SCROLL REVEAL SECTION */}
-      <section className="relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#FDF0F5]/80 via-white to-brand-accent/40">
-        <div className="max-w-4xl mx-auto text-center space-y-5">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-xs font-semibold text-brand-primary uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-brand-secondary" />
-            <span>Curated Wedding Excellence</span>
+      {/* ── EDITORIAL SECTION ────────────────────────────── */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-3xl mx-auto text-center space-y-6">
+          {/* Eyebrow */}
+          <p className="text-[10px] uppercase tracking-[0.3em] text-brand-secondary font-medium">
+            Curated Wedding Excellence
+          </p>
+
+          {/* Divider */}
+          <div className="flex items-center justify-center gap-3">
+            <span className="h-px w-8 bg-brand-secondary/30 block" />
+            <span className="text-brand-secondary text-xs">✦</span>
+            <span className="h-px w-8 bg-brand-secondary/30 block" />
           </div>
 
-          {/* Animated Headline */}
+          {/* Headline */}
           <h2
             ref={titleRef}
-            className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-dark tracking-tight leading-tight uppercase"
+            className="text-2xl sm:text-3xl md:text-4xl font-semibold text-brand-dark tracking-[0.04em] leading-snug"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
-            Where Every Beginning <br className="hidden sm:inline" />
-            <span className="text-brand-primary">Becomes a Royal Celebration</span>
+            Where Every Beginning<br />
+            <span className="text-brand-secondary">Becomes a Royal Celebration</span>
           </h2>
 
-          {/* Animated Description */}
+          {/* Description */}
           <p
             ref={descRef}
-            className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto font-light leading-relaxed"
+            className="text-sm text-neutral-500 max-w-2xl mx-auto font-light leading-loose"
           >
-            From heritage palaces in Trivandrum and waterfront halls in Kochi to grand convention centres in Kozhikode — MANA Venues handpicks and verifies Kerala’s most majestic spaces for your unforgettable milestones.
+            From heritage palaces in Trivandrum and waterfront halls in Kochi to grand
+            convention centres in Kozhikode — MANA Venues handpicks and verifies
+            Kerala's most majestic spaces for your unforgettable milestones.
           </p>
         </div>
       </section>
     </div>
   )
 }
-

@@ -19,35 +19,15 @@ export default function BottomNav() {
   const isProfileActive = pathname === '/profile' && !searchParams.includes('tab=bookings')
 
   const tabs = [
-    {
-      label: 'Home',
-      icon: Home,
-      isActive: isHomeActive,
-      onClick: () => navigate('/'),
-    },
-    {
-      label: 'Search',
-      icon: Search,
-      isActive: isSearchActive,
-      onClick: () => navigate(`/city/${citySlug}`),
-    },
-    {
-      label: 'Bookings',
-      icon: CalendarDays,
-      isActive: isBookingsActive,
-      onClick: () => navigate(user ? '/profile?tab=bookings' : '/auth/login'),
-    },
-    {
-      label: 'Profile',
-      icon: User,
-      isActive: isProfileActive,
-      onClick: () => navigate(user ? '/profile' : '/auth/login'),
-    },
+    { label: 'Home', icon: Home, isActive: isHomeActive, onClick: () => navigate('/') },
+    { label: 'Search', icon: Search, isActive: isSearchActive, onClick: () => navigate(`/city/${citySlug}`) },
+    { label: 'Bookings', icon: CalendarDays, isActive: isBookingsActive, onClick: () => navigate(user ? '/profile?tab=bookings' : '/auth/login') },
+    { label: 'Profile', icon: User, isActive: isProfileActive, onClick: () => navigate(user ? '/profile' : '/auth/login') },
   ]
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 md:hidden pb-safe"
+      className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-100 z-50 md:hidden pb-safe"
       aria-label="Mobile Navigation"
     >
       <div className="flex items-center justify-around h-16 px-2">
@@ -58,14 +38,26 @@ export default function BottomNav() {
               key={tab.label}
               type="button"
               onClick={tab.onClick}
-              className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors ${
+              className={`flex-1 flex flex-col items-center justify-center py-2 gap-1 transition-colors ${
                 tab.isActive
-                  ? 'text-brand-primary font-semibold'
-                  : 'text-gray-400 hover:text-gray-600'
+                  ? 'text-brand-secondary'
+                  : 'text-neutral-400 hover:text-neutral-600'
               }`}
             >
-              <Icon className="w-5 h-5 mb-1" />
-              <span className="text-[11px] leading-tight">{tab.label}</span>
+              <Icon className="w-5 h-5" />
+              <span
+                className={`text-[10px] tracking-widest uppercase ${
+                  tab.isActive ? 'font-semibold' : 'font-normal'
+                }`}
+              >
+                {tab.label}
+              </span>
+              {/* Active indicator dot */}
+              <span
+                className={`w-1 h-1 rounded-full transition-opacity ${
+                  tab.isActive ? 'bg-brand-secondary opacity-100' : 'opacity-0'
+                }`}
+              />
             </button>
           )
         })}

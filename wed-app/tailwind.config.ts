@@ -10,9 +10,14 @@ export default {
       colors: {
         brand: {
           primary: '#8B1A4A',    // deep rose/maroon (wedding)
-          secondary: '#D4AF37',  // gold
+          secondary: '#C5A059',  // metallic champagne gold (matching logo)
           accent: '#FDF0F5',     // blush pink background
           dark: '#1A0A10',       // near-black
+          gold: {
+            light: '#E6D3B3',
+            DEFAULT: '#C5A059',
+            dark: '#A6823E',
+          },
         },
       },
       fontFamily: {
