@@ -40,18 +40,18 @@ export default function PriceRangeSlider() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between text-xs font-semibold text-brand-dark">
+    <div className="space-y-4 text-white">
+      <div className="flex items-center justify-between text-xs font-bold text-brand-secondary">
         <span>{formatCurrency(localMin)}</span>
-        <span className="text-gray-400">to</span>
+        <span className="text-green-300/60">to</span>
         <span>{formatCurrency(localMax)}</span>
       </div>
 
       <div className="space-y-3">
         <div>
-          <div className="flex justify-between text-[11px] text-gray-500 mb-1">
+          <div className="flex justify-between text-[11px] text-green-300/70 mb-1">
             <span>Min Budget</span>
-            <span className="font-medium text-gray-700">{formatCurrency(localMin)}</span>
+            <span className="font-semibold text-white">{formatCurrency(localMin)}</span>
           </div>
           <input
             type="range"
@@ -61,14 +61,14 @@ export default function PriceRangeSlider() {
             value={localMin}
             onChange={handleMinChange}
             aria-label="Minimum budget"
-            className="w-full accent-brand-primary cursor-pointer h-1.5 bg-gray-200 rounded-lg appearance-none"
+            className="w-full accent-brand-secondary cursor-pointer h-1.5 bg-green-950/80 rounded-lg appearance-none"
           />
         </div>
 
         <div>
-          <div className="flex justify-between text-[11px] text-gray-500 mb-1">
+          <div className="flex justify-between text-[11px] text-green-300/70 mb-1">
             <span>Max Budget</span>
-            <span className="font-medium text-gray-700">{formatCurrency(localMax)}</span>
+            <span className="font-semibold text-white">{formatCurrency(localMax)}</span>
           </div>
           <input
             type="range"
@@ -78,12 +78,12 @@ export default function PriceRangeSlider() {
             value={localMax}
             onChange={handleMaxChange}
             aria-label="Maximum budget"
-            className="w-full accent-brand-primary cursor-pointer h-1.5 bg-gray-200 rounded-lg appearance-none"
+            className="w-full accent-brand-secondary cursor-pointer h-1.5 bg-green-950/80 rounded-lg appearance-none"
           />
         </div>
       </div>
 
-      <div className="flex justify-between text-[10px] text-gray-400 pt-0.5">
+      <div className="flex justify-between text-[10px] text-green-400/60 pt-0.5">
         <span>₹0</span>
         <span>₹5,00,000</span>
       </div>

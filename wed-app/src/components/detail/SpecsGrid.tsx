@@ -37,15 +37,15 @@ export default function SpecsGrid({ auditorium }: SpecsGridProps) {
         return (
           <div
             key={index}
-            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col justify-between"
+            className="bg-brand-dark/85 backdrop-blur-md rounded-xl p-4 shadow-xl border border-green-800/40 flex flex-col justify-between"
           >
-            <div className="flex items-center gap-2 mb-2 text-brand-primary">
+            <div className="flex items-center gap-2 mb-2 text-brand-secondary">
               <Icon className="w-5 h-5 shrink-0" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-green-300/70">
                 {item.label}
               </span>
             </div>
-            <div className="text-base sm:text-lg font-bold text-gray-900 truncate" title={item.value}>
+            <div className="text-base sm:text-lg font-bold text-white truncate" title={item.value}>
               {item.value}
             </div>
           </div>

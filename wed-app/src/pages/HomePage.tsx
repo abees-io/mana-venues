@@ -143,12 +143,12 @@ export default function HomePage() {
       {/* SECTION 1: HERO BANNER */}
       <section
         ref={heroRef}
-        className="relative overflow-hidden bg-gradient-to-br from-brand-primary via-[#1B4332] to-brand-dark text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8 shadow-inner"
+        className="relative overflow-hidden bg-brand-dark/50 backdrop-blur-xs text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8"
       >
         {/* Subtle background decorative shapes */}
         <div className="absolute inset-0 pointer-events-none opacity-10">
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-brand-secondary blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-white blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-green-500 blur-3xl" />
         </div>
 
         <div className="relative max-w-5xl mx-auto text-center space-y-5">
@@ -159,7 +159,7 @@ export default function HomePage() {
             Grand Venues for Your Big Days
           </h1>
 
-          <p className="hero-animate text-base sm:text-lg text-green-50/90 max-w-2xl mx-auto font-light">
+          <p className="hero-animate text-base sm:text-lg text-green-100/90 max-w-2xl mx-auto font-light">
             Discover verified auditoriums, convention centres, and luxury wedding
             halls across Kerala with real-time pricing and availability.
           </p>
@@ -168,23 +168,23 @@ export default function HomePage() {
           <div className="hero-animate max-w-2xl mx-auto pt-2">
             <form
               onSubmit={handleSearchSubmit}
-              className="relative flex items-center shadow-2xl rounded-full overflow-hidden bg-white p-1.5 focus-within:ring-4 focus-within:ring-brand-secondary/40 transition-all"
+              className="relative flex items-center shadow-2xl rounded-full overflow-hidden bg-brand-dark/85 backdrop-blur-md border border-green-700/40 p-1.5 focus-within:ring-4 focus-within:ring-brand-secondary/40 transition-all"
             >
-              <div className="pl-3 sm:pl-4 text-gray-400">
-                <Search className="w-5 h-5 text-brand-primary" />
+              <div className="pl-3 sm:pl-4 text-brand-secondary">
+                <Search className="w-5 h-5 text-brand-secondary" />
               </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search venues by name, landmark, or amenities..."
-                className="w-full px-3 py-2 text-sm sm:text-base text-brand-dark bg-transparent focus:outline-none placeholder-gray-400"
+                className="w-full px-3 py-2 text-sm sm:text-base text-green-50 bg-transparent focus:outline-none placeholder-green-300/50"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="p-1 mr-1 text-gray-400 hover:text-gray-600 rounded-full"
+                  className="p-1 mr-1 text-green-400 hover:text-green-200 rounded-full"
                   aria-label="Clear search"
                 >
                   <X className="w-4 h-4" />
@@ -192,7 +192,7 @@ export default function HomePage() {
               )}
               <button
                 type="submit"
-                className="shrink-0 px-4 sm:px-6 py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary/90 text-white font-medium text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5"
+                className="shrink-0 px-4 sm:px-6 py-2.5 rounded-full bg-brand-secondary hover:bg-brand-secondary/90 text-brand-dark font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5"
               >
                 <span>Search</span>
                 <ChevronRight className="w-4 h-4 hidden sm:inline" />
@@ -212,7 +212,7 @@ export default function HomePage() {
                 className={`px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
                   !selectedCity
                     ? 'bg-gradient-to-r from-[#C8901F] via-[#D8A629] to-[#F4D940] text-brand-dark font-bold shadow-md scale-105 border border-[#F4D940]/50'
-                    : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
+                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
                 }`}
               >
                 All Kerala
@@ -235,7 +235,7 @@ export default function HomePage() {
                       className={`px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
                         isSelected
                           ? 'bg-gradient-to-r from-[#C8901F] via-[#D8A629] to-[#F4D940] text-brand-dark font-bold shadow-md scale-105 border border-[#F4D940]/50'
-                          : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
+                          : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
                       }`}
                     >
                       {city.name}
@@ -263,19 +263,19 @@ export default function HomePage() {
       {/* SECTION 2 & 3: FEED & GRID */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Feed Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-200/70 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-green-800/40 mb-8">
           <div>
             <div className="flex items-center gap-2.5">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                 {selectedCity ? `Venues in ${selectedCity.name}` : 'All Venues in Kerala'}
               </h2>
               {!isLoading && (
-                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-brand-accent text-brand-primary border border-brand-primary/20">
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-green-900/40 text-brand-secondary border border-green-700/40">
                   {displayedAuditoriums.length}
                 </span>
               )}
             </div>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            <p className="text-xs sm:text-sm text-green-200/70 mt-1">
               {selectedCity
                 ? `Showing curated auditoriums in ${selectedCity.name}`
                 : 'Showing all verified wedding auditoriums across cities'}
@@ -287,9 +287,9 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setIsLocationModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-brand-primary bg-white border border-brand-primary/30 hover:bg-brand-accent hover:border-brand-primary transition-all shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-green-100 bg-green-900/40 border border-green-700/40 hover:bg-green-800/50 hover:text-brand-secondary transition-all shadow-xs"
             >
-              <MapPin className="w-4 h-4 text-brand-primary" />
+              <MapPin className="w-4 h-4 text-brand-secondary" />
               <span>{selectedCity ? 'Change City' : 'Select City'}</span>
             </button>
           </div>
@@ -302,20 +302,20 @@ export default function HomePage() {
 
           {/* Error State */}
           {isError && (
-            <div className="text-center py-16 bg-white rounded-2xl border border-red-100 shadow-xs max-w-lg mx-auto p-8 space-y-4">
-              <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 mx-auto flex items-center justify-center">
+            <div className="text-center py-16 bg-brand-dark/90 backdrop-blur-md rounded-2xl border border-red-900/40 shadow-xl max-w-lg mx-auto p-8 space-y-4">
+              <div className="w-12 h-12 rounded-full bg-red-950 text-red-400 mx-auto flex items-center justify-center">
                 <RefreshCw className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-gray-800">
+              <h3 className="text-lg font-bold text-red-200">
                 Failed to load auditoriums
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-red-300/70">
                 We encountered an issue fetching venues. Please check your connection and try again.
               </p>
               <button
                 type="button"
                 onClick={() => refetch()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary/90 text-white font-medium text-sm transition-all shadow-sm"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-secondary hover:bg-brand-secondary/90 text-brand-dark font-bold text-sm transition-all shadow-sm"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>Retry</span>
@@ -325,14 +325,14 @@ export default function HomePage() {
 
           {/* Empty State */}
           {!isLoading && !isError && displayedAuditoriums.length === 0 && (
-            <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-xs max-w-lg mx-auto p-8 space-y-4">
-              <div className="w-14 h-14 rounded-full bg-brand-accent text-brand-primary mx-auto flex items-center justify-center">
+            <div className="text-center py-16 bg-brand-dark/90 backdrop-blur-md rounded-2xl border border-green-800/40 shadow-xl max-w-lg mx-auto p-8 space-y-4">
+              <div className="w-14 h-14 rounded-full bg-green-900/40 text-brand-secondary mx-auto flex items-center justify-center">
                 <Building2 className="w-7 h-7" />
               </div>
-              <h3 className="text-lg font-bold text-brand-dark">
+              <h3 className="text-lg font-bold text-white">
                 No venues found {selectedCity ? `in ${selectedCity.name}` : ''}
               </h3>
-              <p className="text-sm text-gray-500 max-w-sm mx-auto">
+              <p className="text-sm text-green-200/70 max-w-sm mx-auto">
                 {searchQuery
                   ? `No venues match the query "${searchQuery}". Try a different keyword or clear the search.`
                   : 'We could not find any active venues matching your criteria in this city.'}
@@ -342,7 +342,7 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-brand-dark bg-gray-100 hover:bg-gray-200 transition-colors"
+                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-green-100 bg-green-900/40 hover:bg-green-800/60 border border-green-700/40 transition-colors"
                   >
                     Clear Search
                   </button>
@@ -351,7 +351,7 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => clearCity()}
-                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-brand-primary hover:bg-brand-primary/90 transition-colors shadow-sm"
+                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-brand-dark bg-brand-secondary hover:bg-brand-secondary/90 transition-colors shadow-sm"
                   >
                     View All Cities
                   </button>
@@ -359,7 +359,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setIsLocationModalOpen(true)}
-                  className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-brand-primary bg-brand-accent hover:bg-green-50 transition-colors border border-brand-primary/20"
+                  className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-brand-secondary bg-green-950/80 hover:bg-green-900/60 transition-colors border border-green-700/50"
                 >
                   Switch City
                 </button>

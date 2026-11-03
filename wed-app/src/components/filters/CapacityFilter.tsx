@@ -32,10 +32,10 @@ export default function CapacityFilter() {
               type="button"
               onClick={() => setCapacityRange(preset.min, preset.max)}
               className={cn(
-                'px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer',
+                'px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 cursor-pointer',
                 isActive
-                  ? 'bg-brand-primary text-white shadow-xs'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-brand-secondary text-brand-dark shadow-sm scale-105'
+                  : 'bg-green-950/70 text-green-200 border border-green-800/40 hover:bg-green-900/50'
               )}
             >
               {preset.label}

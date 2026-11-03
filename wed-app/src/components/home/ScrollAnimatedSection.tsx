@@ -60,10 +60,10 @@ export default function ScrollAnimatedSection() {
   return (
     <div ref={sectionRef} className="w-full overflow-hidden">
       {/* 1. CONTINUOUS RUNNING TEXT TICKER (MARQUEE RIBBON) */}
-      <div className="bg-[#0B1F12] border-y border-brand-secondary/30 py-2.5 sm:py-4 overflow-hidden shadow-lg relative">
+      <div className="bg-brand-dark/90 border-y border-brand-secondary/30 py-2.5 sm:py-4 overflow-hidden shadow-lg relative">
         {/* Subtle gold gradient edge masks */}
-        <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-24 bg-gradient-to-r from-[#0B1F12] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-24 bg-gradient-to-l from-[#0B1F12] to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-24 bg-gradient-to-r from-brand-dark to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-24 bg-gradient-to-l from-brand-dark to-transparent z-10 pointer-events-none" />
 
         <div className="animate-marquee whitespace-nowrap will-change-transform">
           {/* Double array ensures seamless continuous 50% loop */}
@@ -82,27 +82,27 @@ export default function ScrollAnimatedSection() {
       </div>
 
       {/* 2. EDITORIAL SCROLL REVEAL SECTION */}
-      <section className="relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#F0F7F2]/80 via-white to-brand-accent/40">
+      <section className="relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-transparent via-brand-dark/40 to-transparent">
         <div className="max-w-4xl mx-auto text-center space-y-5">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-xs font-semibold text-brand-primary uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-green-900/40 border border-green-700/40 text-xs font-semibold text-brand-secondary uppercase tracking-wider">
             <span>Curated Wedding Excellence</span>
           </div>
 
           {/* Animated Headline */}
           <h2
             ref={titleRef}
-            className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-dark tracking-tight leading-tight uppercase"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight uppercase"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
             Where Every Beginning <br className="hidden sm:inline" />
-            <span className="text-brand-primary">Becomes a Royal Celebration</span>
+            <span className="text-brand-secondary">Becomes a Royal Celebration</span>
           </h2>
 
           {/* Animated Description */}
           <p
             ref={descRef}
-            className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto font-light leading-relaxed"
+            className="text-sm sm:text-base text-green-100/80 max-w-2xl mx-auto font-light leading-relaxed"
           >
             From heritage palaces in Trivandrum and waterfront halls in Kochi to grand convention centres in Kozhikode — MANA Venues handpicks and verifies Kerala’s most majestic spaces for your unforgettable milestones.
           </p>

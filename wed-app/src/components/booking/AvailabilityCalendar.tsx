@@ -87,10 +87,10 @@ export default function AvailabilityCalendar({
   }
 
   return (
-    <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+    <div className="bg-brand-dark/95 backdrop-blur-md rounded-2xl p-4 border border-green-800/40 shadow-xl text-white">
       {/* Month Navigation Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-bold text-gray-900 tracking-tight">
+        <h3 className="text-sm font-bold text-white tracking-tight">
           {format(currentMonth, 'MMMM yyyy')}
         </h3>
         <div className="flex items-center gap-1">
@@ -100,10 +100,10 @@ export default function AvailabilityCalendar({
             disabled={!canGoPrev}
             aria-label="Previous month"
             className={cn(
-              'p-1.5 rounded-lg border border-gray-200 transition-colors',
+              'p-1.5 rounded-lg border transition-colors',
               canGoPrev
-                ? 'text-gray-700 hover:bg-gray-100 active:bg-gray-200 cursor-pointer'
-                : 'text-gray-300 border-gray-100 cursor-not-allowed opacity-50'
+                ? 'text-green-300 border-green-800/50 hover:bg-green-900/40 active:bg-green-900/60 cursor-pointer'
+                : 'text-green-800 border-green-950 cursor-not-allowed opacity-40'
             )}
           >
             <ChevronLeft className="w-4 h-4" />
@@ -114,10 +114,10 @@ export default function AvailabilityCalendar({
             disabled={!canGoNext}
             aria-label="Next month"
             className={cn(
-              'p-1.5 rounded-lg border border-gray-200 transition-colors',
+              'p-1.5 rounded-lg border transition-colors',
               canGoNext
-                ? 'text-gray-700 hover:bg-gray-100 active:bg-gray-200 cursor-pointer'
-                : 'text-gray-300 border-gray-100 cursor-not-allowed opacity-50'
+                ? 'text-green-300 border-green-800/50 hover:bg-green-900/40 active:bg-green-900/60 cursor-pointer'
+                : 'text-green-800 border-green-950 cursor-not-allowed opacity-40'
             )}
           >
             <ChevronRight className="w-4 h-4" />
@@ -128,7 +128,7 @@ export default function AvailabilityCalendar({
       {/* Weekday Labels */}
       <div className="grid grid-cols-7 gap-1 text-center mb-1.5">
         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((dayName) => (
-          <div key={dayName} className="text-xs font-semibold text-gray-400 py-1">
+          <div key={dayName} className="text-xs font-semibold text-green-300/60 py-1">
             {dayName}
           </div>
         ))}
@@ -163,19 +163,19 @@ export default function AvailabilityCalendar({
               }}
               className={cn(
                 'relative flex flex-col items-center justify-center p-1 rounded-lg text-xs transition-all min-h-[52px] group',
-                (isPast || isBooked || isBlocked) && 'opacity-40 cursor-not-allowed',
-                isPast && !isBooked && !isBlocked && 'bg-gray-100 text-gray-400',
-                isBooked && 'bg-red-50 text-red-400 line-through',
-                isBlocked && 'bg-gray-200 text-gray-400',
-                isAvailable && !isSelected && 'bg-green-50 hover:bg-brand-primary hover:text-white cursor-pointer',
-                isSelected && 'bg-brand-primary text-white ring-2 ring-brand-secondary ring-offset-1 font-semibold cursor-pointer'
+                (isPast || isBooked || isBlocked) && 'opacity-35 cursor-not-allowed',
+                isPast && !isBooked && !isBlocked && 'bg-green-950/40 text-green-600',
+                isBooked && 'bg-red-950/40 text-red-400 line-through border border-red-900/30',
+                isBlocked && 'bg-gray-900/40 text-gray-500',
+                isAvailable && !isSelected && 'bg-green-950/60 border border-green-800/30 hover:bg-green-900 hover:text-white cursor-pointer text-green-100',
+                isSelected && 'bg-brand-secondary text-brand-dark ring-2 ring-brand-secondary font-bold cursor-pointer'
               )}
             >
               <span
                 className={cn(
                   'font-medium text-xs',
-                  isSelected && 'text-white font-bold',
-                  isAvailable && !isSelected && 'text-gray-900 group-hover:text-white'
+                  isSelected && 'text-brand-dark font-bold',
+                  isAvailable && !isSelected && 'text-green-100 group-hover:text-white'
                 )}
               >
                 {format(day, 'd')}
@@ -185,7 +185,7 @@ export default function AvailabilityCalendar({
                 <span
                   className={cn(
                     'text-[10px] leading-tight font-medium mt-0.5',
-                    isSelected ? 'text-white/90' : 'text-emerald-700 group-hover:text-white'
+                    isSelected ? 'text-brand-dark font-bold' : 'text-brand-secondary group-hover:text-white'
                   )}
                 >
                   {shortPrice(price)}
@@ -197,7 +197,7 @@ export default function AvailabilityCalendar({
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-3 mt-3 border-t border-gray-100 text-xs text-gray-600">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-3 mt-3 border-t border-green-800/40 text-xs text-green-200/70">
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
           <span>Available</span>
@@ -207,11 +207,11 @@ export default function AvailabilityCalendar({
           <span>Booked</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-gray-400 inline-block" />
+          <span className="w-2.5 h-2.5 rounded-full bg-gray-500 inline-block" />
           <span>Blocked</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-brand-primary inline-block" />
+          <span className="w-2.5 h-2.5 rounded-full bg-brand-secondary inline-block" />
           <span>Selected</span>
         </div>
       </div>
