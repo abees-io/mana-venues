@@ -153,11 +153,11 @@ export default function AuthPage() {
               <label className="block text-sm font-medium text-brand-dark mb-1">
                 Password
               </label>
-              <div className="relative">
+              <div className="relative flex items-center">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
+                  className="w-full pl-3 pr-11 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary text-brand-dark"
                   {...register('password', {
                     required: 'Password is required',
                     minLength: {
@@ -169,13 +169,13 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-dark focus:outline-none transition-colors"
+                  className="absolute right-0 top-0 bottom-0 px-3.5 flex items-center justify-center text-gray-500 hover:text-brand-dark transition-colors z-10 cursor-pointer"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
+                    <EyeOff className="w-5 h-5 text-gray-600" />
                   ) : (
-                    <Eye className="w-4 h-4" />
+                    <Eye className="w-5 h-5 text-gray-600" />
                   )}
                 </button>
               </div>
