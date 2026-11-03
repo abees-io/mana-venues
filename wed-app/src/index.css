@@ -6,6 +6,18 @@
   body {
     @apply bg-brand-accent text-brand-dark font-sans;
   }
+
+  /* Disable browser native password reveal eye (Edge, IE, Chrome) */
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none !important;
+  }
+
+  input::-webkit-credentials-auto-fill-button {
+    visibility: hidden;
+    position: absolute;
+    right: 0;
+  }
 }
 
 @keyframes marquee {
