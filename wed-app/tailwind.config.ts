@@ -10,13 +10,13 @@ export default {
       colors: {
         brand: {
           primary: '#0D2818',    // deep forest green
-          secondary: '#FFD700',  // golden rush yellow
+          secondary: '#D8A629',  // rich metallic royal gold (from brand asset)
           accent: '#F0F7F2',     // light forest tint
           dark: '#0B1F12',       // darkest forest
           gold: {
-            light: '#FFF3B0',
-            DEFAULT: '#FFD700',
-            dark: '#FF9800',
+            light: '#F4D940',
+            DEFAULT: '#D8A629',
+            dark: '#C8901F',
           },
           forest: {
             light: '#1B4332',

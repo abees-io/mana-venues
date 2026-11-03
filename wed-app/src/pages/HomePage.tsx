@@ -45,6 +45,22 @@ export default function HomePage() {
 
   const { data: cities, isLoading: isCitiesLoading } = useCities()
 
+  // Premier popular wedding destination hubs (top 3-4 main cities in priority order)
+  const PREFERRED_POPULAR_SLUGS = ['kochi', 'trivandrum', 'kozhikode', 'thrissur']
+
+  const popularCities = useMemo(() => {
+    if (!cities) return []
+    const preferred = PREFERRED_POPULAR_SLUGS.map((slug) =>
+      cities.find((c) => c.slug.toLowerCase() === slug.toLowerCase())
+    ).filter(Boolean) as typeof cities
+
+    if (preferred.length < 4) {
+      const remaining = cities.filter((c) => !preferred.some((p) => p.id === c.id))
+      preferred.push(...remaining.slice(0, 4 - preferred.length))
+    }
+    return preferred.slice(0, 4)
+  }, [cities])
+
   const [searchQuery, setSearchQuery] = useState('')
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
 
@@ -184,18 +200,18 @@ export default function HomePage() {
             </form>
           </div>
 
-          {/* Quick City Selector Chips */}
+          {/* Quick City Selector Chips - Top 3-4 Premier Main Cities */}
           <div className="hero-animate pt-3">
-            <p className="text-xs uppercase tracking-wider text-yellow-200/80 mb-2 font-medium">
+            <p className="text-xs uppercase tracking-wider text-[#F4D940]/90 mb-2 font-medium">
               Popular Cities
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"
                 onClick={() => clearCity()}
-                className={`px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all ${
+                className={`px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
                   !selectedCity
-                    ? 'bg-brand-secondary text-brand-dark font-bold shadow-md scale-105'
+                    ? 'bg-gradient-to-r from-[#C8901F] via-[#D8A629] to-[#F4D940] text-brand-dark font-bold shadow-md scale-105 border border-[#F4D940]/50'
                     : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
                 }`}
               >
@@ -203,7 +219,7 @@ export default function HomePage() {
               </button>
 
               {!isCitiesLoading &&
-                cities?.map((city) => {
+                popularCities.map((city) => {
                   const isSelected = selectedCity?.id === city.id || selectedCity?.slug === city.slug
                   return (
                     <button
@@ -216,9 +232,9 @@ export default function HomePage() {
                           slug: city.slug,
                         })
                       }
-                      className={`px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all ${
+                      className={`px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
                         isSelected
-                          ? 'bg-brand-secondary text-brand-dark font-bold shadow-md scale-105'
+                          ? 'bg-gradient-to-r from-[#C8901F] via-[#D8A629] to-[#F4D940] text-brand-dark font-bold shadow-md scale-105 border border-[#F4D940]/50'
                           : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
                       }`}
                     >
@@ -226,6 +242,27 @@ export default function HomePage() {
                     </button>
                   )
                 })}
+
+              {/* If selected city is outside the top 4 popular cities, display it as selected */}
+              {selectedCity && !popularCities.some((c) => c.slug === selectedCity.slug || c.id === selectedCity.id) && (
+                <button
+                  type="button"
+                  className="px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all bg-gradient-to-r from-[#C8901F] via-[#D8A629] to-[#F4D940] text-brand-dark shadow-md scale-105 border border-[#F4D940]/50"
+                >
+                  {selectedCity.name}
+                </button>
+              )}
+
+              {/* Browse All / More Cities Button */}
+              <button
+                type="button"
+                onClick={() => setIsLocationModalOpen(true)}
+                className="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all bg-white/10 hover:bg-white/20 text-yellow-100/90 hover:text-white border border-white/20 flex items-center gap-1.5"
+                aria-label="View more cities"
+              >
+                <span>More Cities</span>
+                <span className="text-[10px] opacity-75">▾</span>
+              </button>
             </div>
           </div>
         </div>
