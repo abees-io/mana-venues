@@ -19,6 +19,7 @@ export default function AuthPage() {
   const isRegisterRoute = location.pathname.includes('/register')
   const [isRegister, setIsRegister] = useState(isRegisterRoute)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
@@ -30,16 +31,24 @@ export default function AuthPage() {
 
   const toggleMode = () => {
     setErrorMsg(null)
+    setSuccessMsg(null)
     setIsRegister((prev) => !prev)
     reset()
   }
 
   const onSubmit = async (data: AuthFormData) => {
     setErrorMsg(null)
+    setSuccessMsg(null)
     setIsSubmitting(true)
     try {
       if (isRegister) {
-        await signUp(data.email, data.password, data.fullName || '', data.phone || '')
+        const res = await signUp(data.email, data.password, data.fullName || '', data.phone || '')
+        if (!res.session) {
+          setSuccessMsg('Account created! Please check your email to verify your account or sign in below.')
+          setIsRegister(false)
+          reset()
+          return
+        }
       } else {
         await signIn(data.email, data.password)
       }
@@ -79,6 +88,13 @@ export default function AuthPage() {
             {isRegister ? 'Create your account to get started' : 'Welcome back — sign in to continue'}
           </p>
         </div>
+
+        {successMsg && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-800 text-sm rounded-lg flex items-center gap-2">
+            <span>✓</span>
+            <p>{successMsg}</p>
+          </div>
+        )}
 
         {errorMsg && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">

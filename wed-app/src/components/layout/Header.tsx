@@ -47,7 +47,8 @@ export default function Header() {
     }
   }
 
-  const userInitial = (profile?.full_name?.[0] || user?.email?.[0] || 'U').toUpperCase()
+  const displayName = profile?.full_name || (user?.user_metadata?.full_name as string) || (user?.user_metadata?.name as string) || user?.email
+  const userInitial = (displayName?.[0] || 'U').toUpperCase()
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm w-full">
@@ -120,7 +121,7 @@ export default function Header() {
                   <div className="px-4 py-2 border-b border-gray-100">
                     <p className="text-xs text-gray-400 font-medium">Signed in as</p>
                     <p className="text-sm font-semibold text-brand-dark truncate">
-                      {profile?.full_name || user.email}
+                      {displayName}
                     </p>
                   </div>
 

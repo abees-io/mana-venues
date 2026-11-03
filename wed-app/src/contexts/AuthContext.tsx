@@ -8,8 +8,10 @@ interface AuthContextType {
   profile: Profile | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, fullName: string, phone: string) => Promise<void>
+  signUp: (email: string, password: string, fullName: string, phone: string) => Promise<{ session: boolean }>
   signOut: () => Promise<void>
+  updateProfile: (updates: { full_name?: string; phone?: string; avatar_url?: string }) => Promise<void>
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -19,7 +21,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
 
+  const buildFallbackProfile = (targetUser: User): Profile => {
+    const meta = (targetUser.user_metadata || {}) as Record<string, unknown>
+    return {
+      id: targetUser.id,
+      email: targetUser.email || '',
+      full_name: (meta.full_name as string) || (meta.name as string) || '',
+      phone: (meta.phone as string) || null,
+      role: ((meta.role as string) || 'customer') as 'customer' | 'vendor' | 'admin',
+      avatar_url: (meta.avatar_url as string) || null,
+      created_at: targetUser.created_at || new Date().toISOString(),
+    }
+  }
+
   const fetchProfile = async (userId: string, currentUser?: User | null) => {
+    const targetUser = currentUser || user
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -27,35 +43,92 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('id', userId)
         .single()
 
-      if (error) {
-        console.warn('Profile not found, attempting self-heal:', error.message)
-        const targetUser = currentUser || user
+      if (error || !data) {
         if (targetUser) {
-          const { data: createdProfile } = await supabase
-            .from('profiles')
-            .upsert({
-              id: userId,
-              email: targetUser.email || '',
-              full_name: (targetUser.user_metadata?.full_name as string) || '',
-              phone: (targetUser.user_metadata?.phone as string) || null,
-              role: 'customer',
-            })
-            .select()
-            .single()
+          const fallback = buildFallbackProfile(targetUser)
+          // Try self-heal in public.profiles table
+          try {
+            const { data: createdProfile } = await supabase
+              .from('profiles')
+              .upsert(fallback)
+              .select()
+              .single()
 
-          if (createdProfile) {
-            setProfile(createdProfile as Profile)
-            return
+            if (createdProfile) {
+              setProfile(createdProfile as Profile)
+              return
+            }
+          } catch {
+            // Silently fallback if table RLS restricts direct insert
           }
+          // Set in-memory profile from user metadata so UI is never blank
+          setProfile(fallback)
+          return
         }
         setProfile(null)
       } else {
-        setProfile(data as Profile)
+        // Merge with targetUser metadata if DB fields were empty
+        const meta = (targetUser?.user_metadata || {}) as Record<string, unknown>
+        setProfile({
+          ...data,
+          full_name: data.full_name || (meta.full_name as string) || '',
+          phone: data.phone || (meta.phone as string) || null,
+        } as Profile)
       }
     } catch (err) {
       console.warn('Unexpected error fetching profile:', err)
-      setProfile(null)
+      if (targetUser) {
+        setProfile(buildFallbackProfile(targetUser))
+      } else {
+        setProfile(null)
+      }
     }
+  }
+
+  const refreshProfile = async () => {
+    if (user?.id) {
+      await fetchProfile(user.id, user)
+    }
+  }
+
+  const updateProfile = async (updates: {
+    full_name?: string
+    phone?: string
+    avatar_url?: string
+  }) => {
+    if (!user) throw new Error('Not authenticated')
+
+    // 1. Update Supabase Auth user metadata (always permitted for current user)
+    const { data: authData, error: authError } = await supabase.auth.updateUser({
+      data: updates,
+    })
+    if (authError) throw authError
+    if (authData?.user) {
+      setUser(authData.user)
+    }
+
+    // 2. Try upserting in public.profiles table
+    try {
+      await supabase.from('profiles').upsert({
+        id: user.id,
+        email: user.email || '',
+        full_name: updates.full_name ?? profile?.full_name ?? '',
+        phone: updates.phone ?? profile?.phone ?? null,
+        role: profile?.role || 'customer',
+        avatar_url: updates.avatar_url ?? profile?.avatar_url ?? null,
+      })
+    } catch (err) {
+      console.warn('Could not update profiles table directly:', err)
+    }
+
+    // 3. Update local profile state immediately
+    setProfile((prev) => {
+      const base = prev || buildFallbackProfile(user)
+      return {
+        ...base,
+        ...updates,
+      }
+    })
   }
 
   useEffect(() => {
@@ -110,8 +183,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     fullName: string,
     phone: string
-  ): Promise<void> => {
-    const { error } = await supabase.auth.signUp({
+  ): Promise<{ session: boolean }> => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -122,6 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     })
     if (error) throw error
+    return { session: !!data.session }
   }
 
   const signOut = async (): Promise<void> => {
@@ -140,6 +214,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signIn,
         signUp,
         signOut,
+        updateProfile,
+        refreshProfile,
       }}
     >
       {children}
