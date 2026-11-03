@@ -1,7 +1,6 @@
-﻿import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Sparkles } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -76,7 +75,7 @@ export default function ScrollAnimatedSection() {
               >
                 {text}
               </span>
-              <span className="text-brand-secondary text-xs sm:text-sm">✦</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-secondary inline-block opacity-80" />
             </div>
           ))}
         </div>
@@ -87,7 +86,6 @@ export default function ScrollAnimatedSection() {
         <div className="max-w-4xl mx-auto text-center space-y-5">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-xs font-semibold text-brand-primary uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-brand-secondary" />
             <span>Curated Wedding Excellence</span>
           </div>
 
@@ -113,4 +111,3 @@ export default function ScrollAnimatedSection() {
     </div>
   )
 }
-
