@@ -46,3 +46,4 @@ export function useCustomerBookings() {
     enabled: !!user?.id,
   })
 }
+
