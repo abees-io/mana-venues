@@ -47,7 +47,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 md:hidden pb-safe"
+      className="fixed bottom-0 left-0 right-0 bg-brand-dark/95 backdrop-blur-md border-t border-green-900/50 z-50 md:hidden pb-safe"
       aria-label="Mobile Navigation"
     >
       <div className="flex items-center justify-around h-16 px-2">
@@ -60,8 +60,8 @@ export default function BottomNav() {
               onClick={tab.onClick}
               className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors ${
                 tab.isActive
-                  ? 'text-brand-primary font-semibold'
-                  : 'text-gray-400 hover:text-gray-600'
+                  ? 'text-brand-secondary font-semibold'
+                  : 'text-green-300/60 hover:text-green-100'
               }`}
             >
               <Icon className="w-5 h-5 mb-1" />

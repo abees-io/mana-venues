@@ -4,7 +4,12 @@
 
 @layer base {
   body {
-    @apply bg-brand-accent text-brand-dark font-sans;
+    @apply bg-brand-dark text-white font-sans;
+    background-image: url('/bg-main.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
 
   /* Disable browser native password reveal eye (Edge, IE, Chrome) */
