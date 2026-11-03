@@ -9,14 +9,19 @@ export default {
     extend: {
       colors: {
         brand: {
-          primary: '#8B1A4A',    // deep rose/maroon (wedding)
-          secondary: '#C5A059',  // metallic champagne gold (matching logo)
-          accent: '#FDF0F5',     // blush pink background
-          dark: '#1A0A10',       // near-black
+          primary: '#0D2818',    // deep forest green
+          secondary: '#FFD700',  // golden rush yellow
+          accent: '#F0F7F2',     // light forest tint
+          dark: '#0B1F12',       // darkest forest
           gold: {
-            light: '#E6D3B3',
-            DEFAULT: '#C5A059',
-            dark: '#A6823E',
+            light: '#FFF3B0',
+            DEFAULT: '#FFD700',
+            dark: '#FF9800',
+          },
+          forest: {
+            light: '#1B4332',
+            DEFAULT: '#0D2818',
+            dark: '#0B1F12',
           },
         },
       },

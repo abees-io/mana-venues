@@ -1,8 +1,15 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+﻿import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { MapPin, Search, RefreshCw, X, Building2, ChevronRight } from 'lucide-react'
+import {
+  MapPin,
+  Search,
+  RefreshCw,
+  X,
+  Building2,
+  ChevronRight,
+} from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import AuditoriumCard from '../components/cards/AuditoriumCard'
 import { AuditoriumCardSkeletonList } from '../components/cards/AuditoriumCardSkeleton'
@@ -27,51 +34,65 @@ export default function HomePage() {
   const heroRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
 
-  const { data: auditoriums, isLoading, isError, refetch } = useAuditoriums(selectedCity?.slug, filters)
+  // Fetch auditoriums filtered by selected city and filter store
+  const {
+    data: auditoriums,
+    isLoading,
+    isError,
+    refetch,
+  } = useAuditoriums(selectedCity?.slug, filters)
 
+  // Filter client-side by hero search term if present
   const displayedAuditoriums = useMemo(() => {
     if (!auditoriums) return []
     const term = searchQuery.trim().toLowerCase()
     if (!term) return auditoriums
+
     return auditoriums.filter((item) => {
       const matchTitle = item.title?.toLowerCase().includes(term)
       const matchAddress = item.address?.toLowerCase().includes(term)
       const matchCity = item.cities?.name?.toLowerCase().includes(term)
-      const matchAmenities = item.amenities?.some((a) => a.toLowerCase().includes(term))
+      const matchAmenities = item.amenities?.some((a) =>
+        a.toLowerCase().includes(term)
+      )
       return matchTitle || matchAddress || matchCity || matchAmenities
     })
   }, [auditoriums, searchQuery])
 
-  // Hero entrance — subtle, no parallax
+  // GSAP: Hero text animation on mount
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from('.hero-eyebrow', { y: 14, opacity: 0, duration: 0.65, ease: 'power3.out' })
-      gsap.from('.hero-title-anim', { y: 28, opacity: 0, duration: 0.85, delay: 0.12, ease: 'power3.out' })
-      gsap.from('.hero-divider', { scaleX: 0, opacity: 0, duration: 0.6, delay: 0.28, ease: 'power2.out', transformOrigin: 'center' })
-      gsap.from('.hero-subtitle-anim', { y: 18, opacity: 0, duration: 0.65, delay: 0.35, ease: 'power2.out' })
-      gsap.from('.hero-search-anim', { y: 16, opacity: 0, duration: 0.6, delay: 0.48, ease: 'power2.out' })
-      gsap.from('.hero-chip', { y: 10, opacity: 0, duration: 0.45, delay: 0.62, stagger: 0.045, ease: 'power2.out' })
+      gsap.from('.hero-animate', {
+        y: 35,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.12,
+        ease: 'power2.out',
+      })
     }, heroRef)
+
     return () => ctx.revert()
   }, [])
 
-  // Card grid entrance
+  // GSAP: Card grid entrance animation with ScrollTrigger
   useEffect(() => {
     if (isLoading || displayedAuditoriums.length === 0) return
+
     const ctx = gsap.context(() => {
       gsap.from('.auditorium-card', {
         opacity: 0,
-        y: 24,
-        stagger: 0.065,
-        duration: 0.5,
+        y: 40,
+        stagger: 0.08,
+        duration: 0.6,
         ease: 'power2.out',
         scrollTrigger: {
           trigger: gridRef.current,
-          start: 'top 88%',
+          start: 'top 85%',
           toggleActions: 'play none none none',
         },
       })
     }, gridRef)
+
     return () => ctx.revert()
   }, [displayedAuditoriums, isLoading, selectedCity])
 
@@ -79,93 +100,86 @@ export default function HomePage() {
     e.preventDefault()
     const trimmed = searchQuery.trim()
     const citySlug = selectedCity?.slug ?? 'kochi'
-    if (trimmed) navigate(`/city/${citySlug}?q=${encodeURIComponent(trimmed)}`)
+    if (trimmed) {
+      navigate(`/city/${citySlug}?q=${encodeURIComponent(trimmed)}`)
+    }
   }
 
   return (
     <Layout>
-      {/* HERO */}
-      <section ref={heroRef} className="relative bg-brand-dark text-white py-20 sm:py-28 px-4 sm:px-6 lg:px-8">
-        {/* Single hairline gold rule at top */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-brand-secondary opacity-40" />
+      {/* SECTION 1: HERO BANNER */}
+      <section
+        ref={heroRef}
+        className="relative overflow-hidden bg-gradient-to-br from-brand-primary via-[#1B4332] to-brand-dark text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8 shadow-inner"
+      >
+        {/* Subtle background decorative shapes */}
+        <div className="absolute inset-0 pointer-events-none opacity-10">
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-brand-secondary blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-white blur-3xl" />
+        </div>
 
-        <div className="relative max-w-3xl mx-auto text-center space-y-5">
-          {/* Eyebrow */}
-          <p className="hero-eyebrow text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-brand-secondary font-medium">
-            Kerala's Premier Venue Discovery
-          </p>
-
-          {/* Heading */}
+        <div className="relative max-w-5xl mx-auto text-center space-y-5">
           <h1
-            className="hero-title-anim text-3xl sm:text-4xl md:text-5xl font-semibold tracking-[0.05em] text-white leading-tight"
+            className="hero-animate text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[0.06em] sm:tracking-[0.12em] text-white uppercase drop-shadow-md whitespace-normal sm:whitespace-nowrap"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
-            Grand Venues for{' '}
-            <span className="text-brand-secondary">Your Big Days</span>
+            Grand Venues for Your Big Days
           </h1>
 
-          {/* Hairline divider */}
-          <div className="hero-divider flex items-center justify-center gap-3 py-1">
-            <span className="block h-px w-10 bg-brand-secondary/35" />
-            <span className="block w-1 h-1 bg-brand-secondary/60" />
-            <span className="block h-px w-10 bg-brand-secondary/35" />
-          </div>
-
-          {/* Subtitle */}
-          <p className="hero-subtitle-anim text-sm text-neutral-400 max-w-lg mx-auto font-light leading-loose">
-            Verified auditoriums, convention centres and luxury wedding halls
-            across Kerala with transparent pricing and real-time availability.
+          <p className="hero-animate text-base sm:text-lg text-green-50/90 max-w-2xl mx-auto font-light">
+            Discover verified auditoriums, convention centres, and luxury wedding
+            halls across Kerala with real-time pricing and availability.
           </p>
 
-          {/* Search */}
-          <div className="hero-search-anim max-w-xl mx-auto pt-2">
+          {/* Centered Search Bar */}
+          <div className="hero-animate max-w-2xl mx-auto pt-2">
             <form
               onSubmit={handleSearchSubmit}
-              className="flex items-stretch border border-white/10 hover:border-white/20 focus-within:border-brand-secondary/50 transition-colors"
+              className="relative flex items-center shadow-2xl rounded-full overflow-hidden bg-white p-1.5 focus-within:ring-4 focus-within:ring-brand-secondary/40 transition-all"
             >
-              <div className="flex items-center pl-4 text-neutral-500 bg-white/5">
-                <Search className="w-4 h-4" />
+              <div className="pl-3 sm:pl-4 text-gray-400">
+                <Search className="w-5 h-5 text-brand-primary" />
               </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, landmark, or amenity..."
-                className="w-full px-3 py-3.5 text-sm text-white bg-white/5 focus:outline-none placeholder-neutral-600"
+                placeholder="Search venues by name, landmark, or amenities..."
+                className="w-full px-3 py-2 text-sm sm:text-base text-brand-dark bg-transparent focus:outline-none placeholder-gray-400"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  aria-label="Clear"
-                  className="px-3 text-neutral-500 hover:text-neutral-300 bg-white/5 transition-colors"
+                  className="p-1 mr-1 text-gray-400 hover:text-gray-600 rounded-full"
+                  aria-label="Clear search"
                 >
                   <X className="w-4 h-4" />
                 </button>
               )}
               <button
                 type="submit"
-                className="shrink-0 px-5 py-3.5 bg-brand-secondary hover:bg-brand-gold-dark text-brand-dark font-semibold text-xs tracking-widest uppercase transition-colors flex items-center gap-1.5"
+                className="shrink-0 px-4 sm:px-6 py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary/90 text-white font-medium text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5"
               >
-                Search
-                <ChevronRight className="w-3.5 h-3.5" />
+                <span>Search</span>
+                <ChevronRight className="w-4 h-4 hidden sm:inline" />
               </button>
             </form>
           </div>
 
-          {/* City Chips */}
-          <div className="pt-2 space-y-2.5">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-neutral-600 font-medium">
-              Browse by City
+          {/* Quick City Selector Chips */}
+          <div className="hero-animate pt-3">
+            <p className="text-xs uppercase tracking-wider text-yellow-200/80 mb-2 font-medium">
+              Popular Cities
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"
                 onClick={() => clearCity()}
-                className={`hero-chip px-4 py-1.5 text-[11px] font-medium tracking-wider uppercase border transition-colors ${
+                className={`px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all ${
                   !selectedCity
-                    ? 'bg-brand-secondary border-brand-secondary text-brand-dark'
-                    : 'border-white/15 text-neutral-500 hover:border-brand-secondary/50 hover:text-white'
+                    ? 'bg-brand-secondary text-brand-dark font-bold shadow-md scale-105'
+                    : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
                 }`}
               >
                 All Kerala
@@ -178,11 +192,17 @@ export default function HomePage() {
                     <button
                       key={city.id}
                       type="button"
-                      onClick={() => setCity({ id: city.id, name: city.name, slug: city.slug })}
-                      className={`hero-chip px-4 py-1.5 text-[11px] font-medium tracking-wider uppercase border transition-colors ${
+                      onClick={() =>
+                        setCity({
+                          id: city.id,
+                          name: city.name,
+                          slug: city.slug,
+                        })
+                      }
+                      className={`px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all ${
                         isSelected
-                          ? 'bg-brand-secondary border-brand-secondary text-brand-dark'
-                          : 'border-white/15 text-neutral-500 hover:border-brand-secondary/50 hover:text-white'
+                          ? 'bg-brand-secondary text-brand-dark font-bold shadow-md scale-105'
+                          : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
                       }`}
                     >
                       {city.name}
@@ -192,94 +212,94 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-
-        {/* Bottom hairline */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-brand-secondary opacity-20" />
       </section>
 
-      {/* SCROLL ANIMATED EDITORIAL SECTION */}
+      {/* SCROLL-ANIMATED TICKER & EDITORIAL REVEAL SECTION */}
       <ScrollAnimatedSection />
 
-      {/* VENUE FEED */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        {/* Feed header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-5 border-b border-neutral-100">
+      {/* SECTION 2 & 3: FEED & GRID */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Feed Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-200/70 mb-8">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.25em] text-brand-secondary font-medium mb-1.5">
-              {selectedCity ? `Venues in ${selectedCity.name}` : 'All Kerala'}
-            </p>
-            <h2
-              className="text-xl sm:text-2xl font-semibold text-brand-dark tracking-wide"
-              style={{ fontFamily: "'Cinzel', serif" }}
-            >
-              {selectedCity ? selectedCity.name : 'All Venues'}
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
+                {selectedCity ? `Venues in ${selectedCity.name}` : 'All Venues in Kerala'}
+              </h2>
               {!isLoading && (
-                <span className="ml-2.5 text-sm font-normal text-neutral-400">
-                  ({displayedAuditoriums.length})
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-brand-accent text-brand-primary border border-brand-primary/20">
+                  {displayedAuditoriums.length}
                 </span>
               )}
-            </h2>
-            <p className="text-xs text-neutral-400 mt-1 font-light">
+            </div>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
               {selectedCity
-                ? `Curated wedding spaces in ${selectedCity.name}`
-                : 'Verified wedding venues across Kerala'}
+                ? `Showing curated auditoriums in ${selectedCity.name}`
+                : 'Showing all verified wedding auditoriums across cities'}
               {searchQuery ? ` matching "${searchQuery}"` : ''}
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIsLocationModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-medium text-neutral-500 border border-neutral-200 hover:border-brand-secondary hover:text-brand-secondary transition-colors self-start sm:self-auto shrink-0"
-          >
-            <MapPin className="w-3.5 h-3.5" />
-            {selectedCity ? 'Change City' : 'Select City'}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsLocationModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-brand-primary bg-white border border-brand-primary/30 hover:bg-brand-accent hover:border-brand-primary transition-all shadow-xs"
+            >
+              <MapPin className="w-4 h-4 text-brand-primary" />
+              <span>{selectedCity ? 'Change City' : 'Select City'}</span>
+            </button>
+          </div>
         </div>
 
-        {/* Grid / States */}
+        {/* FEED GRID / STATES */}
         <div ref={gridRef}>
+          {/* Loading Skeleton */}
           {isLoading && <AuditoriumCardSkeletonList count={6} />}
 
+          {/* Error State */}
           {isError && (
-            <div className="text-center py-20 max-w-sm mx-auto space-y-4">
-              <div className="w-10 h-10 border border-red-200 text-red-400 mx-auto flex items-center justify-center">
-                <RefreshCw className="w-4 h-4" />
+            <div className="text-center py-16 bg-white rounded-2xl border border-red-100 shadow-xs max-w-lg mx-auto p-8 space-y-4">
+              <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 mx-auto flex items-center justify-center">
+                <RefreshCw className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-semibold text-brand-dark">Failed to load venues</h3>
-              <p className="text-xs text-neutral-500 leading-relaxed">
-                Check your connection and try again.
+              <h3 className="text-lg font-bold text-gray-800">
+                Failed to load auditoriums
+              </h3>
+              <p className="text-sm text-gray-500">
+                We encountered an issue fetching venues. Please check your connection and try again.
               </p>
               <button
                 type="button"
                 onClick={() => refetch()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-dark hover:bg-brand-secondary text-white hover:text-brand-dark text-[11px] font-medium tracking-widest uppercase transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary/90 text-white font-medium text-sm transition-all shadow-sm"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
-                Retry
+                <RefreshCw className="w-4 h-4" />
+                <span>Retry</span>
               </button>
             </div>
           )}
 
+          {/* Empty State */}
           {!isLoading && !isError && displayedAuditoriums.length === 0 && (
-            <div className="text-center py-20 max-w-sm mx-auto space-y-4">
-              <div className="w-10 h-10 border border-neutral-200 text-neutral-400 mx-auto flex items-center justify-center">
-                <Building2 className="w-4 h-4" />
+            <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-xs max-w-lg mx-auto p-8 space-y-4">
+              <div className="w-14 h-14 rounded-full bg-brand-accent text-brand-primary mx-auto flex items-center justify-center">
+                <Building2 className="w-7 h-7" />
               </div>
-              <h3 className="text-sm font-semibold text-brand-dark">
-                No venues found{selectedCity ? ` in ${selectedCity.name}` : ''}
+              <h3 className="text-lg font-bold text-brand-dark">
+                No venues found {selectedCity ? `in ${selectedCity.name}` : ''}
               </h3>
-              <p className="text-xs text-neutral-500 leading-relaxed max-w-xs mx-auto">
+              <p className="text-sm text-gray-500 max-w-sm mx-auto">
                 {searchQuery
-                  ? `No results for "${searchQuery}". Try a different keyword.`
-                  : 'No active venues match your criteria in this location.'}
+                  ? `No venues match the query "${searchQuery}". Try a different keyword or clear the search.`
+                  : 'We could not find any active venues matching your criteria in this city.'}
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+              <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="px-4 py-2 text-[11px] font-medium text-neutral-600 border border-neutral-200 hover:border-brand-secondary transition-colors"
+                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-brand-dark bg-gray-100 hover:bg-gray-200 transition-colors"
                   >
                     Clear Search
                   </button>
@@ -288,17 +308,25 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => clearCity()}
-                    className="px-4 py-2 text-[11px] font-medium text-white bg-brand-dark hover:bg-brand-secondary hover:text-brand-dark transition-colors"
+                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-brand-primary hover:bg-brand-primary/90 transition-colors shadow-sm"
                   >
                     View All Cities
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={() => setIsLocationModalOpen(true)}
+                  className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-brand-primary bg-brand-accent hover:bg-green-50 transition-colors border border-brand-primary/20"
+                >
+                  Switch City
+                </button>
               </div>
             </div>
           )}
 
+          {/* Cards Grid */}
           {!isLoading && !isError && displayedAuditoriums.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayedAuditoriums.map((auditorium) => (
                 <AuditoriumCard key={auditorium.id} auditorium={auditorium} />
               ))}
@@ -307,7 +335,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      <LocationModal isOpen={isLocationModalOpen} onClose={() => setIsLocationModalOpen(false)} />
+      {/* Location Modal */}
+      <LocationModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+      />
     </Layout>
   )
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Cookie, X, Check, ShieldCheck, Settings2 } from 'lucide-react'
 
 export interface CookiePreferences {
@@ -34,8 +34,10 @@ export default function CookieBanner() {
   })
 
   useEffect(() => {
+    // Only show if user has not made a choice yet
     const stored = getStoredConsent()
     if (!stored) {
+      // Small delay so it smoothly slides in after initial paint
       const timer = setTimeout(() => setIsVisible(true), 800)
       return () => clearTimeout(timer)
     }
@@ -64,74 +66,70 @@ export default function CookieBanner() {
     saveConsent(essentialOnly)
   }
 
-  const handleSavePreferences = () => saveConsent(preferences)
+  const handleSavePreferences = () => {
+    saveConsent(preferences)
+  }
 
   if (!isVisible) return null
 
   return (
     <>
-      {/* Cookie Banner — bottom sheet */}
+      {/* Floating Cookie Banner */}
       <div
         role="region"
         aria-label="Cookie consent banner"
-        className="fixed z-40 bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-md bg-white border border-neutral-200 shadow-lg p-5"
+        className="fixed z-40 bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-md bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-green-900/30/80 p-5 animate-in fade-in slide-in-from-bottom-5 duration-300"
       >
         <div className="flex items-start gap-3.5">
-          <div className="w-9 h-9 border border-neutral-200 flex items-center justify-center shrink-0 text-brand-secondary">
-            <Cookie className="w-4.5 h-4.5" />
+          <div className="w-10 h-10 rounded-xl bg-brand-accent text-brand-primary flex items-center justify-center shrink-0 border border-brand-primary/15 shadow-xs">
+            <Cookie className="w-5 h-5 text-brand-primary" />
           </div>
 
-          <div className="flex-1 space-y-1 min-w-0">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-xs font-semibold text-brand-dark tracking-wide uppercase">
+          <div className="flex-1 space-y-1">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-brand-dark tracking-tight">
                 Cookie Preferences
               </h3>
               <button
                 type="button"
                 onClick={handleEssentialOnly}
-                className="text-neutral-400 hover:text-neutral-600 p-0.5 transition-colors shrink-0"
-                aria-label="Dismiss"
+                className="text-gray-400 hover:text-gray-600 p-1 -mr-1 rounded-lg"
+                aria-label="Dismiss cookie banner"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-[11px] text-neutral-500 leading-relaxed">
-              We use cookies to save your city preference, enable secure checkout, and improve venue
-              discovery. View our{' '}
-              <a href="/cookie-policy" className="underline hover:text-brand-secondary transition-colors">
-                Cookie Policy
-              </a>{' '}
-              and{' '}
-              <a href="/privacy" className="underline hover:text-brand-secondary transition-colors">
-                Privacy Policy
-              </a>
-              .
+            <p className="text-xs text-gray-600 leading-relaxed">
+              We use cookies to optimize your venue discovery, save your city preferences, and provide secure booking checkout.
             </p>
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-neutral-100 flex flex-wrap items-center gap-2">
+        {/* Action Buttons */}
+        <div className="mt-4 flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
           <button
             type="button"
             onClick={handleAcceptAll}
-            className="flex-1 bg-brand-dark hover:bg-brand-secondary hover:text-brand-dark text-white text-[11px] font-semibold py-2 px-3 tracking-wider uppercase transition-colors"
+            className="flex-1 bg-brand-primary hover:bg-brand-primary/90 text-white text-xs font-semibold py-2 px-3.5 rounded-xl transition-all shadow-xs active:scale-98"
           >
             Accept All
           </button>
+
           <button
             type="button"
             onClick={handleEssentialOnly}
-            className="flex-1 border border-neutral-200 hover:border-brand-secondary text-brand-dark hover:text-brand-secondary text-[11px] font-semibold py-2 px-3 tracking-wider uppercase transition-colors"
+            className="flex-1 bg-white hover:bg-gray-50 text-brand-dark border border-gray-200 text-xs font-semibold py-2 px-3.5 rounded-xl transition-colors active:scale-98"
           >
             Essential Only
           </button>
+
           <button
             type="button"
             onClick={() => setShowPreferences(true)}
-            className="w-full text-center text-[11px] font-medium text-neutral-400 hover:text-brand-secondary py-1 transition-colors flex items-center justify-center gap-1.5"
+            className="w-full text-center text-xs font-medium text-brand-primary hover:text-brand-primary/80 py-1 transition-colors flex items-center justify-center gap-1"
           >
             <Settings2 className="w-3.5 h-3.5" />
-            Customize
+            <span>Customize Settings</span>
           </button>
         </div>
       </div>
@@ -141,54 +139,54 @@ export default function CookieBanner() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-brand-dark/70 flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
         >
-          <div className="bg-white max-w-md w-full p-6 shadow-xl border border-neutral-100 relative my-auto">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative my-auto animate-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-neutral-100 mb-5">
+            <div className="flex items-center justify-between pb-3.5 border-b border-gray-100 mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 border border-neutral-200 flex items-center justify-center text-brand-secondary">
-                  <Cookie className="w-3.5 h-3.5" />
+                <div className="w-8 h-8 rounded-full bg-brand-accent text-brand-primary flex items-center justify-center shrink-0">
+                  <Cookie className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-semibold text-brand-dark tracking-wide">Customize Cookies</h2>
-                  <p className="text-[10px] text-neutral-400 mt-0.5">Choose which cookies you allow</p>
+                  <h2 className="text-base font-bold text-brand-dark">Customize Cookies</h2>
+                  <p className="text-xs text-gray-500">Choose which cookies you allow</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowPreferences(false)}
-                className="p-1 text-neutral-400 hover:text-neutral-600 transition-colors"
+                className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
                 aria-label="Close"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Categories */}
-            <div className="space-y-3 text-xs">
+            {/* Cookie Categories */}
+            <div className="space-y-3.5 text-xs">
               {/* Essential */}
-              <div className="p-4 bg-neutral-50 border border-neutral-100 flex items-start justify-between gap-3">
+              <div className="p-3.5 rounded-xl bg-gray-50/80 border border-gray-100 flex items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-1.5 font-semibold text-brand-dark">
-                    <ShieldCheck className="w-3.5 h-3.5 text-brand-secondary" />
-                    Strictly Necessary
+                  <div className="flex items-center gap-1.5 font-bold text-brand-dark">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Strictly Necessary</span>
                   </div>
-                  <p className="text-neutral-500 leading-relaxed">
-                    Required for authentication, payment security, and city preference persistence. Always enabled.
+                  <p className="text-gray-500 leading-relaxed">
+                    Required for Supabase authentication, Razorpay security, and selected city persistence. Always enabled.
                   </p>
                 </div>
-                <span className="shrink-0 text-[9px] font-bold uppercase tracking-widest px-2 py-1 bg-neutral-100 text-neutral-500 border border-neutral-200">
+                <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
                   Always On
                 </span>
               </div>
 
               {/* Preferences */}
-              <div className="p-4 bg-neutral-50 border border-neutral-100 flex items-start justify-between gap-3">
+              <div className="p-3.5 rounded-xl bg-gray-50/80 border border-gray-100 flex items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <span className="font-semibold text-brand-dark block">Preference Cookies</span>
-                  <p className="text-neutral-500 leading-relaxed">
-                    Remembers your venue search filters, budget range, and sort preferences across sessions.
+                  <span className="font-bold text-brand-dark block">Preference Cookies</span>
+                  <p className="text-gray-500 leading-relaxed">
+                    Remembers your venue search filters, budget sliders, and sort selections across browsing sessions.
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
@@ -200,16 +198,16 @@ export default function CookieBanner() {
                     }
                     className="sr-only peer"
                   />
-                  <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-secondary" />
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-primary"></div>
                 </label>
               </div>
 
               {/* Analytics */}
-              <div className="p-4 bg-neutral-50 border border-neutral-100 flex items-start justify-between gap-3">
+              <div className="p-3.5 rounded-xl bg-gray-50/80 border border-gray-100 flex items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <span className="font-semibold text-brand-dark block">Analytics &amp; Performance</span>
-                  <p className="text-neutral-500 leading-relaxed">
-                    Helps us understand popular venues and improve the platform. No personal data is sold.
+                  <span className="font-bold text-brand-dark block">Analytics & Performance</span>
+                  <p className="text-gray-500 leading-relaxed">
+                    Helps us understand popular wedding destinations and venue demand to improve the MANA Venues platform.
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
@@ -221,27 +219,27 @@ export default function CookieBanner() {
                     }
                     className="sr-only peer"
                   />
-                  <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-secondary" />
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-primary"></div>
                 </label>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="mt-5 flex items-center justify-end gap-2 pt-4 border-t border-neutral-100">
+            {/* Modal Actions */}
+            <div className="mt-5 flex items-center justify-end gap-2.5 pt-3 border-t border-gray-100">
               <button
                 type="button"
                 onClick={() => setShowPreferences(false)}
-                className="px-4 py-2 text-[11px] font-medium text-neutral-500 hover:text-neutral-700 border border-neutral-200 hover:border-neutral-300 transition-colors"
+                className="px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSavePreferences}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold text-brand-dark bg-brand-secondary hover:bg-brand-gold-dark transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-brand-primary hover:bg-brand-primary/90 rounded-xl transition-colors shadow-xs"
               >
                 <Check className="w-3.5 h-3.5" />
-                Save Preferences
+                <span>Save Preferences</span>
               </button>
             </div>
           </div>
@@ -250,3 +248,4 @@ export default function CookieBanner() {
     </>
   )
 }
+

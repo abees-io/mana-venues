@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import {
   User,
@@ -233,7 +233,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-brand-primary bg-brand-accent hover:bg-pink-100 rounded-lg transition-colors border border-brand-primary/20"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-brand-primary bg-brand-accent hover:bg-green-50 rounded-lg transition-colors border border-brand-primary/20"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                   <span>Edit Profile</span>
