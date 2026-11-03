@@ -18,26 +18,11 @@ const MARQUEE_ITEMS = [
 
 export default function ScrollAnimatedSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
-  const tickerRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
   const descRef = useRef<HTMLParagraphElement>(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // 1. Ticker scroll velocity interaction
-      if (tickerRef.current) {
-        gsap.to(tickerRef.current, {
-          xPercent: -15,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 1.2,
-          },
-        })
-      }
-
       // 2. Editorial Title reveal on scroll
       if (titleRef.current) {
         gsap.from(titleRef.current, {
@@ -81,7 +66,7 @@ export default function ScrollAnimatedSection() {
         <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-[#15050C] to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-[#15050C] to-transparent z-10 pointer-events-none" />
 
-        <div ref={tickerRef} className="flex whitespace-nowrap will-change-transform">
+        <div className="flex whitespace-nowrap">
           {/* Loop items twice for seamless infinite effect */}
           {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((text, idx) => (
             <div key={idx} className="inline-flex items-center gap-6 px-4">
