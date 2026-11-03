@@ -18,6 +18,8 @@ export default {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
         cinzel: ["'Cinzel'", 'serif'],
+        cormorant: ["'Cormorant Garamond'", 'serif'],
+        playfair: ["'Playfair Display'", 'serif'],
       },
     },
   },

@@ -81,7 +81,10 @@ export default function AuthPage() {
           >
             MANA <span className="text-brand-secondary">VENUES</span>
           </h1>
-          <p className="text-brand-dark/70 text-xs sm:text-sm mt-1 font-medium" style={{ fontFamily: "'Cinzel', serif" }}>
+          <p
+            className="text-brand-dark/70 text-sm sm:text-base mt-1 italic tracking-wide font-normal"
+            style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', serif" }}
+          >
             Grand venues for your big days
           </p>
           <p className="text-gray-500 text-xs sm:text-sm mt-3">
