@@ -1,6 +1,6 @@
-﻿import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { MapPin, Search, ChevronDown, User, LogOut } from 'lucide-react'
+import { MapPin, Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
 import LocationModal from '../modals/LocationModal'
@@ -49,6 +49,8 @@ export default function Header() {
 
   const displayName = profile?.full_name || (user?.user_metadata?.full_name as string) || (user?.user_metadata?.name as string) || user?.email
   const userInitial = (displayName?.[0] || 'U').toUpperCase()
+  const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
+  const isVendor = profile?.role === 'vendor' || user?.user_metadata?.role === 'vendor'
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm w-full">
@@ -73,7 +75,7 @@ export default function Header() {
           <button
             type="button"
             onClick={() => setIsLocationModalOpen(true)}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-brand-accent hover:bg-green-50 text-brand-dark transition-colors text-xs sm:text-sm font-medium border border-green-900/30/60 shrink min-w-0"
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-brand-accent hover:bg-green-50 text-brand-dark transition-colors text-xs sm:text-sm font-medium border border-green-900/30 shrink min-w-0"
             aria-label="Select City"
           >
             <MapPin className="w-3.5 h-3.5 text-brand-primary shrink-0" />
@@ -100,6 +102,27 @@ export default function Header() {
 
         {/* Right: Auth Buttons or User Avatar Dropdown */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Quick Admin Dashboard Link for Admin Users */}
+          {user && isAdmin && (
+            <Link
+              to="/admin"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-primary text-white hover:bg-brand-primary/90 shadow-xs transition-colors"
+            >
+              <ShieldAlert className="w-3.5 h-3.5 text-brand-secondary" />
+              <span>Admin Panel</span>
+            </Link>
+          )}
+
+          {user && isVendor && !isAdmin && (
+            <Link
+              to="/vendor"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-primary text-white hover:bg-brand-primary/90 shadow-xs transition-colors"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5" />
+              <span>Vendor Dashboard</span>
+            </Link>
+          )}
+
           {user ? (
             <div className="relative" ref={userMenuRef}>
               <button
@@ -117,13 +140,56 @@ export default function Header() {
 
               {/* User Dropdown */}
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 sm:w-52 max-w-[calc(100vw-1.5rem)] bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-50">
+                <div className="absolute right-0 mt-2 w-52 sm:w-56 max-w-[calc(100vw-1.5rem)] bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-50">
                   <div className="px-4 py-2 border-b border-gray-100">
                     <p className="text-xs text-gray-400 font-medium">Signed in as</p>
                     <p className="text-sm font-semibold text-brand-dark truncate">
                       {displayName}
                     </p>
+                    {isAdmin && (
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold bg-brand-primary/10 text-brand-primary uppercase">
+                        Super Admin
+                      </span>
+                    )}
                   </div>
+
+                  {/* Direct Admin Links in Dropdown */}
+                  {isAdmin && (
+                    <>
+                      <Link
+                        to="/admin"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-brand-primary hover:bg-brand-accent transition-colors"
+                      >
+                        <ShieldAlert className="w-4 h-4 text-brand-primary" />
+                        <span>Admin Dashboard</span>
+                      </Link>
+
+                      <Link
+                        to="/admin/verification"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-brand-accent hover:text-brand-primary transition-colors"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        <span>Verification Queue</span>
+                      </Link>
+                      <div className="border-t border-gray-100 my-1" />
+                    </>
+                  )}
+
+                  {isVendor && (
+                    <>
+                      <Link
+                        to="/vendor"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm font-semibold text-brand-primary hover:bg-brand-accent transition-colors"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        <span>Vendor Dashboard</span>
+                      </Link>
+                      <div className="border-t border-gray-100 my-1" />
+                    </>
+                  )}
 
                   <Link
                     to="/profile"
