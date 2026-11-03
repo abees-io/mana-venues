@@ -116,13 +116,16 @@ export default function HomePage() {
             <span>Kerala's Premier Wedding Hall Discovery</span>
           </div>
 
-          <h1
-            className="hero-animate text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-white leading-[1.12] drop-shadow-md"
-            style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}
-          >
-            Grand Venues for Your <br className="hidden sm:inline" />
+          <h1 className="hero-animate flex flex-col items-center justify-center space-y-1">
             <span
-              className="italic font-normal bg-gradient-to-r from-[#FDE08B] via-[#E2BF59] to-[#F5D577] bg-clip-text text-transparent drop-shadow-lg tracking-normal inline-block ml-1"
+              className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[0.12em] text-white uppercase drop-shadow-md"
+              style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}
+            >
+              Grand Venues for Your
+            </span>
+            <span
+              className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl text-brand-secondary font-normal drop-shadow-[0_4px_24px_rgba(212,175,55,0.45)] leading-tight pt-1"
+              style={{ fontFamily: "'Great Vibes', cursive" }}
             >
               Big Days
             </span>

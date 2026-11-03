@@ -81,11 +81,19 @@ export default function AuthPage() {
           >
             MANA <span className="text-brand-secondary">VENUES</span>
           </h1>
-          <p
-            className="text-brand-dark/70 text-sm sm:text-base mt-1 italic tracking-wide font-normal"
-            style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', serif" }}
-          >
-            Grand venues for your big days
+          <p className="mt-1 flex items-center justify-center gap-1.5 flex-wrap">
+            <span
+              className="text-xs uppercase tracking-[0.14em] text-brand-dark/70 font-semibold"
+              style={{ fontFamily: "'Cinzel', serif" }}
+            >
+              Grand venues for your
+            </span>
+            <span
+              className="text-2xl text-brand-secondary font-normal drop-shadow-xs"
+              style={{ fontFamily: "'Great Vibes', cursive" }}
+            >
+              Big Days
+            </span>
           </p>
           <p className="text-gray-500 text-xs sm:text-sm mt-3">
             {isRegister ? 'Create your account to get started' : 'Welcome back — sign in to continue'}
