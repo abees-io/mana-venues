@@ -5,7 +5,6 @@ import {
   MapPin,
   Search,
   RefreshCw,
-  Sparkles,
   X,
   Building2,
   ChevronRight,
@@ -110,25 +109,12 @@ export default function HomePage() {
           <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-white blur-3xl" />
         </div>
 
-        <div className="relative max-w-4xl mx-auto text-center space-y-6">
-          <div className="hero-animate inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-medium text-pink-100">
-            <Sparkles className="w-3.5 h-3.5 text-brand-secondary" />
-            <span>Kerala's Premier Wedding Hall Discovery</span>
-          </div>
-
-          <h1 className="hero-animate flex flex-col items-center justify-center space-y-1">
-            <span
-              className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[0.12em] text-white uppercase drop-shadow-md"
-              style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}
-            >
-              Grand Venues for Your
-            </span>
-            <span
-              className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl text-brand-secondary font-normal drop-shadow-[0_4px_24px_rgba(212,175,55,0.45)] leading-tight pt-1"
-              style={{ fontFamily: "'Great Vibes', cursive" }}
-            >
-              Big Days
-            </span>
+        <div className="relative max-w-5xl mx-auto text-center space-y-5">
+          <h1
+            className="hero-animate text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[0.06em] sm:tracking-[0.12em] text-white uppercase drop-shadow-md whitespace-normal sm:whitespace-nowrap"
+            style={{ fontFamily: "'Cinzel', serif" }}
+          >
+            Grand Venues for Your <span className="text-brand-secondary">Big Days</span>
           </h1>
 
           <p className="hero-animate text-base sm:text-lg text-pink-100/90 max-w-2xl mx-auto font-light">
