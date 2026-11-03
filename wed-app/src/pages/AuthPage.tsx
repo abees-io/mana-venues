@@ -85,7 +85,7 @@ export default function AuthPage() {
             className="text-xs uppercase tracking-[0.14em] text-brand-dark/70 font-semibold mt-1"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
-            Grand venues for your <span className="text-brand-secondary">big days</span>
+            Grand venues for your big days
           </p>
           <p className="text-gray-500 text-xs sm:text-sm mt-3">
             {isRegister ? 'Create your account to get started' : 'Welcome back — sign in to continue'}

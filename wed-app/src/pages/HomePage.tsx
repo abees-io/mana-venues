@@ -114,7 +114,7 @@ export default function HomePage() {
             className="hero-animate text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[0.06em] sm:tracking-[0.12em] text-white uppercase drop-shadow-md whitespace-normal sm:whitespace-nowrap"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
-            Grand Venues for Your <span className="text-brand-secondary">Big Days</span>
+            Grand Venues for Your Big Days
           </h1>
 
           <p className="hero-animate text-base sm:text-lg text-pink-100/90 max-w-2xl mx-auto font-light">
