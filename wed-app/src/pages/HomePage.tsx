@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -25,7 +25,24 @@ gsap.registerPlugin(ScrollTrigger)
 export default function HomePage() {
   const navigate = useNavigate()
   const { selectedCity, setCity, clearCity } = useCityStore()
-  const filters = useFilterStore()
+  
+  const capacityMin = useFilterStore((state) => state.capacityMin)
+  const capacityMax = useFilterStore((state) => state.capacityMax)
+  const priceMin = useFilterStore((state) => state.priceMin)
+  const priceMax = useFilterStore((state) => state.priceMax)
+  const amenities = useFilterStore((state) => state.amenities)
+
+  const filterParams = useMemo(
+    () => ({
+      capacityMin,
+      capacityMax,
+      priceMin,
+      priceMax,
+      amenities,
+    }),
+    [capacityMin, capacityMax, priceMin, priceMax, amenities]
+  )
+
   const { data: cities, isLoading: isCitiesLoading } = useCities()
 
   const [searchQuery, setSearchQuery] = useState('')
@@ -40,7 +57,7 @@ export default function HomePage() {
     isLoading,
     isError,
     refetch,
-  } = useAuditoriums(selectedCity?.slug, filters)
+  } = useAuditoriums(selectedCity?.slug, filterParams)
 
   // Filter client-side by hero search term if present
   const displayedAuditoriums = useMemo(() => {
@@ -74,27 +91,27 @@ export default function HomePage() {
     return () => ctx.revert()
   }, [])
 
-  // GSAP: Card grid entrance animation with ScrollTrigger
+  // Smooth entrance for auditorium cards when loaded
   useEffect(() => {
     if (isLoading || displayedAuditoriums.length === 0) return
 
     const ctx = gsap.context(() => {
-      gsap.from('.auditorium-card', {
-        opacity: 0,
-        y: 40,
-        stagger: 0.08,
-        duration: 0.6,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: gridRef.current,
-          start: 'top 85%',
-          toggleActions: 'play none none none',
-        },
-      })
+      gsap.fromTo(
+        '.auditorium-card',
+        { opacity: 0, y: 25 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.06,
+          duration: 0.45,
+          ease: 'power2.out',
+          clearProps: 'all',
+        }
+      )
     }, gridRef)
 
     return () => ctx.revert()
-  }, [displayedAuditoriums, isLoading, selectedCity])
+  }, [displayedAuditoriums.length, isLoading, selectedCity?.slug])
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()

@@ -7,13 +7,17 @@ export function useAuditoriums(citySlug?: string | null, filters?: Partial<Filte
   return useQuery({
     queryKey: ['auditoriums', citySlug, filters],
     queryFn: async () => {
+      const selectClause = citySlug
+        ? '*, cities!inner(id, name, slug, state)'
+        : '*, cities(id, name, slug, state)'
+
       let query = supabase
         .from('auditoriums')
-        .select('*, cities(id, name, slug, state)')
+        .select(selectClause)
         .eq('verified', true)
 
       if (citySlug) {
-        // Filter by city slug via join
+        // Filter by city slug via inner join
         query = query.eq('cities.slug', citySlug)
       }
       if (filters?.capacityMin) {
