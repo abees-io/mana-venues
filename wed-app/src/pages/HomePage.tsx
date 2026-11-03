@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   MapPin,
   Search,
@@ -13,10 +14,13 @@ import Layout from '../components/layout/Layout'
 import AuditoriumCard from '../components/cards/AuditoriumCard'
 import { AuditoriumCardSkeletonList } from '../components/cards/AuditoriumCardSkeleton'
 import LocationModal from '../components/modals/LocationModal'
+import ScrollAnimatedSection from '../components/home/ScrollAnimatedSection'
 import { useAuditoriums } from '../hooks/useAuditoriums'
 import { useCities } from '../hooks/useCities'
 import { useCityStore } from '../store/cityStore'
 import { useFilterStore } from '../store/filterStore'
+
+gsap.registerPlugin(ScrollTrigger)
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -70,17 +74,22 @@ export default function HomePage() {
     return () => ctx.revert()
   }, [])
 
-  // GSAP: Card grid entrance animation on data update
+  // GSAP: Card grid entrance animation with ScrollTrigger
   useEffect(() => {
     if (isLoading || displayedAuditoriums.length === 0) return
 
     const ctx = gsap.context(() => {
       gsap.from('.auditorium-card', {
         opacity: 0,
-        y: 30,
+        y: 40,
         stagger: 0.08,
-        duration: 0.5,
+        duration: 0.6,
         ease: 'power2.out',
+        scrollTrigger: {
+          trigger: gridRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none',
+        },
       })
     }, gridRef)
 
@@ -204,6 +213,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* SCROLL-ANIMATED TICKER & EDITORIAL REVEAL SECTION */}
+      <ScrollAnimatedSection />
 
       {/* SECTION 2 & 3: FEED & GRID */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
