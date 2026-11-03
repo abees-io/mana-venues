@@ -252,17 +252,6 @@ export default function HomePage() {
                   {selectedCity.name}
                 </button>
               )}
-
-              {/* Browse All / More Cities Button */}
-              <button
-                type="button"
-                onClick={() => setIsLocationModalOpen(true)}
-                className="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all bg-white/10 hover:bg-white/20 text-yellow-100/90 hover:text-white border border-white/20 flex items-center gap-1.5"
-                aria-label="View more cities"
-              >
-                <span>More Cities</span>
-                <span className="text-[10px] opacity-75">▾</span>
-              </button>
             </div>
           </div>
         </div>
