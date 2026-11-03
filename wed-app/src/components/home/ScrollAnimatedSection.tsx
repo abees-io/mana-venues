@@ -22,7 +22,7 @@ export default function ScrollAnimatedSection() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // 2. Editorial Title reveal on scroll
+      // Editorial Title reveal on scroll
       if (titleRef.current) {
         gsap.from(titleRef.current, {
           y: 45,
@@ -37,7 +37,7 @@ export default function ScrollAnimatedSection() {
         })
       }
 
-      // 3. Description reveal on scroll
+      // Description reveal on scroll
       if (descRef.current) {
         gsap.from(descRef.current, {
           y: 35,
@@ -59,23 +59,23 @@ export default function ScrollAnimatedSection() {
 
   return (
     <div ref={sectionRef} className="w-full overflow-hidden">
-      {/* 1. INFINITE RUNNING TEXT TICKER (MARQUEE RIBBON) */}
-      <div className="bg-[#0B1F12] border-y border-brand-secondary/30 py-3.5 sm:py-4.5 overflow-hidden shadow-lg relative">
+      {/* 1. CONTINUOUS RUNNING TEXT TICKER (MARQUEE RIBBON) */}
+      <div className="bg-[#0B1F12] border-y border-brand-secondary/30 py-2.5 sm:py-4 overflow-hidden shadow-lg relative">
         {/* Subtle gold gradient edge masks */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-[#0B1F12] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-[#0B1F12] to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-24 bg-gradient-to-r from-[#0B1F12] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-24 bg-gradient-to-l from-[#0B1F12] to-transparent z-10 pointer-events-none" />
 
-        <div className="flex whitespace-nowrap">
-          {/* Loop items twice for seamless infinite effect */}
-          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((text, idx) => (
-            <div key={idx} className="inline-flex items-center gap-6 px-4">
+        <div className="animate-marquee whitespace-nowrap will-change-transform">
+          {/* Double array ensures seamless continuous 50% loop */}
+          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((text, idx) => (
+            <div key={idx} className="inline-flex items-center gap-3 sm:gap-6 px-3 sm:px-6">
               <span
-                className="text-xs sm:text-sm md:text-base font-semibold tracking-[0.2em] text-green-50/90 uppercase hover:text-brand-secondary transition-colors"
+                className="text-[11px] sm:text-sm md:text-base font-semibold tracking-[0.14em] sm:tracking-[0.2em] text-green-50/90 uppercase hover:text-brand-secondary transition-colors"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 {text}
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-secondary inline-block opacity-80" />
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-secondary inline-block shrink-0 opacity-80" />
             </div>
           ))}
         </div>
