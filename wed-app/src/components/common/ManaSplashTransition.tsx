@@ -2,23 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const ManaSplashTransition: React.FC = () => {
-  // Always true on initial load so it never gets blocked
   const [isPlaying, setIsPlaying] = useState(true);
-  const [phase, setPhase] = useState<'intro' | 'docking'>('intro');
+  const [phase, setPhase] = useState<'intro' | 'shimmer' | 'reveal'>('intro');
 
   useEffect(() => {
-    // Phase 1: Logo springs in and holds (0ms - 800ms)
-    const dockTimer = setTimeout(() => {
-      setPhase('docking');
-    }, 900);
+    // Phase 1: Logo springs in with golden glow (0 - 600ms)
+    // Phase 2: Shimmer light sweep across logo (600ms - 1200ms)
+    const shimmerTimer = setTimeout(() => {
+      setPhase('shimmer');
+    }, 700);
 
-    // Phase 2: Curtain slide up & complete (1600ms)
+    // Phase 3: Cinematic portal zoom & dissolve into website (1200ms - 1800ms)
+    const revealTimer = setTimeout(() => {
+      setPhase('reveal');
+    }, 1300);
+
     const completeTimer = setTimeout(() => {
       setIsPlaying(false);
-    }, 1700);
+    }, 1850);
 
     return () => {
-      clearTimeout(dockTimer);
+      clearTimeout(shimmerTimer);
+      clearTimeout(revealTimer);
       clearTimeout(completeTimer);
     };
   }, []);
@@ -31,85 +36,119 @@ export const ManaSplashTransition: React.FC = () => {
     <AnimatePresence>
       {isPlaying && (
         <motion.div
-          key="mana-splash-screen"
-          initial={{ y: 0, opacity: 1 }}
-          animate={
-            phase === 'intro'
-              ? { y: 0, opacity: 1 }
-              : {
-                  y: '-100%', // Elegant upward curtain slide like the 60fps.design onboarding flow
-                  transition: {
-                    duration: 0.75,
-                    ease: [0.76, 0, 0.24, 1], // iOS fluid slide curve
-                  },
-                }
-          }
-          exit={{
-            y: '-100%',
-            transition: { duration: 0.6, ease: [0.76, 0, 0.24, 1] },
+          key="mana-cinematic-splash"
+          initial={{ opacity: 1 }}
+          animate={{
+            opacity: phase === 'reveal' ? 0 : 1,
+            transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
           }}
-          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center select-none overflow-hidden cursor-pointer bg-[#0B1F12]"
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center select-none overflow-hidden cursor-pointer bg-[#07170E]"
           onClick={handleSkip}
         >
-          {/* Branded Emerald Green Background Canvas with Radial Depth */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-brand-secondary/25 via-emerald-600/20 to-transparent blur-[110px]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,#06130B_85%)]" />
-          </div>
-
-          {/* Central Logo & Brand Element */}
+          {/* Ambient Luxury Emerald & Gold Radial Glow */}
           <motion.div
-            initial={{ scale: 0.7, opacity: 0, y: 20 }}
+            animate={{
+              scale: phase === 'reveal' ? 1.5 : [1, 1.2, 1],
+              opacity: phase === 'reveal' ? 0 : 0.8,
+            }}
+            transition={{
+              scale: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
+              opacity: { duration: 0.5 },
+            }}
+            className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-[#FFAE00]/20 via-emerald-600/25 to-[#F9E866]/15 blur-[120px] pointer-events-none"
+          />
+
+          {/* Deep Radial Vignette */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,#05120B_80%)] pointer-events-none" />
+
+          {/* Center Logo Showcase with Cinematic Zoom Transition */}
+          <motion.div
+            initial={{ scale: 0.6, opacity: 0, filter: 'blur(10px)' }}
             animate={
               phase === 'intro'
                 ? {
                     scale: 1,
                     opacity: 1,
-                    y: 0,
+                    filter: 'blur(0px)',
                     transition: {
                       type: 'spring',
-                      stiffness: 280,
-                      damping: 20,
+                      stiffness: 220,
+                      damping: 18,
                       mass: 0.8,
                     },
                   }
+                : phase === 'shimmer'
+                ? {
+                    scale: 1.05,
+                    opacity: 1,
+                    filter: 'blur(0px)',
+                    transition: { duration: 0.6, ease: 'easeInOut' },
+                  }
                 : {
-                    scale: 0.65,
-                    y: -60,
-                    opacity: 0.85,
-                    transition: {
-                      duration: 0.7,
-                      ease: [0.76, 0, 0.24, 1],
-                    },
+                    // Portal zoom-through into the website
+                    scale: 1.45,
+                    opacity: 0,
+                    filter: 'blur(12px)',
+                    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
                   }
             }
             className="relative z-10 flex flex-col items-center justify-center pointer-events-none"
           >
-            {/* The Pure MANA Logo (no square container, no border) */}
+            {/* Pure Borderless MANA Logo Graphic */}
             <div className="relative flex items-center justify-center">
               <img
                 src="/logo.svg"
                 alt="MANA Logo"
-                className="w-32 h-32 sm:w-44 sm:h-44 object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,0.8)]"
+                className="w-36 h-36 sm:w-48 sm:h-48 object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)]"
+              />
+
+              {/* Shimmer Light Reflection Sweep */}
+              <motion.div
+                initial={{ x: '-100%', opacity: 0 }}
+                animate={
+                  phase === 'shimmer' || phase === 'reveal'
+                    ? {
+                        x: '100%',
+                        opacity: [0, 0.7, 0],
+                        transition: { duration: 0.8, ease: 'easeInOut' },
+                      }
+                    : { x: '-100%', opacity: 0 }
+                }
+                className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-[#F9E866]/30 to-transparent skew-x-12 pointer-events-none"
               />
             </div>
 
-            {/* Brand Title: MANA VENUES */}
-            <div className="mt-6 text-center">
+            {/* Typography: MANA */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={
+                phase === 'reveal'
+                  ? { opacity: 0, y: -10 }
+                  : { opacity: 1, y: 0 }
+              }
+              transition={{ delay: 0.15, duration: 0.5 }}
+              className="mt-6 text-center"
+            >
               <h1
-                className="text-3xl sm:text-4xl font-extrabold tracking-[0.2em] uppercase bg-gradient-to-r from-[#FFAE00] via-[#FCE881] to-[#FFAE00] bg-clip-text text-transparent drop-shadow-md"
+                className="text-3xl sm:text-4xl font-extrabold tracking-[0.22em] uppercase bg-gradient-to-r from-[#FFAE00] via-[#FCE881] to-[#FFAE00] bg-clip-text text-transparent drop-shadow-md"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 MANA
               </h1>
-              <p className="text-xs uppercase tracking-[0.3em] text-emerald-200/90 font-semibold mt-1">
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.85 }}
+                transition={{ delay: 0.35, duration: 0.5 }}
+                className="text-[11px] sm:text-xs uppercase tracking-[0.3em] text-emerald-200/90 font-medium mt-1.5"
+              >
                 Luxury Wedding Venues
-              </p>
-            </div>
+              </motion.p>
+            </motion.div>
           </motion.div>
 
-          {/* Discreet Skip Prompt */}
-          <div className="absolute bottom-10 text-[11px] uppercase tracking-widest text-emerald-400/60 font-medium">
+          {/* Discreet Hint */}
+          <div className="absolute bottom-8 text-[11px] uppercase tracking-widest text-emerald-400/50 font-medium">
             Tap anywhere to enter
           </div>
         </motion.div>
