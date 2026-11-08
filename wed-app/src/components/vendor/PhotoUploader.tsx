@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { UploadCloud, X, Loader2, Image as ImageIcon, AlertCircle } from 'lucide-react'
-import { supabase } from '../../lib/supabase'
+import { uploadOrConvertPhoto } from '../../lib/imageUtils'
 
 interface PhotoUploaderProps {
   auditoriumId: string
@@ -44,26 +44,9 @@ export function PhotoUploader({ auditoriumId, existingPhotos, onUpdate }: PhotoU
     try {
       for (let i = 0; i < validFiles.length; i++) {
         const file = validFiles[i]
-        setUploadProgress(`Uploading ${i + 1} of ${validFiles.length}...`)
-
-        const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-        const filePath = `${auditoriumId}/${Date.now()}-${cleanFileName}`
-
-        const { error: uploadError } = await supabase.storage
-          .from('auditorium-photos')
-          .upload(filePath, file, { upsert: true })
-
-        if (uploadError) {
-          throw uploadError
-        }
-
-        const { data: urlData } = supabase.storage
-          .from('auditorium-photos')
-          .getPublicUrl(filePath)
-
-        if (urlData?.publicUrl) {
-          newUrls.push(urlData.publicUrl)
-        }
+        setUploadProgress(`Processing ${i + 1} of ${validFiles.length}...`)
+        const photoUrl = await uploadOrConvertPhoto(file, auditoriumId)
+        newUrls.push(photoUrl)
       }
 
       onUpdate([...existingPhotos, ...newUrls])

@@ -14,7 +14,7 @@ export default {
           accent: '#F0F7F2',     // light forest tint
           dark: '#0B1F12',       // darkest forest
           gold: {
-            light: '#F4D940',
+            light: '#E0B12D',
             DEFAULT: '#D8A629',
             dark: '#C8901F',
           },

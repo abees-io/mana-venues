@@ -202,7 +202,7 @@ export default function HomePage() {
 
           {/* Quick City Selector Chips - Top 3-4 Premier Main Cities */}
           <div className="hero-animate pt-3">
-            <p className="text-xs uppercase tracking-wider text-[#F4D940]/90 mb-2 font-medium">
+            <p className="text-xs uppercase tracking-wider text-brand-secondary mb-2 font-semibold">
               Popular Cities
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
@@ -211,7 +211,7 @@ export default function HomePage() {
                 onClick={() => clearCity()}
                 className={`px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
                   !selectedCity
-                    ? 'bg-gradient-to-r from-[#C8901F] via-[#D8A629] to-[#F4D940] text-brand-dark font-bold shadow-md scale-105 border border-[#F4D940]/50'
+                    ? 'bg-gradient-to-r from-[#C8901F] via-[#E0B12D] to-[#C8901F] text-brand-dark font-bold shadow-md scale-105 border border-[#D8A629]/70'
                     : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
                 }`}
               >
@@ -234,7 +234,7 @@ export default function HomePage() {
                       }
                       className={`px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
                         isSelected
-                          ? 'bg-gradient-to-r from-[#C8901F] via-[#D8A629] to-[#F4D940] text-brand-dark font-bold shadow-md scale-105 border border-[#F4D940]/50'
+                          ? 'bg-gradient-to-r from-[#C8901F] via-[#E0B12D] to-[#C8901F] text-brand-dark font-bold shadow-md scale-105 border border-[#D8A629]/70'
                           : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
                       }`}
                     >
@@ -247,7 +247,7 @@ export default function HomePage() {
               {selectedCity && !popularCities.some((c) => c.slug === selectedCity.slug || c.id === selectedCity.id) && (
                 <button
                   type="button"
-                  className="px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all bg-gradient-to-r from-[#C8901F] via-[#D8A629] to-[#F4D940] text-brand-dark shadow-md scale-105 border border-[#F4D940]/50"
+                  className="px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all bg-gradient-to-r from-[#C8901F] via-[#E0B12D] to-[#C8901F] text-brand-dark shadow-md scale-105 border border-[#D8A629]/70"
                 >
                   {selectedCity.name}
                 </button>

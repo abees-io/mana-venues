@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import {
   ClipboardList,
@@ -7,12 +7,14 @@ import {
   IndianRupee,
   Building2,
   PlusCircle,
+  Plus,
   Loader2,
   Settings,
 } from 'lucide-react'
 import Layout from '../../components/layout/Layout'
 import VendorStatsCard from '../../components/vendor/VendorStatsCard'
 import VendorBookingsList from '../../components/vendor/VendorBookingsList'
+import AddVenueModal from '../../components/modals/AddVenueModal'
 import { useVendorStats } from '../../hooks/useVendorStats'
 import { useVendorBookings } from '../../hooks/useVendorBookings'
 import { useAuth } from '../../contexts/AuthContext'
@@ -22,6 +24,7 @@ export default function VendorDashboard() {
   const { profile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [showAll, setShowAll] = useState(false)
+  const [isAddVenueOpen, setIsAddVenueOpen] = useState(false)
 
   const statsQuery = useVendorStats(profile?.id)
   const auditoriumIds = statsQuery.data?.auditoriumIds ?? []
@@ -82,13 +85,14 @@ export default function VendorDashboard() {
               List your auditorium to get discovered by couples across Kerala, manage real-time availability, and receive advance payments securely.
             </p>
             <div className="mt-6 flex justify-center">
-              <Link
-                to="/vendor/auditorium/new"
+              <button
+                type="button"
+                onClick={() => setIsAddVenueOpen(true)}
                 className="inline-flex items-center gap-2 bg-brand-primary text-white font-medium px-6 py-3 rounded-xl hover:bg-brand-primary/95 transition shadow-sm"
               >
                 <PlusCircle className="w-5 h-5" />
                 List Your Hall
-              </Link>
+              </button>
             </div>
           </div>
         ) : (
@@ -117,11 +121,19 @@ export default function VendorDashboard() {
 
             {/* Quick Actions Row */}
             <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsAddVenueOpen(true)}
+                className="inline-flex items-center gap-2 bg-brand-primary text-white font-medium px-4 py-2.5 rounded-xl hover:bg-brand-primary/90 transition shadow-sm text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Add New Venue
+              </button>
               {firstAuditoriumId && (
                 <button
                   type="button"
                   onClick={() => navigate(`/vendor/auditorium/${firstAuditoriumId}`)}
-                  className="inline-flex items-center gap-2 bg-brand-primary text-white font-medium px-4 py-2.5 rounded-xl hover:bg-brand-primary/90 transition shadow-sm text-sm"
+                  className="inline-flex items-center gap-2 bg-white text-brand-dark border border-gray-300 font-medium px-4 py-2.5 rounded-xl hover:bg-gray-50 transition shadow-sm text-sm"
                 >
                   <Building2 className="w-4 h-4" />
                   Manage My Hall
@@ -173,6 +185,14 @@ export default function VendorDashboard() {
           </>
         )}
       </div>
+
+      <AddVenueModal
+        isOpen={isAddVenueOpen}
+        onClose={() => setIsAddVenueOpen(false)}
+        onSuccess={() => {
+          statsQuery.refetch()
+        }}
+      />
     </Layout>
   )
 }
