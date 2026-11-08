@@ -1,0 +1,9 @@
+{
+  "name": "weds-root",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix wed-app run build",
+    "dev": "npm --prefix wed-app run dev",
+    "install": "npm --prefix wed-app install"
+  }
+}
