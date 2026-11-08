@@ -95,28 +95,42 @@ export const ManaSplashTransition: React.FC = () => {
             }
             className="relative z-10 flex flex-col items-center justify-center pointer-events-none"
           >
-            {/* Pure Borderless MANA Logo Graphic */}
-            <div className="relative flex items-center justify-center">
+            {/* Pure Borderless MANA Logo Graphic with Pixel-Perfect Mask Shimmer */}
+            <div className="relative w-36 h-36 sm:w-48 sm:h-48 flex items-center justify-center">
+              {/* Base MANA Logo */}
               <img
                 src="/logo.svg"
                 alt="MANA Logo"
-                className="w-36 h-36 sm:w-48 sm:h-48 object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)]"
+                className="w-full h-full object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)]"
               />
 
-              {/* Shimmer Light Reflection Sweep */}
-              <motion.div
-                initial={{ x: '-100%', opacity: 0 }}
-                animate={
-                  phase === 'shimmer' || phase === 'reveal'
-                    ? {
-                        x: '100%',
-                        opacity: [0, 0.7, 0],
-                        transition: { duration: 0.8, ease: 'easeInOut' },
-                      }
-                    : { x: '-100%', opacity: 0 }
-                }
-                className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-[#F9E866]/30 to-transparent skew-x-12 pointer-events-none"
-              />
+              {/* Shimmer Light Reflection Sweep - STRICTLY MASKED TO THE LETTER "M" LOGO ONLY */}
+              <div
+                className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden"
+                style={{
+                  WebkitMaskImage: 'url(/logo.svg)',
+                  maskImage: 'url(/logo.svg)',
+                  WebkitMaskSize: 'contain',
+                  maskSize: 'contain',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskPosition: 'center',
+                  maskPosition: 'center',
+                }}
+              >
+                <motion.div
+                  initial={{ x: '-120%' }}
+                  animate={
+                    phase === 'shimmer' || phase === 'reveal'
+                      ? {
+                          x: '140%',
+                          transition: { duration: 0.85, ease: 'easeInOut' },
+                        }
+                      : { x: '-120%' }
+                  }
+                  className="w-full h-full bg-gradient-to-r from-transparent via-[#FFF8BA] to-transparent skew-x-[-25deg] opacity-95"
+                />
+              </div>
             </div>
 
             {/* Typography: MANA */}
