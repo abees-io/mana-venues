@@ -2,38 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const ManaSplashTransition: React.FC = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [phase, setPhase] = useState<'intro' | 'docking' | 'complete'>('intro');
+  // Always true on initial load so it never gets blocked
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [phase, setPhase] = useState<'intro' | 'docking'>('intro');
 
   useEffect(() => {
-    // Play splash on initial session visit
-    const hasSeenSplash = sessionStorage.getItem('mana_splash_played');
-    if (!hasSeenSplash) {
-      setIsPlaying(true);
+    // Phase 1: Logo springs in and holds (0ms - 800ms)
+    const dockTimer = setTimeout(() => {
+      setPhase('docking');
+    }, 900);
 
-      // Phase 1: Logo pulse in center (0 - 800ms)
-      // Phase 2: Logo scales down and slides up, background dissolves (800ms)
-      const dockTimer = setTimeout(() => {
-        setPhase('docking');
-      }, 850);
+    // Phase 2: Curtain slide up & complete (1600ms)
+    const completeTimer = setTimeout(() => {
+      setIsPlaying(false);
+    }, 1700);
 
-      // Phase 3: Transition finishes completely (1700ms)
-      const completeTimer = setTimeout(() => {
-        setPhase('complete');
-        setIsPlaying(false);
-        sessionStorage.setItem('mana_splash_played', 'true');
-      }, 1750);
-
-      return () => {
-        clearTimeout(dockTimer);
-        clearTimeout(completeTimer);
-      };
-    }
+    return () => {
+      clearTimeout(dockTimer);
+      clearTimeout(completeTimer);
+    };
   }, []);
 
   const handleSkip = () => {
     setIsPlaying(false);
-    sessionStorage.setItem('mana_splash_played', 'true');
   };
 
   return (
@@ -41,52 +32,55 @@ export const ManaSplashTransition: React.FC = () => {
       {isPlaying && (
         <motion.div
           key="mana-splash-screen"
-          initial={{ opacity: 1 }}
+          initial={{ y: 0, opacity: 1 }}
+          animate={
+            phase === 'intro'
+              ? { y: 0, opacity: 1 }
+              : {
+                  y: '-100%', // Elegant upward curtain slide like the 60fps.design onboarding flow
+                  transition: {
+                    duration: 0.75,
+                    ease: [0.76, 0, 0.24, 1], // iOS fluid slide curve
+                  },
+                }
+          }
           exit={{
-            opacity: 0,
-            transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+            y: '-100%',
+            transition: { duration: 0.6, ease: [0.76, 0, 0.24, 1] },
           }}
-          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center select-none overflow-hidden cursor-pointer"
+          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center select-none overflow-hidden cursor-pointer bg-[#0B1F12]"
           onClick={handleSkip}
         >
           {/* Branded Emerald Green Background Canvas with Radial Depth */}
-          <motion.div
-            initial={{ opacity: 1 }}
-            animate={{
-              opacity: phase === 'docking' ? 0 : 1,
-            }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute inset-0 bg-[#0B1F12] flex items-center justify-center pointer-events-none"
-          >
-            {/* Soft Ambient Gold & Forest Green Glow */}
-            <div className="absolute w-[450px] h-[450px] rounded-full bg-gradient-to-tr from-brand-secondary/20 via-emerald-600/15 to-transparent blur-[100px] pointer-events-none" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_35%,#07150C_85%)]" />
-          </motion.div>
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-brand-secondary/25 via-emerald-600/20 to-transparent blur-[110px]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,#06130B_85%)]" />
+          </div>
 
-          {/* Central Animated Brand Container (Scales and glides upward) */}
+          {/* Central Logo & Brand Element */}
           <motion.div
-            initial={{ scale: 0.75, opacity: 0, y: 15 }}
+            initial={{ scale: 0.7, opacity: 0, y: 20 }}
             animate={
               phase === 'intro'
-                ? { scale: 1, opacity: 1, y: 0 }
-                : {
-                    // Docking phase: scales down and slides up toward top navigation bar
-                    scale: 0.38,
-                    y: -260,
-                    opacity: 0,
-                  }
-            }
-            transition={
-              phase === 'intro'
                 ? {
-                    type: 'spring',
-                    stiffness: 260,
-                    damping: 22,
-                    mass: 0.9,
+                    scale: 1,
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      type: 'spring',
+                      stiffness: 280,
+                      damping: 20,
+                      mass: 0.8,
+                    },
                   }
                 : {
-                    duration: 0.75,
-                    ease: [0.16, 1, 0.3, 1], // Fluid iOS transition curve
+                    scale: 0.65,
+                    y: -60,
+                    opacity: 0.85,
+                    transition: {
+                      duration: 0.7,
+                      ease: [0.76, 0, 0.24, 1],
+                    },
                   }
             }
             className="relative z-10 flex flex-col items-center justify-center pointer-events-none"
@@ -96,8 +90,8 @@ export const ManaSplashTransition: React.FC = () => {
               {/* Outer soft gold pulse ring */}
               <motion.div
                 animate={{
-                  scale: phase === 'intro' ? [1, 1.15, 1] : 1,
-                  opacity: phase === 'intro' ? [0.4, 0.8, 0.4] : 0,
+                  scale: [1, 1.15, 1],
+                  opacity: [0.35, 0.7, 0.35],
                 }}
                 transition={{
                   repeat: Infinity,
@@ -108,45 +102,33 @@ export const ManaSplashTransition: React.FC = () => {
               />
 
               {/* Logo Emblem Icon */}
-              <div className="relative w-28 h-28 sm:w-36 sm:h-36 p-4 rounded-3xl bg-brand-dark/80 backdrop-blur-md border border-[#D8A629]/50 shadow-[0_15px_40px_rgba(0,0,0,0.8),inset_0_1px_2px_rgba(255,255,255,0.4)] flex items-center justify-center">
+              <div className="relative w-28 h-28 sm:w-36 sm:h-36 p-4 rounded-3xl bg-brand-dark/85 backdrop-blur-md border border-[#D8A629]/60 shadow-[0_20px_50px_rgba(0,0,0,0.85),inset_0_1.5px_2px_rgba(255,255,255,0.4)] flex items-center justify-center">
                 <img
                   src="/logo.svg"
                   alt="MANA Logo"
-                  className="w-full h-full object-contain drop-shadow-[0_4px_12px_rgba(216,166,41,0.4)]"
+                  className="w-full h-full object-contain drop-shadow-[0_4px_12px_rgba(216,166,41,0.5)]"
                 />
               </div>
             </div>
 
             {/* Brand Title: MANA VENUES */}
-            <motion.div
-              animate={{
-                opacity: phase === 'docking' ? 0 : 1,
-                y: phase === 'docking' ? -10 : 0,
-              }}
-              transition={{ duration: 0.4 }}
-              className="mt-6 text-center"
-            >
+            <div className="mt-6 text-center">
               <h1
                 className="text-3xl sm:text-4xl font-extrabold tracking-[0.2em] uppercase bg-gradient-to-r from-[#FFAE00] via-[#FCE881] to-[#FFAE00] bg-clip-text text-transparent drop-shadow-md"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 MANA
               </h1>
-              <p className="text-xs uppercase tracking-[0.3em] text-emerald-200/80 font-semibold mt-1">
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-200/90 font-semibold mt-1">
                 Luxury Wedding Venues
               </p>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Discreet Skip Prompt */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: phase === 'intro' ? 0.6 : 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-            className="absolute bottom-10 text-[11px] uppercase tracking-widest text-emerald-400/60 hover:text-emerald-300 font-medium transition-colors"
-          >
+          <div className="absolute bottom-10 text-[11px] uppercase tracking-widest text-emerald-400/60 font-medium">
             Tap anywhere to enter
-          </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
