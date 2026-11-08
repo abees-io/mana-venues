@@ -6,20 +6,20 @@ export const ManaSplashTransition: React.FC = () => {
   const [phase, setPhase] = useState<'intro' | 'shimmer' | 'reveal'>('intro');
 
   useEffect(() => {
-    // Phase 1: Logo springs in with golden glow (0 - 600ms)
-    // Phase 2: Shimmer light sweep across logo (600ms - 1200ms)
+    // Phase 1: Logo springs in gently (0 - 1000ms)
+    // Phase 2: Slow, graceful golden shimmer sweep across the "M" logo (1000ms - 2600ms)
     const shimmerTimer = setTimeout(() => {
       setPhase('shimmer');
-    }, 700);
+    }, 1000);
 
-    // Phase 3: Cinematic portal zoom & dissolve into website (1200ms - 1800ms)
+    // Phase 3: Smooth cinematic portal zoom & dissolve into website (2600ms - 3500ms)
     const revealTimer = setTimeout(() => {
       setPhase('reveal');
-    }, 1300);
+    }, 2600);
 
     const completeTimer = setTimeout(() => {
       setIsPlaying(false);
-    }, 1850);
+    }, 3550);
 
     return () => {
       clearTimeout(shimmerTimer);
@@ -40,7 +40,7 @@ export const ManaSplashTransition: React.FC = () => {
           initial={{ opacity: 1 }}
           animate={{
             opacity: phase === 'reveal' ? 0 : 1,
-            transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+            transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
           }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[99999] flex flex-col items-center justify-center select-none overflow-hidden cursor-pointer bg-[#07170E]"
@@ -53,8 +53,8 @@ export const ManaSplashTransition: React.FC = () => {
               opacity: phase === 'reveal' ? 0 : 0.8,
             }}
             transition={{
-              scale: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
-              opacity: { duration: 0.5 },
+              scale: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
+              opacity: { duration: 0.8 },
             }}
             className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-[#FFAE00]/20 via-emerald-600/25 to-[#F9E866]/15 blur-[120px] pointer-events-none"
           />
@@ -64,7 +64,7 @@ export const ManaSplashTransition: React.FC = () => {
 
           {/* Center Logo Showcase with Cinematic Zoom Transition */}
           <motion.div
-            initial={{ scale: 0.6, opacity: 0, filter: 'blur(10px)' }}
+            initial={{ scale: 0.65, opacity: 0, filter: 'blur(10px)' }}
             animate={
               phase === 'intro'
                 ? {
@@ -73,24 +73,24 @@ export const ManaSplashTransition: React.FC = () => {
                     filter: 'blur(0px)',
                     transition: {
                       type: 'spring',
-                      stiffness: 220,
-                      damping: 18,
-                      mass: 0.8,
+                      stiffness: 140,
+                      damping: 20,
+                      mass: 0.9,
                     },
                   }
                 : phase === 'shimmer'
                 ? {
-                    scale: 1.05,
+                    scale: 1.04,
                     opacity: 1,
                     filter: 'blur(0px)',
-                    transition: { duration: 0.6, ease: 'easeInOut' },
+                    transition: { duration: 1.2, ease: 'easeInOut' },
                   }
                 : {
                     // Portal zoom-through into the website
-                    scale: 1.45,
+                    scale: 1.4,
                     opacity: 0,
-                    filter: 'blur(12px)',
-                    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+                    filter: 'blur(14px)',
+                    transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
                   }
             }
             className="relative z-10 flex flex-col items-center justify-center pointer-events-none"
@@ -119,14 +119,14 @@ export const ManaSplashTransition: React.FC = () => {
                 }}
               >
                 <motion.div
-                  initial={{ x: '-120%' }}
+                  initial={{ x: '-130%' }}
                   animate={
                     phase === 'shimmer' || phase === 'reveal'
                       ? {
-                          x: '140%',
-                          transition: { duration: 0.85, ease: 'easeInOut' },
+                          x: '150%',
+                          transition: { duration: 1.45, ease: 'easeInOut' },
                         }
-                      : { x: '-120%' }
+                      : { x: '-130%' }
                   }
                   className="w-full h-full bg-gradient-to-r from-transparent via-[#FFF8BA] to-transparent skew-x-[-25deg] opacity-95"
                 />
