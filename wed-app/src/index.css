@@ -12,6 +12,17 @@
     background-repeat: no-repeat;
   }
 
+  /* Mobile viewport background: perfectly fitted portrait background without fixed zoom/distortion */
+  @media (max-width: 767px) {
+    body {
+      background-image: url('/bg-mobile.jpg');
+      background-size: cover;
+      background-position: center top;
+      background-attachment: scroll;
+      background-repeat: no-repeat;
+    }
+  }
+
   /* Disable browser native password reveal eye (Edge, IE, Chrome) */
   input::-ms-reveal,
   input::-ms-clear {
