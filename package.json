@@ -7,3 +7,4 @@
     "install": "npm --prefix wed-app install"
   }
 }
+

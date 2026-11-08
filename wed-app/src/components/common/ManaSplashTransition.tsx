@@ -85,30 +85,13 @@ export const ManaSplashTransition: React.FC = () => {
             }
             className="relative z-10 flex flex-col items-center justify-center pointer-events-none"
           >
-            {/* The MANA Logo with Specular Glass Ring */}
+            {/* The Pure MANA Logo (no square container, no border) */}
             <div className="relative flex items-center justify-center">
-              {/* Outer soft gold pulse ring */}
-              <motion.div
-                animate={{
-                  scale: [1, 1.15, 1],
-                  opacity: [0.35, 0.7, 0.35],
-                }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 2,
-                  ease: 'easeInOut',
-                }}
-                className="absolute w-36 h-36 sm:w-44 sm:h-44 rounded-full border border-brand-secondary/40 pointer-events-none"
+              <img
+                src="/logo.svg"
+                alt="MANA Logo"
+                className="w-32 h-32 sm:w-44 sm:h-44 object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,0.8)]"
               />
-
-              {/* Logo Emblem Icon */}
-              <div className="relative w-28 h-28 sm:w-36 sm:h-36 p-4 rounded-3xl bg-brand-dark/85 backdrop-blur-md border border-[#D8A629]/60 shadow-[0_20px_50px_rgba(0,0,0,0.85),inset_0_1.5px_2px_rgba(255,255,255,0.4)] flex items-center justify-center">
-                <img
-                  src="/logo.svg"
-                  alt="MANA Logo"
-                  className="w-full h-full object-contain drop-shadow-[0_4px_12px_rgba(216,166,41,0.5)]"
-                />
-              </div>
             </div>
 
             {/* Brand Title: MANA VENUES */}
