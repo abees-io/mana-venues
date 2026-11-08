@@ -153,7 +153,7 @@ export default function HomePage() {
 
         <div className="relative max-w-5xl mx-auto text-center space-y-5">
           <h1
-            className="hero-animate text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[0.06em] sm:tracking-[0.12em] uppercase drop-shadow-md whitespace-normal sm:whitespace-nowrap bg-gradient-to-r from-[#C8901F] via-[#E0B12D] to-[#C8901F] bg-clip-text text-transparent"
+            className="hero-animate text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] font-extrabold tracking-[0.03em] sm:tracking-[0.06em] uppercase px-2 py-1 leading-tight sm:leading-snug bg-[linear-gradient(110deg,#C28F20_0%,#FDE887_25%,#FFFFFF_45%,#FBE186_60%,#B8861B_100%)] bg-clip-text text-transparent drop-shadow-md mx-auto max-w-4xl"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
             Grand Venues for Your Big Days
