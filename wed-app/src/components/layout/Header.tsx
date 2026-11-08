@@ -59,7 +59,7 @@ export default function Header() {
         <div className="flex items-center gap-2 sm:gap-4 shrink min-w-0">
           <Link to="/" className="flex items-center gap-2 shrink-0 group">
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="MANA Venues"
               className="h-8 sm:h-9 w-auto object-contain group-hover:scale-105 transition-transform"
             />
