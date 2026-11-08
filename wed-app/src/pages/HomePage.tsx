@@ -140,7 +140,7 @@ export default function HomePage() {
 
   return (
     <Layout>
-      {/* SECTION 1: HERO BANNER */}
+      {/* SECTION 1: HERO */}
       <section
         ref={heroRef}
         className="relative overflow-hidden bg-brand-dark/50 backdrop-blur-xs text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8"
