@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Phone, Share2, Check, ArrowLeft, AlertCircle } from 'lucide-react'
+import { Phone, MessageCircle, Share2, Check, ArrowLeft, AlertCircle } from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import PhotoGallery from '../components/gallery/PhotoGallery'
 import SpecsGrid from '../components/detail/SpecsGrid'
@@ -97,7 +97,39 @@ export default function AuditoriumDetailPage() {
 
   const cityName = auditorium.cities?.name || 'Kerala'
   const vendorName = auditorium.profiles?.full_name || 'Verified Partner'
-  const vendorPhone = auditorium.profiles?.phone
+
+  // Extract direct phone and WhatsApp contact
+  let callPhone = auditorium.profiles?.phone || ''
+  let whatsappPhone = ''
+
+  if (auditorium.amenities && Array.isArray(auditorium.amenities)) {
+    for (const item of auditorium.amenities) {
+      if (item.startsWith('phone:')) {
+        callPhone = item.replace('phone:', '').trim()
+      } else if (item.startsWith('whatsapp:')) {
+        whatsappPhone = item.replace('whatsapp:', '').trim()
+      }
+    }
+  }
+
+  if (!whatsappPhone && callPhone) {
+    whatsappPhone = callPhone
+  }
+
+  const cleanWhatsApp = whatsappPhone.replace(/[^0-9]/g, '')
+  const formattedWhatsApp =
+    cleanWhatsApp.startsWith('91') || cleanWhatsApp.length > 10
+      ? cleanWhatsApp
+      : cleanWhatsApp
+      ? `91${cleanWhatsApp}`
+      : ''
+
+  const whatsappMessage = encodeURIComponent(
+    `Hello! I found ${auditorium.title} on MANA Venues and would like to enquire about hall availability and booking.`
+  )
+  const whatsappUrl = formattedWhatsApp
+    ? `https://wa.me/${formattedWhatsApp}?text=${whatsappMessage}`
+    : ''
 
   return (
     <Layout>
@@ -189,26 +221,40 @@ export default function AuditoriumDetailPage() {
         <div className="bg-brand-dark/85 backdrop-blur-md rounded-2xl p-6 sm:p-7 border border-green-800/40 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-5">
           <div className="space-y-1">
             <div className="text-xs font-semibold text-green-400/70 uppercase tracking-wider">
-              Venue Host & Enquiry
+              Venue Host & Direct Contact
             </div>
             <div className="text-lg sm:text-xl font-bold text-white">
               Listed by {vendorName}
             </div>
             <p className="text-xs sm:text-sm text-green-200/70">
-              Contact the venue directly for availability, booking arrangements, and site visits.
+              Reach out directly for date availability, hall tours, package pricing, and reservations.
             </p>
           </div>
 
-          <div>
-            {vendorPhone ? (
+          <div className="flex flex-wrap items-center gap-3">
+            {callPhone && (
               <a
-                href={`tel:${vendorPhone}`}
-                className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-brand-secondary hover:bg-brand-secondary/90 text-brand-dark font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+                href={`tel:${callPhone}`}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-brand-secondary hover:bg-brand-secondary/90 text-brand-dark font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
               >
-                <Phone className="w-5 h-5 shrink-0" />
-                <span>Call {vendorPhone}</span>
+                <Phone className="w-4 h-4 shrink-0" />
+                <span>Call {callPhone}</span>
               </a>
-            ) : (
+            )}
+
+            {whatsappUrl && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+              >
+                <MessageCircle className="w-5 h-5 shrink-0" />
+                <span>WhatsApp</span>
+              </a>
+            )}
+
+            {!callPhone && !whatsappUrl && (
               <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-950/60 border border-green-800/40 text-xs sm:text-sm text-green-300/70">
                 <Phone className="w-4 h-4 shrink-0 text-green-500/50" />
                 <span>Contact via management office</span>

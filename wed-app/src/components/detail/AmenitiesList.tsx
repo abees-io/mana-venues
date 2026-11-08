@@ -16,7 +16,11 @@ const AMENITY_ICONS: Record<string, ComponentType<{ className?: string }>> = {
 }
 
 export default function AmenitiesList({ amenities }: AmenitiesListProps) {
-  if (!amenities || amenities.length === 0) {
+  const visibleAmenities = (amenities || []).filter(
+    (a) => !a.startsWith('phone:') && !a.startsWith('whatsapp:')
+  )
+
+  if (visibleAmenities.length === 0) {
     return (
       <div className="bg-brand-dark/85 backdrop-blur-md rounded-xl p-5 border border-green-800/40 text-white">
         <h3 className="text-lg font-bold text-white mb-3">Amenities</h3>
@@ -29,7 +33,7 @@ export default function AmenitiesList({ amenities }: AmenitiesListProps) {
     <div className="bg-brand-dark/85 backdrop-blur-md rounded-xl p-5 border border-green-800/40 text-white shadow-xl">
       <h3 className="text-lg font-bold text-white mb-4">Amenities</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {amenities.map((amenity, idx) => {
+        {visibleAmenities.map((amenity, idx) => {
           const IconComponent = AMENITY_ICONS[amenity] || CheckCircle2
           return (
             <div

@@ -8,6 +8,8 @@ import {
   Check,
   AlertCircle,
   Loader2,
+  Phone,
+  MessageCircle,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useCities } from '../../hooks/useCities'
@@ -44,6 +46,11 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
   const [venuePrice, setVenuePrice] = useState('')
   const [venueDescription, setVenueDescription] = useState('')
   const [venueAmenities, setVenueAmenities] = useState<string[]>(['AC', 'Parking'])
+
+  // Contact Information state
+  const [contactPhone, setContactPhone] = useState('')
+  const [whatsappPhone, setWhatsappPhone] = useState('')
+  const [sameAsCallNumber, setSameAsCallNumber] = useState(true)
 
   // Photo management state
   const [venuePhotos, setVenuePhotos] = useState<string[]>([])
@@ -157,6 +164,27 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
         ? venuePhotos
         : ['https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&auto=format&fit=crop&q=80']
 
+    // Construct final amenities with direct contact tags
+    const finalAmenities = [...venueAmenities]
+    const callNumberToSave = contactPhone.trim()
+    const whatsappNumberToSave = sameAsCallNumber ? callNumberToSave : whatsappPhone.trim()
+
+    if (callNumberToSave) {
+      finalAmenities.push(`phone:${callNumberToSave}`)
+    }
+    if (whatsappNumberToSave) {
+      finalAmenities.push(`whatsapp:${whatsappNumberToSave}`)
+    }
+
+    // Also update host profile phone if user is logged in
+    if (user?.id && callNumberToSave) {
+      try {
+        await supabase.from('profiles').update({ phone: callNumberToSave }).eq('id', user.id)
+      } catch {
+        // Continue even if profile update fails
+      }
+    }
+
     const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
 
     try {
@@ -172,7 +200,7 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
           floating_capacity: parseInt(venueFloating) || parseInt(venueSeating) || 1000,
           base_price_per_day: parseFloat(venuePrice),
           description: venueDescription.trim() || null,
-          amenities: venueAmenities,
+          amenities: finalAmenities,
           photos: finalPhotos,
           verified: isAdmin, // Admin-created venues auto-verify; vendor venues undergo review
         })
@@ -199,6 +227,9 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
         setVenueSeating('')
         setVenueFloating('')
         setVenueDescription('')
+        setContactPhone('')
+        setWhatsappPhone('')
+        setSameAsCallNumber(true)
         setVenuePhotos([])
         if (onSuccess) {
           onSuccess(inserted?.id)
@@ -524,6 +555,84 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
                 placeholder="e.g. 1500"
                 className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:outline-none text-sm text-brand-dark"
               />
+            </div>
+          </div>
+
+          {/* Direct Venue Contact & WhatsApp Inquiries Section */}
+          <div className="bg-emerald-950/5 border border-emerald-800/20 rounded-2xl p-4 space-y-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-brand-secondary" />
+                <h4 className="font-bold text-gray-900 text-xs uppercase tracking-wider">
+                  Venue Direct Contact (Call & WhatsApp)
+                </h4>
+              </div>
+              <p className="text-[11px] text-gray-500 mt-0.5">
+                Customers on MANA Venues will use these details to contact you directly via Phone Call or WhatsApp.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Phone Call Number */}
+              <div>
+                <label className="block font-semibold text-gray-700 uppercase tracking-wider mb-1">
+                  Contact Number (for Calls) *
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+                  <input
+                    type="tel"
+                    required
+                    value={contactPhone}
+                    onChange={(e) => {
+                      setContactPhone(e.target.value)
+                      if (sameAsCallNumber) {
+                        setWhatsappPhone(e.target.value)
+                      }
+                    }}
+                    placeholder="e.g. +91 98470 12345"
+                    className="w-full pl-9 pr-3.5 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:outline-none text-sm text-brand-dark"
+                  />
+                </div>
+              </div>
+
+              {/* WhatsApp Number */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-semibold text-gray-700 uppercase tracking-wider">
+                    WhatsApp Number
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-emerald-800 font-medium select-none">
+                    <input
+                      type="checkbox"
+                      checked={sameAsCallNumber}
+                      onChange={(e) => {
+                        setSameAsCallNumber(e.target.checked)
+                        if (e.target.checked) {
+                          setWhatsappPhone(contactPhone)
+                        }
+                      }}
+                      className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>Same as Call</span>
+                  </label>
+                </div>
+                <div className="relative">
+                  <MessageCircle className="w-4 h-4 text-emerald-600 absolute left-3 top-3" />
+                  <input
+                    type="tel"
+                    value={sameAsCallNumber ? contactPhone : whatsappPhone}
+                    onChange={(e) => setWhatsappPhone(e.target.value)}
+                    disabled={sameAsCallNumber}
+                    placeholder="e.g. +91 98470 12345"
+                    className={`w-full pl-9 pr-3.5 py-2.5 border rounded-xl text-sm text-brand-dark focus:ring-2 focus:ring-brand-primary focus:outline-none ${
+                      sameAsCallNumber
+                        ? 'bg-gray-100/70 border-gray-200 text-gray-600 cursor-not-allowed'
+                        : 'border-gray-300 bg-white'
+                    }`}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
