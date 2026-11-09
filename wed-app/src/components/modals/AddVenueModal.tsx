@@ -162,7 +162,7 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
     const finalPhotos =
       venuePhotos.length > 0
         ? venuePhotos
-        : ['https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&auto=format&fit=crop&q=80']
+        : ['https://lh3.googleusercontent.com/grass-cs/AABkmLcj_nOY8Dm-Un6PXO717C4ArfxK8ssVjVWx200pqughg6ccY8gMYKo9TKiUW4-sCIykVhdHC19Hq7_S3qZF0wkTI2ubQmsACduJtlS0hwR2Ug7cr2zYOrP8VUoiw82VJ5JLyqdNiVMG6lWS=w1200-h800-k-no']
 
     // Construct final amenities with direct contact tags
     const finalAmenities = [...venueAmenities]
@@ -501,7 +501,7 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
                     type="url"
                     value={fallbackUrlInput}
                     onChange={(e) => setFallbackUrlInput(e.target.value)}
-                    placeholder="https://images.unsplash.com/photo-..."
+                    placeholder="https://lh3.googleusercontent.com/..."
                     className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-xs"
                   />
                   <button

@@ -3,10 +3,10 @@ import gsap from 'gsap'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 
 export const FALLBACK_PHOTOS = [
-  'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1478147427282-58a87a433038?w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&auto=format&fit=crop',
+  'https://lh3.googleusercontent.com/grass-cs/AABkmLcj_nOY8Dm-Un6PXO717C4ArfxK8ssVjVWx200pqughg6ccY8gMYKo9TKiUW4-sCIykVhdHC19Hq7_S3qZF0wkTI2ubQmsACduJtlS0hwR2Ug7cr2zYOrP8VUoiw82VJ5JLyqdNiVMG6lWS=w1200-h800-k-no',
+  'https://lh3.googleusercontent.com/grass-cs/AABkmLe-LeeGMMs6pDovu8ow6Zt2Wcm6ewnZKUBSafsgO3FDL9qrTkNPi3Q_cKepZoMauto24WmgS3b3IY0C8FLuDNy5BscXlUgmd75l3fOQGRUmKGVk-q50_m2Jr_B1nKpTeNvwJ36Kxw=w1200-h800-k-no',
+  'https://lh3.googleusercontent.com/grass-cs/AABkmLc5sRCEi0JjWf6DbzSGzNBsXO-o67NsJ7s7Wmm7-M9QFledZnbYi5KNWdNPmLVVAIs3A8Vub7XdgpKx0DQH0Bh01oPLAAdOtYAm95xTo3-isXvG2houJKiMECZWSLvqdfEYSe6CaA=w1200-h800-k-no',
+  'https://lh3.googleusercontent.com/grass-cs/AABkmLceGqLski0fWMcgEbOHkoJ6JFOBx5TN1i4-J66QSS5t8Jv-JFOPEhfPPX_O-_nBtGgyYYSzGGg2Ry2A6coeUTlt23vApu0QSaPTpNjW5GRdvnyc6gFU-IQo4Lby3Pb0u6vdRyRQ=w1200-h800-k-no',
 ]
 
 interface PhotoGalleryProps {
@@ -15,7 +15,10 @@ interface PhotoGalleryProps {
 }
 
 export default function PhotoGallery({ photos, title }: PhotoGalleryProps) {
-  const displayPhotos = photos && photos.length > 0 ? photos : FALLBACK_PHOTOS
+  const realPhotos = (photos || []).filter(
+    (p) => typeof p === 'string' && p.startsWith('http') && !p.includes('unsplash.com') && !p.includes('placeholder')
+  )
+  const displayPhotos = realPhotos.length > 0 ? realPhotos : FALLBACK_PHOTOS
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const mainImageRef = useRef<HTMLImageElement>(null)
@@ -92,6 +95,7 @@ export default function PhotoGallery({ photos, title }: PhotoGalleryProps) {
           ref={mainImageRef}
           src={displayPhotos[activeIndex] || FALLBACK_PHOTOS[0]}
           alt={title}
+          referrerPolicy="no-referrer"
           onClick={() => setLightboxOpen(true)}
           className="w-full aspect-video object-cover rounded-xl max-h-[500px] cursor-pointer transition-transform duration-300 group-hover:scale-[1.01]"
         />
@@ -122,6 +126,7 @@ export default function PhotoGallery({ photos, title }: PhotoGalleryProps) {
               <img
                 src={photo}
                 alt={`${title} thumbnail ${i + 1}`}
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
               />
               {showMoreOverlay && (

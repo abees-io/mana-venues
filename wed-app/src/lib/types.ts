@@ -18,7 +18,7 @@ export type City = {
   slug: string
   state: string
   is_active: boolean
-  created_at: string
+  created_at?: string
 }
 
 export type Auditorium = {
@@ -26,17 +26,25 @@ export type Auditorium = {
   owner_id: string | null
   city_id: string | null
   title: string
+  name?: string
   slug: string
+  district?: string
+  city?: string | null
   address: string | null
+  phone_number?: string | null
   latitude: number | null
   longitude: number | null
   seating_capacity: number
+  capacity?: number
   floating_capacity: number | null
   base_price_per_day: number
+  starting_price?: number
   photos: string[]
   description: string | null
   amenities: string[]
   verified: boolean
+  is_verified?: boolean
+  is_claimed?: boolean
   created_at: string
 }
 

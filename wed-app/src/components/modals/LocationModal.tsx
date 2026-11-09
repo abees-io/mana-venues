@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { MapPin, X, Check, RefreshCw } from 'lucide-react'
+import { MapPin, X, Check, RefreshCw, Search } from 'lucide-react'
 import { useCities } from '../../hooks/useCities'
 import { useCityStore } from '../../store/cityStore'
 import type { City } from '../../lib/types'
@@ -13,10 +13,14 @@ interface LocationModalProps {
 export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
   const { data: cities, isLoading, isError, refetch } = useCities()
   const { selectedCity, setCity } = useCityStore()
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Close on Escape key press and prevent body scroll
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {
+      setSearchTerm('')
+      return
+    }
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -34,6 +38,22 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
     }
   }, [isOpen, onClose])
 
+  const filteredCities = useMemo(() => {
+    if (!cities) return []
+    // Filter out any accidental "All Kerala" entry
+    const validCities = cities.filter(
+      (c) => c.slug.toLowerCase() !== 'all-kerala' && c.name.toLowerCase() !== 'all kerala'
+    )
+    if (!searchTerm.trim()) return validCities
+    const term = searchTerm.toLowerCase().trim()
+    return validCities.filter(
+      (c) =>
+        c.name.toLowerCase().includes(term) ||
+        c.slug.toLowerCase().includes(term) ||
+        c.state?.toLowerCase().includes(term)
+    )
+  }, [cities, searchTerm])
+
   if (!isOpen) return null
 
   const handleSelectCity = (city: City) => {
@@ -48,7 +68,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
   const modalContent = (
     <div
       onClick={onClose}
-      className="fixed inset-0 bg-black/75 backdrop-blur-md z-[99999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+      className="fixed inset-0 bg-brand-dark/80 backdrop-blur-md z-[99999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="location-modal-title"
@@ -66,7 +86,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
             <div>
               <h2
                 id="location-modal-title"
-                className="text-base sm:text-lg font-bold text-white"
+                className="text-base sm:text-lg font-bold text-white tracking-wide"
               >
                 Choose Your City
               </h2>
@@ -83,10 +103,23 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
           </button>
         </div>
 
-        {/* Modal Content */}
-        <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
+        {/* Quick Search */}
+        <div className="relative mb-3">
+          <Search className="w-4 h-4 text-brand-secondary/70 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search Palakkad, Kochi, Thrissur..."
+            className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-green-950/60 border border-green-800/50 rounded-xl text-green-50 placeholder-green-300/40 focus:outline-none focus:border-brand-secondary/80 focus:ring-1 focus:ring-brand-secondary/50 transition"
+            autoFocus
+          />
+        </div>
+
+        {/* Modal Content - Cities List in Emerald Theme */}
+        <div className="space-y-1.5 max-h-[50vh] overflow-y-auto pr-1">
           {isLoading && (
-            <div className="space-y-2.5 py-2">
+            <div className="space-y-2 py-2">
               {[1, 2, 3].map((n) => (
                 <div
                   key={n}
@@ -116,41 +149,40 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
             </div>
           )}
 
-          {!isLoading && !isError && cities && cities.length === 0 && (
+          {!isLoading && !isError && filteredCities.length === 0 && (
             <p className="text-sm text-center text-green-300/70 py-6">
-              No active cities found.
+              No matching cities found for &quot;{searchTerm}&quot;.
             </p>
           )}
 
           {!isLoading &&
             !isError &&
-            cities &&
-            cities.map((city) => {
-              const isSelected = selectedCity?.id === city.id || selectedCity?.slug === city.slug
+            filteredCities.map((city) => {
+              const isSelected =
+                selectedCity?.id === city.id || selectedCity?.slug === city.slug
+
               return (
                 <button
                   key={city.id}
                   type="button"
                   onClick={() => handleSelectCity(city)}
-                  className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all ${
-                    isSelected
+                  className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all ${isSelected
                       ? 'bg-green-900/50 border border-brand-secondary/60 text-brand-secondary font-semibold shadow-sm'
                       : 'hover:bg-green-900/30 text-green-100 border border-transparent'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                        isSelected
-                          ? 'bg-brand-secondary text-brand-dark'
+                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isSelected
+                          ? 'bg-brand-secondary text-brand-dark font-bold'
                           : 'bg-green-950/70 text-green-300/70 border border-green-800/40'
-                      }`}
+                        }`}
                     >
                       <MapPin className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold truncate text-white">{city.name}</p>
-                      <p className="text-xs text-green-300/60 truncate">{city.state}</p>
+                      <p className="text-xs text-green-300/60 truncate">{city.state || 'Kerala'}</p>
                     </div>
                   </div>
                   {isSelected && (

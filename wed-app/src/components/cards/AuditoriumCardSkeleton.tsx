@@ -19,9 +19,10 @@ export function AuditoriumCardSkeleton() {
           <div className="h-4 bg-green-900/30 rounded w-14" />
         </div>
 
-        {/* Price skeleton */}
-        <div className="pt-2 border-t border-green-900/40 flex items-center justify-between">
-          <div className="h-5 bg-green-900/40 rounded w-1/3" />
+        {/* Footer skeleton */}
+        <div className="pt-2.5 border-t border-green-900/40 flex items-center justify-between">
+          <div className="h-4 bg-green-900/40 rounded w-20" />
+          <div className="h-7 bg-green-900/40 rounded-lg w-24" />
         </div>
       </div>
     </div>
