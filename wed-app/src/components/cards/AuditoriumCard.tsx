@@ -84,13 +84,31 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
     ? REAL_KERALA_VENUE_FALLBACK
     : photosList[photoIndex] || REAL_KERALA_VENUE_FALLBACK
 
-  const cityDisplay =
-    auditorium.address ||
-    (auditorium.cities
-      ? `${auditorium.cities.name}, ${auditorium.cities.state}`
-      : auditorium.district
-      ? `${auditorium.city || auditorium.district}, Kerala`
-      : 'Kerala')
+  const cityDisplay = useMemo(() => {
+    // Show specific town if available (e.g. Pattambi, Kulappully, Cherpulassery, Ottapalam)
+    // Filter out generic "Palakkad" city display
+    if (
+      auditorium.city &&
+      auditorium.city.toLowerCase() !== 'palakkad' &&
+      auditorium.city.toLowerCase() !== 'kerala'
+    ) {
+      return `${auditorium.city}, Kerala`
+    }
+    if (auditorium.address) {
+      const cleanAddr = auditorium.address
+        .replace(/[\uE000-\uF8FF]/g, '')
+        .replace(/^[A-Z0-9\+]{4,9},\s*/i, '')
+        .replace(/\bPalakkad\b/gi, '')
+        .replace(/,\s*,/g, ',')
+        .replace(/^\s*,\s*|\s*,\s*$/g, '')
+        .trim()
+      if (cleanAddr) return cleanAddr
+    }
+    if (auditorium.district && auditorium.district.toLowerCase() !== 'palakkad') {
+      return `${auditorium.district}, Kerala`
+    }
+    return 'Kerala'
+  }, [auditorium.city, auditorium.address, auditorium.district])
 
   const amenities = auditorium.amenities ?? []
   const visibleAmenities = amenities.slice(0, 3)
@@ -161,12 +179,6 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
           </>
         )}
 
-        {/* District badge */}
-        {auditorium.district && (
-          <div className="absolute top-3 left-3 bg-brand-dark/90 backdrop-blur-xs text-green-100 border border-green-700/50 text-xs px-2.5 py-1 rounded-full font-medium shadow-sm z-10">
-            <span>{auditorium.district}</span>
-          </div>
-        )}
 
         {/* Capacity badge */}
         <div className="absolute top-3 right-3 bg-brand-dark/90 backdrop-blur-xs text-brand-secondary border border-green-700/50 text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1 shadow-sm z-10">

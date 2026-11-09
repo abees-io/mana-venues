@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Home, Search, CalendarDays, User } from 'lucide-react'
+import { Home, Search, User } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
 
@@ -11,12 +11,10 @@ export default function BottomNav() {
 
   const citySlug = selectedCity?.slug ?? 'kochi'
   const pathname = location.pathname
-  const searchParams = location.search
 
   const isHomeActive = pathname === '/'
   const isSearchActive = pathname.startsWith('/city')
-  const isBookingsActive = pathname === '/profile' && searchParams.includes('tab=bookings')
-  const isProfileActive = pathname === '/profile' && !searchParams.includes('tab=bookings')
+  const isProfileActive = pathname === '/profile'
 
   const tabs = [
     {
@@ -30,12 +28,6 @@ export default function BottomNav() {
       icon: Search,
       isActive: isSearchActive,
       onClick: () => navigate(`/city/${citySlug}`),
-    },
-    {
-      label: 'Bookings',
-      icon: CalendarDays,
-      isActive: isBookingsActive,
-      onClick: () => navigate(user ? '/profile?tab=bookings' : '/auth/login'),
     },
     {
       label: 'Profile',
