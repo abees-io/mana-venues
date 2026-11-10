@@ -276,11 +276,10 @@ export const DistrictVenuesDirectory: React.FC = () => {
                   setSelectedDistrict(district);
                   setSearchFilter('');
                 }}
-                className={`whitespace-nowrap px-4 py-2 text-xs font-medium rounded-full transition-all border ${
-                  isSelected
-                    ? 'bg-white text-black border-white shadow-sm font-semibold'
-                    : 'bg-neutral-900/80 text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
-                }`}
+                className={`whitespace-nowrap px-4 py-2 text-xs font-medium rounded-full transition-all border ${isSelected
+                  ? 'bg-white text-black border-white shadow-sm font-semibold'
+                  : 'bg-neutral-900/80 text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
+                  }`}
               >
                 {district}
               </button>

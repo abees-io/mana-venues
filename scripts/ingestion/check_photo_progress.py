@@ -20,3 +20,4 @@ if without_photos:
     print('\nFirst 10 missing:')
     for r in without_photos[:10]:
         print(f"  {r['district']} | {r['city']} | {r['name']}")
+

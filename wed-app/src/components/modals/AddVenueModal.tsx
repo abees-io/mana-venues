@@ -270,11 +270,10 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
 
         {submitMessage && (
           <div
-            className={`mb-4 p-3 rounded-xl text-xs flex items-center gap-2 ${
-              submitMessage.type === 'success'
-                ? 'bg-green-50 text-green-700 border border-green-200'
-                : 'bg-red-50 text-red-700 border border-red-200'
-            }`}
+            className={`mb-4 p-3 rounded-xl text-xs flex items-center gap-2 ${submitMessage.type === 'success'
+              ? 'bg-green-50 text-green-700 border border-green-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
+              }`}
           >
             {submitMessage.type === 'success' ? (
               <Check className="w-4 h-4 shrink-0" />
@@ -417,11 +416,10 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
                   {venuePhotos.map((url, index) => (
                     <div
                       key={index}
-                      className={`relative group rounded-xl overflow-hidden aspect-[4/3] bg-gray-100 border shadow-xs ${
-                        index === 0
-                          ? 'ring-2 ring-brand-primary border-transparent shadow-md'
-                          : 'border-gray-200'
-                      }`}
+                      className={`relative group rounded-xl overflow-hidden aspect-[4/3] bg-gray-100 border shadow-xs ${index === 0
+                        ? 'ring-2 ring-brand-primary border-transparent shadow-md'
+                        : 'border-gray-200'
+                        }`}
                     >
                       <img
                         src={url}
@@ -625,11 +623,10 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
                     onChange={(e) => setWhatsappPhone(e.target.value)}
                     disabled={sameAsCallNumber}
                     placeholder="e.g. +91 98470 12345"
-                    className={`w-full pl-9 pr-3.5 py-2.5 border rounded-xl text-sm text-brand-dark focus:ring-2 focus:ring-brand-primary focus:outline-none ${
-                      sameAsCallNumber
-                        ? 'bg-gray-100/70 border-gray-200 text-gray-600 cursor-not-allowed'
-                        : 'border-gray-300 bg-white'
-                    }`}
+                    className={`w-full pl-9 pr-3.5 py-2.5 border rounded-xl text-sm text-brand-dark focus:ring-2 focus:ring-brand-primary focus:outline-none ${sameAsCallNumber
+                      ? 'bg-gray-100/70 border-gray-200 text-gray-600 cursor-not-allowed'
+                      : 'border-gray-300 bg-white'
+                      }`}
                   />
                 </div>
               </div>
@@ -649,11 +646,10 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
                     key={item}
                     type="button"
                     onClick={() => toggleAmenity(item)}
-                    className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
-                      isSelected
-                        ? 'bg-brand-primary text-white border-brand-primary'
-                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                    }`}
+                    className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${isSelected
+                      ? 'bg-brand-primary text-white border-brand-primary'
+                      : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                      }`}
                   >
                     {isSelected ? `✓ ${item}` : `+ ${item}`}
                   </button>

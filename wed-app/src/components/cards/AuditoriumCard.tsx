@@ -10,6 +10,7 @@ import {
   ImageOff,
 } from 'lucide-react'
 import type { Auditorium } from '../../lib/types'
+import { filterRealPhotos, getVenueCityDisplay } from '../../lib/photoUtils'
 
 export type AuditoriumWithCity = Auditorium & {
   phone_number?: string | null
@@ -33,27 +34,10 @@ interface AuditoriumCardProps {
 
 export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
   // Deduplicated real photos only — no fallback stock image, no AI images
-  const photosList = useMemo(() => {
-    if (auditorium.photos && auditorium.photos.length > 0) {
-      const seen = new Set<string>()
-      const valid = auditorium.photos.filter(
-        (p): p is string => {
-          if (
-            typeof p !== 'string' ||
-            p.trim().length === 0 ||
-            p.includes('unsplash.com') ||
-            p.includes('placeholder')
-          ) return false
-          const key = p.trim()
-          if (seen.has(key)) return false
-          seen.add(key)
-          return true
-        }
-      )
-      if (valid.length > 0) return valid
-    }
-    return [] // empty = show no-photo placeholder
-  }, [auditorium.photos])
+  const photosList = useMemo(
+    () => filterRealPhotos(auditorium.photos ?? []),
+    [auditorium.photos],
+  )
 
   const [photoIndex, setPhotoIndex] = useState(0)
   const [failedIndices, setFailedIndices] = useState<Set<number>>(new Set())
@@ -98,31 +82,11 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
   const hasPhoto = photosList.length > 0 && effectiveIndex !== -1
   const activePhoto = hasPhoto ? photosList[effectiveIndex] : null
 
-  const cityDisplay = useMemo(() => {
-    // Show specific town if available (e.g. Pattambi, Kulappully, Cherpulassery, Ottapalam)
-    // Filter out generic "Palakkad" city display
-    if (
-      auditorium.city &&
-      auditorium.city.toLowerCase() !== 'palakkad' &&
-      auditorium.city.toLowerCase() !== 'kerala'
-    ) {
-      return `${auditorium.city}, Kerala`
-    }
-    if (auditorium.address) {
-      const cleanAddr = auditorium.address
-        .replace(/[\uE000-\uF8FF]/g, '')
-        .replace(/^[A-Z0-9\+]{4,9},\s*/i, '')
-        .replace(/\bPalakkad\b/gi, '')
-        .replace(/,\s*,/g, ',')
-        .replace(/^\s*,\s*|\s*,\s*$/g, '')
-        .trim()
-      if (cleanAddr) return cleanAddr
-    }
-    if (auditorium.district && auditorium.district.toLowerCase() !== 'palakkad') {
-      return `${auditorium.district}, Kerala`
-    }
-    return 'Kerala'
-  }, [auditorium.city, auditorium.address, auditorium.district])
+  // City/location display — specific town preferred over generic district name
+  const cityDisplay = useMemo(
+    () => getVenueCityDisplay(auditorium.city, auditorium.address, auditorium.district),
+    [auditorium.city, auditorium.address, auditorium.district],
+  )
 
   const amenities = auditorium.amenities ?? []
   const visibleAmenities = amenities.slice(0, 3)

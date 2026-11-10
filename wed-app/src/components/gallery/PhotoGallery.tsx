@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import gsap from 'gsap'
 import { ChevronLeft, ChevronRight, X, ImageOff } from 'lucide-react'
+import { filterRealPhotos } from '../../lib/photoUtils'
 
 interface PhotoGalleryProps {
   photos: string[]
@@ -9,19 +10,7 @@ interface PhotoGalleryProps {
 
 export default function PhotoGallery({ photos, title }: PhotoGalleryProps) {
   // Only keep genuinely valid Google Maps / CDN photo URLs for THIS venue
-  const seen = new Set<string>()
-  const displayPhotos = (photos || []).filter((p) => {
-    if (
-      typeof p !== 'string' ||
-      !p.startsWith('http') ||
-      p.includes('unsplash.com') ||
-      p.includes('placeholder')
-    ) return false
-    const key = p.trim()
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
+  const displayPhotos = filterRealPhotos(photos ?? [])
 
   const hasPhotos = displayPhotos.length > 0
   const [activeIndex, setActiveIndex] = useState(0)
