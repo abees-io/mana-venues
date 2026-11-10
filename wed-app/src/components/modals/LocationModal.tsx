@@ -103,7 +103,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
           </button>
         </div>
 
-        {/* Quick Search */}
+        {/* Quick Search — no autoFocus so mobile users see the city list first */}
         <div className="relative mb-3">
           <Search className="w-4 h-4 text-brand-secondary/70 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
@@ -112,7 +112,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search Palakkad, Kochi, Thrissur..."
             className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-green-950/60 border border-green-800/50 rounded-xl text-green-50 placeholder-green-300/40 focus:outline-none focus:border-brand-secondary/80 focus:ring-1 focus:ring-brand-secondary/50 transition"
-            autoFocus
+            tabIndex={-1}
           />
         </div>
 

@@ -7,6 +7,7 @@ import {
   Navigation,
   ChevronRight,
   ChevronLeft,
+  ImageOff,
 } from 'lucide-react'
 import type { Auditorium } from '../../lib/types'
 
@@ -30,24 +31,28 @@ interface AuditoriumCardProps {
   auditorium: AuditoriumWithCity
 }
 
-// Authentic verified Kerala venue photo from Google Maps (Lulu International Convention Centre grand facade)
-const REAL_KERALA_VENUE_FALLBACK =
-  'https://lh3.googleusercontent.com/grass-cs/AABkmLcj_nOY8Dm-Un6PXO717C4ArfxK8ssVjVWx200pqughg6ccY8gMYKo9TKiUW4-sCIykVhdHC19Hq7_S3qZF0wkTI2ubQmsACduJtlS0hwR2Ug7cr2zYOrP8VUoiw82VJ5JLyqdNiVMG6lWS=w1200-h800-k-no'
-
 export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
-  // Use strictly REAL venue photos from Google Maps (zero AI or Unsplash stock photos)
+  // Deduplicated real photos only — no fallback stock image, no AI images
   const photosList = useMemo(() => {
     if (auditorium.photos && auditorium.photos.length > 0) {
+      const seen = new Set<string>()
       const valid = auditorium.photos.filter(
-        (p): p is string =>
-          typeof p === 'string' &&
-          p.trim().length > 0 &&
-          !p.includes('unsplash.com') &&
-          !p.includes('placeholder')
+        (p): p is string => {
+          if (
+            typeof p !== 'string' ||
+            p.trim().length === 0 ||
+            p.includes('unsplash.com') ||
+            p.includes('placeholder')
+          ) return false
+          const key = p.trim()
+          if (seen.has(key)) return false
+          seen.add(key)
+          return true
+        }
       )
       if (valid.length > 0) return valid
     }
-    return [REAL_KERALA_VENUE_FALLBACK]
+    return [] // empty = show no-photo placeholder
   }, [auditorium.photos])
 
   const [photoIndex, setPhotoIndex] = useState(0)
@@ -80,9 +85,18 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
     setFailedIndices((prev) => new Set(prev).add(photoIndex))
   }
 
-  const activePhoto = failedIndices.has(photoIndex)
-    ? REAL_KERALA_VENUE_FALLBACK
-    : photosList[photoIndex] || REAL_KERALA_VENUE_FALLBACK
+  // If the current photo failed AND there are other photos to try, advance automatically
+  const effectiveIndex = useMemo(() => {
+    if (photosList.length === 0) return -1
+    for (let i = 0; i < photosList.length; i++) {
+      const idx = (photoIndex + i) % photosList.length
+      if (!failedIndices.has(idx)) return idx
+    }
+    return -1 // all failed
+  }, [photoIndex, failedIndices, photosList])
+
+  const hasPhoto = photosList.length > 0 && effectiveIndex !== -1
+  const activePhoto = hasPhoto ? photosList[effectiveIndex] : null
 
   const cityDisplay = useMemo(() => {
     // Show specific town if available (e.g. Pattambi, Kulappully, Cherpulassery, Ottapalam)
@@ -122,17 +136,25 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
     >
       {/* 16:9 Thumbnail Header with In-Place Photo Gallery */}
       <div className="relative aspect-video w-full overflow-hidden bg-brand-dark/90 group/img">
-        <img
-          src={activePhoto}
-          alt={`${auditorium.title || auditorium.name} - Photo ${photoIndex + 1}`}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-          onError={handleImageError}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+        {hasPhoto && activePhoto ? (
+          <img
+            src={activePhoto}
+            alt={`${auditorium.title || auditorium.name} - Photo ${effectiveIndex + 1}`}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={handleImageError}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          /* No-photo placeholder — shown when venue has no real photo available */
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-green-950/40">
+            <ImageOff className="w-10 h-10 text-green-700/60" />
+            <span className="text-[11px] text-green-600/70 font-medium">No photo available</span>
+          </div>
+        )}
 
         {/* Next / Prev Photo Controls for venues with multiple authentic photos */}
-        {photosList.length > 1 && (
+        {hasPhoto && photosList.length > 1 && (
           <>
             <button
               type="button"
@@ -156,7 +178,7 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
             {/* Photo Counter Pill */}
             <div className="absolute bottom-2.5 right-3 flex items-center z-10 bg-brand-dark/90 backdrop-blur-xs px-2 py-0.5 rounded-full border border-green-700/60 shadow-md">
               <span className="text-[10px] font-bold text-green-100">
-                {photoIndex + 1}/{photosList.length}
+                {effectiveIndex + 1}/{photosList.length}
               </span>
             </div>
 
