@@ -1,13 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import gsap from 'gsap'
-import { ChevronLeft, ChevronRight, X } from 'lucide-react'
-
-export const FALLBACK_PHOTOS = [
-  'https://lh3.googleusercontent.com/grass-cs/AABkmLcj_nOY8Dm-Un6PXO717C4ArfxK8ssVjVWx200pqughg6ccY8gMYKo9TKiUW4-sCIykVhdHC19Hq7_S3qZF0wkTI2ubQmsACduJtlS0hwR2Ug7cr2zYOrP8VUoiw82VJ5JLyqdNiVMG6lWS=w1200-h800-k-no',
-  'https://lh3.googleusercontent.com/grass-cs/AABkmLe-LeeGMMs6pDovu8ow6Zt2Wcm6ewnZKUBSafsgO3FDL9qrTkNPi3Q_cKepZoMauto24WmgS3b3IY0C8FLuDNy5BscXlUgmd75l3fOQGRUmKGVk-q50_m2Jr_B1nKpTeNvwJ36Kxw=w1200-h800-k-no',
-  'https://lh3.googleusercontent.com/grass-cs/AABkmLc5sRCEi0JjWf6DbzSGzNBsXO-o67NsJ7s7Wmm7-M9QFledZnbYi5KNWdNPmLVVAIs3A8Vub7XdgpKx0DQH0Bh01oPLAAdOtYAm95xTo3-isXvG2houJKiMECZWSLvqdfEYSe6CaA=w1200-h800-k-no',
-  'https://lh3.googleusercontent.com/grass-cs/AABkmLceGqLski0fWMcgEbOHkoJ6JFOBx5TN1i4-J66QSS5t8Jv-JFOPEhfPPX_O-_nBtGgyYYSzGGg2Ry2A6coeUTlt23vApu0QSaPTpNjW5GRdvnyc6gFU-IQo4Lby3Pb0u6vdRyRQ=w1200-h800-k-no',
-]
+import { ChevronLeft, ChevronRight, X, ImageOff } from 'lucide-react'
 
 interface PhotoGalleryProps {
   photos: string[]
@@ -15,10 +8,22 @@ interface PhotoGalleryProps {
 }
 
 export default function PhotoGallery({ photos, title }: PhotoGalleryProps) {
-  const realPhotos = (photos || []).filter(
-    (p) => typeof p === 'string' && p.startsWith('http') && !p.includes('unsplash.com') && !p.includes('placeholder')
-  )
-  const displayPhotos = realPhotos.length > 0 ? realPhotos : FALLBACK_PHOTOS
+  // Only keep genuinely valid Google Maps / CDN photo URLs for THIS venue
+  const seen = new Set<string>()
+  const displayPhotos = (photos || []).filter((p) => {
+    if (
+      typeof p !== 'string' ||
+      !p.startsWith('http') ||
+      p.includes('unsplash.com') ||
+      p.includes('placeholder')
+    ) return false
+    const key = p.trim()
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+
+  const hasPhotos = displayPhotos.length > 0
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const mainImageRef = useRef<HTMLImageElement>(null)
@@ -87,13 +92,26 @@ export default function PhotoGallery({ photos, title }: PhotoGalleryProps) {
   const hasMore = displayPhotos.length > 4
   const thumbnails = displayPhotos.slice(0, 4)
 
+  // ── No-photo state ────────────────────────────────────────────────────────────
+  if (!hasPhotos) {
+    return (
+      <div className="space-y-3">
+        <div className="relative overflow-hidden rounded-xl bg-green-950/40 group aspect-video flex flex-col items-center justify-center gap-3">
+          <ImageOff className="w-16 h-16 text-green-700/40" />
+          <p className="text-sm text-green-600/60 font-medium">No photos available for this venue</p>
+          <p className="text-xs text-green-700/40">Photos will appear here once the venue owner uploads them</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-3">
       {/* Main Image */}
       <div className="relative overflow-hidden rounded-xl bg-gray-100 group">
         <img
           ref={mainImageRef}
-          src={displayPhotos[activeIndex] || FALLBACK_PHOTOS[0]}
+          src={displayPhotos[activeIndex]}
           alt={title}
           referrerPolicy="no-referrer"
           onClick={() => setLightboxOpen(true)}
@@ -119,9 +137,8 @@ export default function PhotoGallery({ photos, title }: PhotoGalleryProps) {
               key={i}
               type="button"
               onClick={() => handleThumbnailClick(i, showMoreOverlay)}
-              className={`relative aspect-video rounded-lg overflow-hidden transition-all focus:outline-none ${
-                isActive ? 'ring-2 ring-brand-primary opacity-100' : 'opacity-70 hover:opacity-100'
-              }`}
+              className={`relative aspect-video rounded-lg overflow-hidden transition-all focus:outline-none ${isActive ? 'ring-2 ring-brand-primary opacity-100' : 'opacity-70 hover:opacity-100'
+                }`}
             >
               <img
                 src={photo}
