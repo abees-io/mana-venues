@@ -5,6 +5,7 @@ import AuditoriumDetailPage from '../pages/AuditoriumDetailPage'
 import BookingConfirmPage from '../pages/BookingConfirmPage'
 import ProfilePage from '../pages/ProfilePage'
 import AuthPage from '../pages/AuthPage'
+import PackagesPage from '../pages/PackagesPage'
 import VendorDashboard from '../pages/vendor/VendorDashboard'
 import VendorHallManager from '../pages/vendor/VendorHallManager'
 import AdminDashboard from '../pages/admin/AdminDashboard'
@@ -15,6 +16,10 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <HomePage />,
+  },
+  {
+    path: '/packages',
+    element: <PackagesPage />,
   },
   {
     path: '/city/:slug',

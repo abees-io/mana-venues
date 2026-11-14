@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
@@ -8,12 +9,16 @@ import {
   X,
   Building2,
   ChevronRight,
+  Sparkles,
+  Package,
 } from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import AuditoriumCard from '../components/cards/AuditoriumCard'
 import { AuditoriumCardSkeletonList } from '../components/cards/AuditoriumCardSkeleton'
 import LocationModal from '../components/modals/LocationModal'
 import ScrollAnimatedSection from '../components/home/ScrollAnimatedSection'
+import StackedDestinationImages from '../components/home/StackedDestinationImages'
+import { WEDDING_PACKAGES } from './PackagesPage'
 import { useAuditoriums } from '../hooks/useAuditoriums'
 import { useCities } from '../hooks/useCities'
 import { useCityStore } from '../store/cityStore'
@@ -237,104 +242,147 @@ export default function HomePage() {
       {/* SECTION 1: HERO */}
       <section
         ref={heroRef}
-        className="relative overflow-hidden bg-brand-dark/50 backdrop-blur-xs text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8"
+        className="relative overflow-hidden bg-brand-dark/60 backdrop-blur-xs text-white py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 border-b border-green-950/40"
       >
         {/* Subtle background decorative shapes */}
-        <div className="absolute inset-0 pointer-events-none opacity-10">
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-brand-secondary blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-green-500 blur-3xl" />
+        <div className="absolute inset-0 pointer-events-none opacity-15">
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-brand-secondary/30 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-emerald-600/20 blur-3xl" />
         </div>
 
-        <div className="relative max-w-5xl mx-auto text-center space-y-5">
-          <h1
-            className="hero-animate text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] font-extrabold tracking-[0.03em] sm:tracking-[0.06em] uppercase px-2 py-1 leading-tight sm:leading-snug bg-[linear-gradient(135deg,#FFAE00_0%,#F9E866_100%)] bg-clip-text text-transparent drop-shadow-md mx-auto max-w-4xl"
-            style={{ fontFamily: "'Cinzel', serif" }}
-          >
-            Grand Venues for Your Big Days
-          </h1>
-
-          <p className="hero-animate text-base sm:text-lg text-green-100/90 max-w-2xl mx-auto font-light">
-            Discover verified auditoriums, convention centres, and luxury wedding
-            halls across Kerala with real-time pricing and availability.
-          </p>
-
-          {/* Centered Search Bar in Gold / Emerald Style */}
-          <div className="hero-animate max-w-2xl mx-auto pt-2">
-            <form
-              onSubmit={handleSearchSubmit}
-              className="relative flex items-center shadow-2xl rounded-full overflow-hidden bg-brand-dark/85 backdrop-blur-md border border-green-700/40 p-1.5 focus-within:ring-4 focus-within:ring-brand-secondary/40 transition-all"
-            >
-              <div className="pl-3 sm:pl-4 text-brand-secondary">
-                <Search className="w-5 h-5 text-brand-secondary" />
+        <div className="relative max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* LEFT COLUMN: Destination Wedding & Venue Content (Left-Aligned) */}
+            <div className="lg:col-span-7 space-y-6 text-left">
+              {/* Kerala Destination Wedding Badge */}
+              <div className="hero-animate inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/80 border border-brand-secondary/40 text-xs font-semibold text-brand-secondary shadow-md">
+                <Sparkles className="w-3.5 h-3.5 text-brand-secondary" />
+                <span className="tracking-wide">Bespoke Destination Weddings in God’s Own Country</span>
               </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search venues by name, landmark, or amenities..."
-                className="w-full px-3 py-2 text-sm sm:text-base text-green-50 bg-transparent focus:outline-none placeholder-green-300/50"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="p-1 mr-1 text-green-400 hover:text-green-200 rounded-full"
-                  aria-label="Clear search"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-              <button
-                type="submit"
-                className="shrink-0 px-4 sm:px-6 py-2.5 rounded-full bg-brand-secondary hover:bg-brand-secondary/90 text-brand-dark font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5"
+
+              {/* Exact Main Heading */}
+              <h1
+                className="hero-animate text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold tracking-[0.03em] uppercase py-1 leading-[1.15] bg-[linear-gradient(135deg,#FFAE00_0%,#F9E866_100%)] bg-clip-text text-transparent drop-shadow-md text-left"
+                style={{ fontFamily: "'Cinzel', serif" }}
               >
-                <span>Search</span>
-                <ChevronRight className="w-4 h-4 hidden sm:inline" />
-              </button>
-            </form>
-          </div>
+                GRAND VENUES FOR YOUR BIG DAYS
+              </h1>
 
-          {/* Quick City Selector Chips */}
-          <div className="hero-animate pt-3">
-            <p className="text-xs uppercase tracking-wider text-brand-secondary mb-2 font-semibold">
-              Popular Cities
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {!isCitiesLoading &&
-                popularCities.map((city) => {
-                  const isSelected = !isNearMeActive && (selectedCity?.id === city.id || selectedCity?.slug === city.slug)
-                  return (
-                    <button
-                      key={city.id}
-                      type="button"
-                      onClick={() => {
-                        setIsNearMeActive(false)
-                        setCity({
-                          id: city.id,
-                          name: city.name,
-                          slug: city.slug,
-                        })
-                      }}
-                      className={`px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
-                        isSelected
-                          ? 'bg-gradient-to-r from-[#C8901F] via-[#E0B12D] to-[#C8901F] text-brand-dark font-bold shadow-md scale-105 border border-[#D8A629]/70'
-                          : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
-                      }`}
-                    >
-                      {city.name}
-                    </button>
-                  )
-                })}
+              {/* Exact Description text with bold modern font style aligned to left */}
+              <p className="hero-animate font-sans font-semibold sm:font-bold text-base sm:text-lg lg:text-[1.125rem] text-emerald-50/95 leading-relaxed tracking-tight sm:tracking-normal text-left max-w-2xl border-l-2 border-brand-secondary/70 pl-4">
+                Your celebration deserves the warmth and safety of home. Explore verified venues and bespoke destination wedding packages across God's Own Country, thoughtfully designed to honor Kerala’s rich cultural tapestry while keeping you in expert, caring hands
+              </p>
 
-              {/* If selected city is outside the top 4 popular cities, display it as selected */}
-              {!isNearMeActive && selectedCity && !popularCities.some((c) => c.slug === selectedCity.slug || c.id === selectedCity.id) && (
-                <button
-                  type="button"
-                  className="px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all bg-gradient-to-r from-[#C8901F] via-[#E0B12D] to-[#C8901F] text-brand-dark shadow-md scale-105 border border-[#D8A629]/70"
+              {/* Search Bar + Action CTAs */}
+              <div className="hero-animate max-w-2xl pt-1 space-y-3">
+                <form
+                  onSubmit={handleSearchSubmit}
+                  className="relative flex items-center shadow-2xl rounded-full overflow-hidden bg-brand-dark/90 backdrop-blur-md border border-green-700/50 p-1.5 focus-within:ring-4 focus-within:ring-brand-secondary/40 transition-all"
                 >
-                  {selectedCity.name}
-                </button>
-              )}
+                  <div className="pl-3 sm:pl-4 text-brand-secondary">
+                    <Search className="w-5 h-5 text-brand-secondary" />
+                  </div>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search venues by name, landmark, or amenities..."
+                    aria-label="Search venues"
+                    className="w-full px-3 py-2 text-sm sm:text-base text-green-50 bg-transparent focus:outline-none placeholder-green-300/50"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="p-1 mr-1 text-green-400 hover:text-green-200 rounded-full"
+                      aria-label="Clear search"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="shrink-0 px-4 sm:px-6 py-2.5 rounded-full bg-brand-secondary hover:bg-brand-secondary/90 text-brand-dark font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5"
+                  >
+                    <span>Search</span>
+                    <ChevronRight className="w-4 h-4 hidden sm:inline" />
+                  </button>
+                </form>
+
+                {/* Explore Destination Packages & Venues CTAs */}
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <Link
+                    to="/packages"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-brand-secondary via-amber-400 to-brand-secondary text-brand-dark font-bold text-xs sm:text-sm shadow-lg hover:shadow-brand-secondary/20 hover:scale-[1.02] transition-all"
+                  >
+                    <Package className="w-4 h-4" />
+                    <span>Explore Wedding Packages</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (gridRef.current) {
+                        gridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-950/70 hover:bg-emerald-900/90 text-emerald-100 border border-emerald-700/50 font-semibold text-xs sm:text-sm transition-all"
+                  >
+                    <Building2 className="w-4 h-4 text-brand-secondary" />
+                    <span>Browse Venues</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick City Selector Chips (Left-aligned) */}
+              <div className="hero-animate pt-2 text-left">
+                <p className="text-xs uppercase tracking-wider text-brand-secondary mb-2 font-semibold">
+                  Popular Kerala Locations
+                </p>
+                <div className="flex flex-wrap items-center justify-start gap-2">
+                  {!isCitiesLoading &&
+                    popularCities.map((city) => {
+                      const isSelected = !isNearMeActive && (selectedCity?.id === city.id || selectedCity?.slug === city.slug)
+                      return (
+                        <button
+                          key={city.id}
+                          type="button"
+                          onClick={() => {
+                            setIsNearMeActive(false)
+                            setCity({
+                              id: city.id,
+                              name: city.name,
+                              slug: city.slug,
+                            })
+                          }}
+                          className={`px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
+                            isSelected
+                              ? 'bg-gradient-to-r from-[#C8901F] via-[#E0B12D] to-[#C8901F] text-brand-dark font-bold shadow-md scale-105 border border-[#D8A629]/70'
+                              : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                          }`}
+                        >
+                          {city.name}
+                        </button>
+                      )
+                    })}
+
+                  {/* If selected city is outside the top 4 popular cities, display it as selected */}
+                  {!isNearMeActive && selectedCity && !popularCities.some((c) => c.slug === selectedCity.slug || c.id === selectedCity.id) && (
+                    <button
+                      type="button"
+                      className="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all bg-gradient-to-r from-[#C8901F] via-[#E0B12D] to-[#C8901F] text-brand-dark shadow-md scale-105 border border-[#D8A629]/70"
+                    >
+                      {selectedCity.name}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: Stacked Destination Wedding Image Animation */}
+            <div className="lg:col-span-5 hero-animate w-full flex items-center justify-center lg:justify-end pt-4 lg:pt-0">
+              <StackedDestinationImages />
             </div>
           </div>
         </div>
@@ -342,6 +390,83 @@ export default function HomePage() {
 
       {/* SCROLL-ANIMATED TICKER & EDITORIAL REVEAL SECTION */}
       <ScrollAnimatedSection />
+
+      {/* SECTION: DESTINATION WEDDING PACKAGES SPOTLIGHT */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 border-b border-green-900/40">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+          <div className="text-left space-y-1">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-secondary">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Curated Destination Plans</span>
+            </div>
+            <h2
+              className="text-2xl sm:text-3xl font-extrabold text-white tracking-wide uppercase"
+              style={{ fontFamily: "'Cinzel', serif" }}
+            >
+              Kerala Destination Packages
+            </h2>
+            <p className="text-xs sm:text-sm text-emerald-200/80 max-w-2xl">
+              From backwater serenity to misty tea-clad hills, connect with verified planners offering complete celebration arrangements.
+            </p>
+          </div>
+
+          <Link
+            to="/packages"
+            className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-brand-secondary hover:text-white transition-colors group shrink-0"
+          >
+            <span>View All Packages</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        {/* 3-4 Highlight Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {WEDDING_PACKAGES.slice(0, 3).map((pkg) => (
+            <Link
+              key={pkg.id}
+              to="/packages"
+              className="group block rounded-xl overflow-hidden bg-brand-dark/85 backdrop-blur-md border border-green-800/40 shadow-xl hover:border-brand-secondary/60 hover:-translate-y-1 transition-all duration-300"
+            >
+              <div className="relative aspect-[16/10] overflow-hidden bg-brand-dark">
+                <img
+                  src={pkg.image}
+                  alt={pkg.title}
+                  loading="lazy"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/30 to-transparent" />
+                <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-brand-dark/80 backdrop-blur-md border border-brand-secondary/40 text-[11px] font-semibold text-brand-secondary">
+                  {pkg.backdrop}
+                </div>
+                <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded bg-brand-dark/90 backdrop-blur-md border border-emerald-700/50 text-right">
+                  <span className="block text-[9px] uppercase tracking-wider text-emerald-300">From</span>
+                  <span className="text-sm font-extrabold text-brand-secondary">{pkg.startingPrice}</span>
+                </div>
+              </div>
+
+              <div className="p-4 space-y-2 text-left">
+                <div className="flex items-center gap-1.5 text-xs text-emerald-300/90 font-medium">
+                  <MapPin className="w-3 h-3 text-brand-secondary shrink-0" />
+                  <span className="truncate">{pkg.location}</span>
+                </div>
+
+                <h3 className="text-base font-bold text-white group-hover:text-brand-secondary transition-colors line-clamp-1">
+                  {pkg.title}
+                </h3>
+
+                <p className="text-xs text-gray-300/80 line-clamp-2 leading-relaxed">
+                  {pkg.tagline}
+                </p>
+
+                <div className="pt-2 flex items-center justify-between text-xs font-semibold text-brand-secondary">
+                  <span>Explore Inclusions</span>
+                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* SECTION 2 & 3: FEED & GRID */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

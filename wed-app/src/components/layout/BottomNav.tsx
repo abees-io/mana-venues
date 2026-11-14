@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Home, Search, User } from 'lucide-react'
+import { Home, Search, User, Package } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
 
@@ -13,6 +13,7 @@ export default function BottomNav() {
   const pathname = location.pathname
 
   const isHomeActive = pathname === '/'
+  const isPackagesActive = pathname === '/packages'
   const isSearchActive = pathname.startsWith('/city')
   const isProfileActive = pathname === '/profile'
 
@@ -22,6 +23,12 @@ export default function BottomNav() {
       icon: Home,
       isActive: isHomeActive,
       onClick: () => navigate('/'),
+    },
+    {
+      label: 'Packages',
+      icon: Package,
+      isActive: isPackagesActive,
+      onClick: () => navigate('/packages'),
     },
     {
       label: 'Search',
@@ -50,6 +57,7 @@ export default function BottomNav() {
               key={tab.label}
               type="button"
               onClick={tab.onClick}
+              aria-label={tab.label}
               className={`flex-1 flex flex-col items-center justify-center py-1 transition-all active:scale-95 ${
                 tab.isActive
                   ? 'text-brand-primary font-bold'

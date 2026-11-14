@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { MapPin, Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard } from 'lucide-react'
+import { MapPin, Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Package } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
 import LocationModal from '../modals/LocationModal'
@@ -102,6 +102,15 @@ export default function Header() {
 
         {/* Right: Auth Buttons or User Avatar Dropdown */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Destination Packages Link */}
+          <Link
+            to="/packages"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-brand-secondary hover:text-white border border-brand-secondary/40 hover:border-brand-secondary hover:bg-brand-secondary/10 transition-colors"
+          >
+            <Package className="w-3.5 h-3.5" />
+            <span>Packages</span>
+          </Link>
+
           {/* Quick Admin Dashboard Link for Admin Users */}
           {user && isAdmin && (
             <Link
