@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -46,50 +46,147 @@ const DESTINATION_CARDS: DestinationCard[] = [
   },
 ]
 
+// Target transforms for the 3 slots in the stack
+const SLOTS = [
+  { y: 0, scale: 1, rotation: 0, opacity: 1, zIndex: 30 },
+  { y: 14, scale: 0.95, rotation: 4, opacity: 0.9, zIndex: 20 },
+  { y: 28, scale: 0.90, rotation: -4, opacity: 0.75, zIndex: 10 },
+]
+
 export default function StackedDestinationImages() {
   const [activeIndex, setActiveIndex] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
+  const deckRef = useRef<HTMLDivElement>(null)
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
+  const isAnimatingRef = useRef(false)
 
-  // Cycle to next card with the original smooth stack animation
-  const handleNext = () => {
-    setActiveIndex((prev) => (prev + 1) % DESTINATION_CARDS.length)
-  }
+  // Position cards on mount and whenever activeIndex changes
+  const applySlotPositions = useCallback((active: number) => {
+    DESTINATION_CARDS.forEach((_, idx) => {
+      const card = cardRefs.current[idx]
+      if (!card) return
+      const slotIdx = (idx - active + DESTINATION_CARDS.length) % DESTINATION_CARDS.length
+      const slot = SLOTS[slotIdx]
+      gsap.set(card, {
+        x: 0,
+        y: slot.y,
+        scale: slot.scale,
+        rotation: slot.rotation,
+        opacity: slot.opacity,
+        zIndex: slot.zIndex,
+      })
+    })
+  }, [])
 
+  // Initial layout on mount
   useEffect(() => {
-    // Check user preference for reduced motion
+    applySlotPositions(0)
+  }, [applySlotPositions])
+
+  // Smooth deck shuffle transition using GSAP with zero flicker
+  const handleNext = useCallback(() => {
+    if (isAnimatingRef.current) return
+    isAnimatingRef.current = true
+
+    const total = DESTINATION_CARDS.length
+    const topIdx = activeIndex
+    const nextIdx = (activeIndex + 1) % total
+    const backIdx = (activeIndex + 2) % total
+
+    const topCard = cardRefs.current[topIdx]
+    const nextCard = cardRefs.current[nextIdx]
+    const backCard = cardRefs.current[backIdx]
+
+    if (!topCard || !nextCard || !backCard) {
+      setActiveIndex(nextIdx)
+      isAnimatingRef.current = false
+      return
+    }
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        // Update active index in React state and set final slot positions smoothly
+        setActiveIndex(nextIdx)
+        applySlotPositions(nextIdx)
+        isAnimatingRef.current = false
+      },
+    })
+
+    // 1. Current top card peels smoothly out to the right with gentle tilt
+    tl.to(topCard, {
+      x: 75,
+      y: -10,
+      rotation: 10,
+      scale: 0.96,
+      opacity: 0.85,
+      duration: 0.22,
+      ease: 'power2.out',
+    })
+
+    // 2. Next card steps forward to Slot 0 (hero)
+    tl.to(
+      nextCard,
+      {
+        x: 0,
+        y: SLOTS[0].y,
+        rotation: SLOTS[0].rotation,
+        scale: SLOTS[0].scale,
+        opacity: SLOTS[0].opacity,
+        zIndex: SLOTS[0].zIndex,
+        duration: 0.38,
+        ease: 'power3.out',
+      },
+      0.08
+    )
+
+    // 3. Back card steps up to Slot 1 (middle)
+    tl.to(
+      backCard,
+      {
+        x: 0,
+        y: SLOTS[1].y,
+        rotation: SLOTS[1].rotation,
+        scale: SLOTS[1].scale,
+        opacity: SLOTS[1].opacity,
+        zIndex: SLOTS[1].zIndex,
+        duration: 0.38,
+        ease: 'power3.out',
+      },
+      0.08
+    )
+
+    // 4. Peeling card ducks cleanly behind to Slot 2 (back)
+    tl.set(topCard, { zIndex: SLOTS[2].zIndex }, 0.22)
+    tl.to(
+      topCard,
+      {
+        x: 0,
+        y: SLOTS[2].y,
+        rotation: SLOTS[2].rotation,
+        scale: SLOTS[2].scale,
+        opacity: SLOTS[2].opacity,
+        duration: 0.22,
+        ease: 'power2.inOut',
+      },
+      0.22
+    )
+  }, [activeIndex, applySlotPositions])
+
+  // Parallax scroll on deck container
+  useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReducedMotion || !containerRef.current) return
+    if (prefersReducedMotion || !containerRef.current || !deckRef.current) return
 
     const ctx = gsap.context(() => {
-      // Scroll-driven stacked card animation:
-      const tl = gsap.timeline({
+      gsap.to(deckRef.current, {
+        y: 20,
+        ease: 'none',
         scrollTrigger: {
           trigger: containerRef.current,
-          start: 'top 70%',
-          end: 'bottom 10%',
+          start: 'top 75%',
+          end: 'bottom 15%',
           scrub: 1.2,
         },
-      })
-
-      // Animate card stack spread on scroll
-      cardRefs.current.forEach((card, idx) => {
-        if (!card) return
-        const spreadY = (idx - 1) * 22
-        const rotateZ = idx === 0 ? -7 : idx === 1 ? 5 : -3
-        const spreadX = (idx - 1) * 16
-
-        tl.to(
-          card,
-          {
-            y: spreadY,
-            x: spreadX,
-            rotation: rotateZ,
-            scale: 1 - idx * 0.04,
-            ease: 'none',
-          },
-          0
-        )
       })
     }, containerRef)
 
@@ -105,23 +202,16 @@ export default function StackedDestinationImages() {
       {/* Subtle backdrop ambient glow */}
       <div className="absolute -inset-4 bg-gradient-to-tr from-emerald-950/40 via-emerald-900/20 to-transparent rounded-3xl blur-2xl pointer-events-none" />
 
-      {/* Stacked Cards Container - click anywhere to flip to next */}
+      {/* Stacked Cards Container - click anywhere to shuffle to next card */}
       <div
+        ref={deckRef}
         onClick={handleNext}
         className="relative w-full aspect-[4/5] sm:aspect-[4/4.8] max-h-[460px] flex items-center justify-center cursor-pointer group outline-none"
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         {DESTINATION_CARDS.map((card, index) => {
-          // Calculate stack positioning relative to activeIndex
           const offset = (index - activeIndex + DESTINATION_CARDS.length) % DESTINATION_CARDS.length
           const isTop = offset === 0
-
-          // Static offsets for layered physical stack look
-          const zIndex = 30 - offset * 10
-          const scale = 1 - offset * 0.05
-          const translateY = offset * 14
-          const rotation = offset === 0 ? 0 : offset === 1 ? 4 : -4
-          const opacity = offset === 0 ? 1 : offset === 1 ? 0.9 : 0.75
 
           return (
             <div
@@ -139,13 +229,10 @@ export default function StackedDestinationImages() {
               role="button"
               aria-label={`View ${card.title}. Tap to see next.`}
               style={{
-                zIndex,
-                transform: `translateY(${translateY}px) scale(${scale}) rotate(${rotation}deg)`,
-                opacity,
                 WebkitTapHighlightColor: 'transparent',
                 outline: 'none',
               }}
-              className={`absolute inset-0 rounded-2xl overflow-hidden transition-all duration-500 ease-out shadow-2xl focus:outline-none focus:ring-0 active:outline-none border-0 ${
+              className={`absolute inset-0 rounded-2xl overflow-hidden shadow-2xl focus:outline-none focus:ring-0 active:outline-none border-0 ${
                 isTop
                   ? 'shadow-[0_25px_50px_rgba(0,0,0,0.85)]'
                   : 'shadow-[0_15px_35px_rgba(0,0,0,0.6)]'
@@ -182,18 +269,22 @@ export default function StackedDestinationImages() {
                   {card.subhead}
                 </p>
 
-                {isTop && (
-                  <div className="pt-2 flex items-center justify-between">
-                    <Link
-                      to="/packages"
-                      onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-emerald-300 hover:text-white transition-colors group/link"
-                    >
-                      <span>Explore Packages</span>
-                      <ChevronRight className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" />
-                    </Link>
-                  </div>
-                )}
+                {/* Constant height bottom link container - opacity fades in/out without layout jump */}
+                <div
+                  className={`pt-2 flex items-center justify-between transition-opacity duration-300 ${
+                    isTop ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                  }`}
+                >
+                  <Link
+                    to="/packages"
+                    onClick={(e) => e.stopPropagation()}
+                    tabIndex={isTop ? 0 : -1}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-300 hover:text-white transition-colors group/link"
+                  >
+                    <span>Explore Packages</span>
+                    <ChevronRight className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" />
+                  </Link>
+                </div>
               </div>
             </div>
           )
@@ -209,7 +300,9 @@ export default function StackedDestinationImages() {
               type="button"
               onClick={(e) => {
                 e.stopPropagation()
+                if (isAnimatingRef.current || idx === activeIndex) return
                 setActiveIndex(idx)
+                applySlotPositions(idx)
               }}
               aria-label={`Jump to photo ${idx + 1}`}
               className={`h-1.5 rounded-full transition-all duration-300 ${
