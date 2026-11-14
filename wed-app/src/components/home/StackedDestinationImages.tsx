@@ -1,10 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { MapPin, ChevronRight } from 'lucide-react'
-
-gsap.registerPlugin(ScrollTrigger)
 
 interface DestinationCard {
   id: string
@@ -46,28 +43,35 @@ const DESTINATION_CARDS: DestinationCard[] = [
   },
 ]
 
-// Target transforms for the 3 slots in the stack
+// Pure static slot definitions for 3 stacked cards
 const SLOTS = [
   { y: 0, scale: 1, rotation: 0, opacity: 1, zIndex: 30 },
-  { y: 14, scale: 0.95, rotation: 4, opacity: 0.9, zIndex: 20 },
-  { y: 28, scale: 0.90, rotation: -4, opacity: 0.75, zIndex: 10 },
+  { y: 14, scale: 0.95, rotation: 3.5, opacity: 0.9, zIndex: 20 },
+  { y: 28, scale: 0.90, rotation: -3.5, opacity: 0.75, zIndex: 10 },
 ]
 
 export default function StackedDestinationImages() {
   const [activeIndex, setActiveIndex] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const deckRef = useRef<HTMLDivElement>(null)
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
   const isAnimatingRef = useRef(false)
 
-  // Position cards on mount and whenever activeIndex changes
-  const applySlotPositions = useCallback((active: number) => {
-    DESTINATION_CARDS.forEach((_, idx) => {
-      const card = cardRefs.current[idx]
-      if (!card) return
-      const slotIdx = (idx - active + DESTINATION_CARDS.length) % DESTINATION_CARDS.length
-      const slot = SLOTS[slotIdx]
-      gsap.set(card, {
+  // Direct GPU positioning helper with zero CSS transition interference
+  const applySlot = useCallback((el: HTMLElement, slotIdx: number, animate = false) => {
+    const slot = SLOTS[slotIdx]
+    if (animate) {
+      gsap.to(el, {
+        x: 0,
+        y: slot.y,
+        scale: slot.scale,
+        rotation: slot.rotation,
+        opacity: slot.opacity,
+        zIndex: slot.zIndex,
+        duration: 0.36,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      })
+    } else {
+      gsap.set(el, {
         x: 0,
         y: slot.y,
         scale: slot.scale,
@@ -75,15 +79,20 @@ export default function StackedDestinationImages() {
         opacity: slot.opacity,
         zIndex: slot.zIndex,
       })
-    })
+    }
   }, [])
 
-  // Initial layout on mount
+  // Position cards initially
   useEffect(() => {
-    applySlotPositions(0)
-  }, [applySlotPositions])
+    DESTINATION_CARDS.forEach((_, idx) => {
+      const el = cardRefs.current[idx]
+      if (!el) return
+      const slotIdx = (idx - activeIndex + DESTINATION_CARDS.length) % DESTINATION_CARDS.length
+      applySlot(el, slotIdx, false)
+    })
+  }, [activeIndex, applySlot])
 
-  // Smooth deck shuffle transition using GSAP with zero flicker
+  // Butter-smooth hardware-accelerated card flip
   const handleNext = useCallback(() => {
     if (isAnimatingRef.current) return
     isAnimatingRef.current = true
@@ -105,25 +114,23 @@ export default function StackedDestinationImages() {
 
     const tl = gsap.timeline({
       onComplete: () => {
-        // Update active index in React state and set final slot positions smoothly
         setActiveIndex(nextIdx)
-        applySlotPositions(nextIdx)
         isAnimatingRef.current = false
       },
     })
 
-    // 1. Current top card peels smoothly out to the right with gentle tilt
+    // 1. Top card glides right with gentle angle
     tl.to(topCard, {
-      x: 75,
+      x: 70,
       y: -10,
-      rotation: 10,
+      rotation: 8,
       scale: 0.96,
       opacity: 0.85,
-      duration: 0.22,
+      duration: 0.2,
       ease: 'power2.out',
     })
 
-    // 2. Next card steps forward to Slot 0 (hero)
+    // 2. Next card steps into hero position
     tl.to(
       nextCard,
       {
@@ -133,13 +140,13 @@ export default function StackedDestinationImages() {
         scale: SLOTS[0].scale,
         opacity: SLOTS[0].opacity,
         zIndex: SLOTS[0].zIndex,
-        duration: 0.38,
-        ease: 'power3.out',
+        duration: 0.34,
+        ease: 'power2.out',
       },
       0.08
     )
 
-    // 3. Back card steps up to Slot 1 (middle)
+    // 3. Back card steps into middle position
     tl.to(
       backCard,
       {
@@ -149,14 +156,14 @@ export default function StackedDestinationImages() {
         scale: SLOTS[1].scale,
         opacity: SLOTS[1].opacity,
         zIndex: SLOTS[1].zIndex,
-        duration: 0.38,
-        ease: 'power3.out',
+        duration: 0.34,
+        ease: 'power2.out',
       },
       0.08
     )
 
-    // 4. Peeling card ducks cleanly behind to Slot 2 (back)
-    tl.set(topCard, { zIndex: SLOTS[2].zIndex }, 0.22)
+    // 4. Old top card tucks cleanly behind to back position
+    tl.set(topCard, { zIndex: SLOTS[2].zIndex }, 0.2)
     tl.to(
       topCard,
       {
@@ -168,50 +175,23 @@ export default function StackedDestinationImages() {
         duration: 0.22,
         ease: 'power2.inOut',
       },
-      0.22
+      0.2
     )
-  }, [activeIndex, applySlotPositions])
-
-  // Parallax scroll on deck container
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReducedMotion || !containerRef.current || !deckRef.current) return
-
-    const ctx = gsap.context(() => {
-      gsap.to(deckRef.current, {
-        y: 20,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top 75%',
-          end: 'bottom 15%',
-          scrub: 1.2,
-        },
-      })
-    }, containerRef)
-
-    return () => ctx.revert()
-  }, [])
+  }, [activeIndex])
 
   return (
     <div
-      ref={containerRef}
-      className="relative w-full max-w-md mx-auto lg:max-w-none flex flex-col items-center lg:items-end select-none"
+      className="relative w-full max-w-sm sm:max-w-md mx-auto select-none"
       aria-label="Destination wedding showcase image stack"
     >
-      {/* Subtle backdrop ambient glow */}
-      <div className="absolute -inset-4 bg-gradient-to-tr from-emerald-950/40 via-emerald-900/20 to-transparent rounded-3xl blur-2xl pointer-events-none" />
-
-      {/* Stacked Cards Container - click anywhere to shuffle to next card */}
+      {/* Stacked Cards Container */}
       <div
-        ref={deckRef}
         onClick={handleNext}
-        className="relative w-full aspect-[4/5] sm:aspect-[4/4.8] max-h-[460px] flex items-center justify-center cursor-pointer group outline-none"
+        className="relative w-full aspect-[4/5] sm:aspect-[4/4.8] max-h-[460px] flex items-center justify-center cursor-pointer outline-none"
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         {DESTINATION_CARDS.map((card, index) => {
-          const offset = (index - activeIndex + DESTINATION_CARDS.length) % DESTINATION_CARDS.length
-          const isTop = offset === 0
+          const isTop = index === activeIndex
 
           return (
             <div
@@ -229,6 +209,7 @@ export default function StackedDestinationImages() {
               role="button"
               aria-label={`View ${card.title}. Tap to see next.`}
               style={{
+                willChange: 'transform, opacity',
                 WebkitTapHighlightColor: 'transparent',
                 outline: 'none',
               }}
@@ -243,19 +224,19 @@ export default function StackedDestinationImages() {
                 src={card.image}
                 alt={card.alt}
                 loading={index === 0 ? 'eager' : 'lazy'}
-                className="w-full h-full object-cover object-center transition-transform duration-700 pointer-events-none select-none"
+                className="w-full h-full object-cover object-center pointer-events-none select-none"
               />
 
               {/* Gradient Scrim */}
               <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/40 to-transparent opacity-90 pointer-events-none" />
 
-              {/* Card Top Badge - Clean text, no emoji, no border */}
+              {/* Card Top Badge */}
               <div className="absolute top-3 left-3 sm:top-4 sm:left-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[11px] sm:text-xs font-medium text-white/90 shadow-md">
                 <span>{card.badge}</span>
               </div>
 
               {/* Card Bottom Content */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 space-y-1.5 text-left">
+              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 space-y-1 text-left">
                 <div className="flex items-center gap-1 text-[11px] sm:text-xs font-medium text-emerald-300/90">
                   <MapPin className="w-3 h-3 text-emerald-400 shrink-0" />
                   <span>{card.location}</span>
@@ -269,9 +250,9 @@ export default function StackedDestinationImages() {
                   {card.subhead}
                 </p>
 
-                {/* Constant height bottom link container - opacity fades in/out without layout jump */}
+                {/* Constant height Explore link */}
                 <div
-                  className={`pt-2 flex items-center justify-between transition-opacity duration-300 ${
+                  className={`pt-2 flex items-center justify-between transition-opacity duration-200 ${
                     isTop ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
                   }`}
                 >
@@ -292,7 +273,7 @@ export default function StackedDestinationImages() {
       </div>
 
       {/* Minimal Stack Indicators */}
-      <div className="mt-4 sm:mt-5 flex items-center justify-center w-full max-w-sm px-2">
+      <div className="mt-4 flex items-center justify-center w-full px-2">
         <div className="flex items-center gap-2" role="tablist" aria-label="Card selection">
           {DESTINATION_CARDS.map((_, idx) => (
             <button
@@ -302,7 +283,6 @@ export default function StackedDestinationImages() {
                 e.stopPropagation()
                 if (isAnimatingRef.current || idx === activeIndex) return
                 setActiveIndex(idx)
-                applySlotPositions(idx)
               }}
               aria-label={`Jump to photo ${idx + 1}`}
               className={`h-1.5 rounded-full transition-all duration-300 ${

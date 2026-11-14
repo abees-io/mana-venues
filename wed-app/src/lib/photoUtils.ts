@@ -51,7 +51,7 @@ export function getVenueCityDisplay(
   if (address) {
     const clean = address
       .replace(/[\uE000-\uF8FF]/g, '')           // strip PUA characters
-      .replace(/^[A-Z0-9\+]{4,9},\s*/i, '')      // strip Google Plus Codes at the start
+      .replace(/^[A-Z0-9+]{4,9},\s*/i, '')      // strip Google Plus Codes at the start
       .replace(/\bPalakkad\b/gi, '')              // remove generic district name
       .replace(/,\s*,/g, ',')                     // collapse double commas
       .replace(/^\s*,\s*|\s*,\s*$/g, '')          // trim leading/trailing commas

@@ -15,10 +15,16 @@ export const ManaSplashTransition: React.FC = () => {
     // Phase 3: Smooth cinematic portal zoom & dissolve into website (2600ms - 3500ms)
     const revealTimer = setTimeout(() => {
       setPhase('reveal');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('mana-splash-reveal'));
+      }
     }, 2600);
 
     const completeTimer = setTimeout(() => {
       setIsPlaying(false);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('mana-splash-end'));
+      }
     }, 3550);
 
     return () => {
@@ -30,6 +36,10 @@ export const ManaSplashTransition: React.FC = () => {
 
   const handleSkip = () => {
     setIsPlaying(false);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('mana-splash-reveal'));
+      window.dispatchEvent(new CustomEvent('mana-splash-end'));
+    }
   };
 
   return (

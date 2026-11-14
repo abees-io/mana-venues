@@ -1,25 +1,51 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   MapPin,
   RefreshCw,
   Building2,
-  ChevronRight,
-  Package,
 } from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import AuditoriumCard from '../components/cards/AuditoriumCard'
 import { AuditoriumCardSkeletonList } from '../components/cards/AuditoriumCardSkeleton'
 import LocationModal from '../components/modals/LocationModal'
-import StackedDestinationImages from '../components/home/StackedDestinationImages'
 import { useAuditoriums } from '../hooks/useAuditoriums'
-import { useCities } from '../hooks/useCities'
 import { useCityStore } from '../store/cityStore'
 import { useFilterStore } from '../store/filterStore'
 
 gsap.registerPlugin(ScrollTrigger)
+
+const CATEGORIES = [
+  {
+    id: 'heritage',
+    title: 'Heritage & Tradition',
+    badge: 'Heritage & Tradition',
+    image: '/dest-wedding-1.jpg',
+    query: 'heritage',
+  },
+  {
+    id: 'lakeside',
+    title: 'Lakeside & Backwaters',
+    badge: 'Lakeside & Backwaters',
+    image: '/category-lakeside.jpg',
+    query: 'backwater',
+  },
+  {
+    id: 'beach',
+    title: 'Beach & Coastline',
+    badge: 'Beach & Coastline',
+    image: '/dest-wedding-2.jpg',
+    query: 'beach',
+  },
+  {
+    id: 'highland',
+    title: 'Highland & Hills',
+    badge: 'Highland & Hills',
+    image: '/dest-wedding-3.jpg',
+    query: 'resort',
+  },
+] as const
 
 // Haversine formula to calculate distance in km between two GPS coordinates
 function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -29,16 +55,16 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2)
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return R * c
 }
 
 export default function HomePage() {
-  const { selectedCity, setCity, clearCity } = useCityStore()
-  
+  const { selectedCity, clearCity } = useCityStore()
+
   const capacityMin = useFilterStore((state) => state.capacityMin)
   const capacityMax = useFilterStore((state) => state.capacityMax)
   const priceMin = useFilterStore((state) => state.priceMin)
@@ -55,27 +81,6 @@ export default function HomePage() {
     }),
     [capacityMin, capacityMax, priceMin, priceMax, amenities]
   )
-
-  const { data: cities, isLoading: isCitiesLoading } = useCities()
-
-  // Premier popular wedding destination hubs
-  const PREFERRED_POPULAR_SLUGS = ['palakkad', 'kochi', 'kozhikode', 'thrissur']
-
-  const popularCities = useMemo(() => {
-    if (!cities) return []
-    const valid = cities.filter(
-      (c) => c.slug.toLowerCase() !== 'all-kerala' && c.name.toLowerCase() !== 'all kerala'
-    )
-    const preferred = PREFERRED_POPULAR_SLUGS.map((slug) =>
-      valid.find((c) => c.slug.toLowerCase() === slug.toLowerCase() || c.name.toLowerCase().includes(slug))
-    ).filter(Boolean) as typeof cities
-
-    if (preferred.length < 4) {
-      const remaining = valid.filter((c) => !preferred.some((p) => p.id === c.id))
-      preferred.push(...remaining.slice(0, 4 - preferred.length))
-    }
-    return preferred.slice(0, 4)
-  }, [cities])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
@@ -188,19 +193,99 @@ export default function HomePage() {
     return list
   }, [auditoriums, searchQuery, isNearMeActive, userCoords])
 
-  // GSAP: Hero text animation on mount
+  // GSAP: Hero loading entrance & scroll reveal animations
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from('.hero-animate', {
-        y: 35,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.12,
-        ease: 'power2.out',
-      })
-    }, heroRef)
+    let ctx: gsap.Context | null = null
+    let hasRevealed = false
 
-    return () => ctx.revert()
+    const runReveal = () => {
+      if (hasRevealed) return
+      hasRevealed = true
+
+      ctx = gsap.context(() => {
+        // 1. Shimmer/Loading bar sweep
+        gsap.fromTo(
+          '.page-loading-bar',
+          { scaleX: 0, opacity: 1 },
+          { scaleX: 1, opacity: 0, duration: 0.6, ease: 'power2.inOut' }
+        )
+
+        // 2. Hero Card entrance zoom/fade
+        gsap.fromTo(
+          '.hero-card-animate',
+          { scale: 0.94, opacity: 0, y: 22 },
+          { scale: 1, opacity: 1, y: 0, duration: 0.95, ease: 'power3.out' }
+        )
+
+        // 3. Loading text reveal on heading & subtitle
+        gsap.fromTo(
+          '.hero-text-reveal',
+          { y: 30, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            delay: 0.2,
+            stagger: 0.12,
+            ease: 'power3.out',
+          }
+        )
+
+        // 4. Scroll reveal for categories on scroll - perfectly level, straight alignment
+        gsap.fromTo(
+          '.category-card-animate',
+          { opacity: 0 },
+          {
+            opacity: 1,
+            duration: 0.45,
+            ease: 'power2.out',
+            clearProps: 'all',
+            scrollTrigger: {
+              trigger: '.categories-section',
+              start: 'top 88%',
+              toggleActions: 'play none none none',
+            },
+          }
+        )
+
+        // 5. Fade Scroll Scrub on Editorial Description (preserves inline text colors including gold highlights)
+        const words = gsap.utils.toArray<HTMLElement>('.editorial-word')
+        if (words.length) {
+          gsap.set(words, {
+            opacity: 0.18,
+            y: 0,
+            filter: 'none',
+          })
+          gsap.to(words, {
+            opacity: 1,
+            stagger: 0.08,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: '.editorial-quote-section',
+              start: 'top 82%',
+              end: 'bottom 45%',
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+            },
+          })
+        }
+      }, heroRef)
+    }
+
+    // Trigger reveal as soon as splash intro starts dissolving or finishes
+    const handleIntroEnd = () => runReveal()
+    window.addEventListener('mana-splash-reveal', handleIntroEnd)
+    window.addEventListener('mana-splash-end', handleIntroEnd)
+
+    // Fallback: in case user already bypassed splash or on direct mount
+    const timer = setTimeout(runReveal, 2700)
+
+    return () => {
+      window.removeEventListener('mana-splash-reveal', handleIntroEnd)
+      window.removeEventListener('mana-splash-end', handleIntroEnd)
+      clearTimeout(timer)
+      if (ctx) ctx.revert()
+    }
   }, [])
 
   // Smooth entrance for auditorium cards when loaded
@@ -225,113 +310,162 @@ export default function HomePage() {
     return () => ctx.revert()
   }, [displayedAuditoriums.length, isLoading, selectedCity?.slug, isNearMeActive])
 
+  const handleCategorySelect = (query: string) => {
+    setSearchQuery(query)
+    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <Layout>
-      {/* SECTION 1: HERO */}
-      <section
-        ref={heroRef}
-        className="relative overflow-hidden bg-brand-dark/60 backdrop-blur-xs text-white py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 border-b border-green-950/40"
-      >
-        {/* Subtle background decorative shapes */}
-        <div className="absolute inset-0 pointer-events-none opacity-15">
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-brand-secondary/30 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-emerald-600/20 blur-3xl" />
-        </div>
+      {/* Top Page Shimmer Loading Reveal Bar */}
+      <div className="page-loading-bar fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#E8BA45] to-transparent z-50 origin-left pointer-events-none" />
 
-        <div className="relative max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            {/* LEFT COLUMN: Destination Wedding & Venue Content (Left-Aligned) */}
-            <div className="lg:col-span-7 space-y-6 text-left">
-              {/* Exact Main Heading */}
+      {/* SECTION 1: HERO & CATEGORIES (Matches User Reference Image) */}
+      <section ref={heroRef} className="w-full pt-4 sm:pt-6 pb-4">
+        {/* HERO CARD CONTAINER */}
+        <div className="max-w-5xl mx-auto px-3 sm:px-6">
+          <div className="hero-card-animate relative rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/10] md:aspect-[2.1/1] min-h-[440px] sm:min-h-[460px] shadow-2xl border border-green-800/30 group">
+            {/* Background Mandap Image (Exact photo from user reference) */}
+            <img
+              src="/dest-wedding-1.jpg"
+              alt="Grand Venues for Your Big Days"
+              className="absolute inset-0 w-full h-full object-cover object-center scale-100 group-hover:scale-105 transition-transform duration-1000"
+            />
+            {/* Vignette Overlay for Crisp Readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25 pointer-events-none" />
+
+            {/* Centered Hero Content */}
+            <div className="relative h-full flex flex-col items-center justify-center text-center p-6 sm:p-10 z-10 space-y-3 sm:space-y-4">
+              {/* Grand Venues Heading */}
               <h1
-                className="hero-animate text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold tracking-[0.03em] uppercase py-1 leading-[1.15] bg-[linear-gradient(135deg,#FFAE00_0%,#F9E866_100%)] bg-clip-text text-transparent drop-shadow-md text-left"
+                className="hero-text-reveal text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide leading-tight bg-[linear-gradient(135deg,#FFAE00_0%,#F9E866_100%)] bg-clip-text text-transparent drop-shadow-lg"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 GRAND VENUES FOR YOUR BIG DAYS
               </h1>
 
-              {/* Exact Description text with bold modern font style aligned to left */}
-              <p className="hero-animate font-sans font-semibold sm:font-bold text-base sm:text-lg lg:text-[1.125rem] text-emerald-50/95 leading-relaxed tracking-tight sm:tracking-normal text-left max-w-2xl">
-                Your celebration deserves the warmth and safety of home. Explore verified venues and bespoke destination wedding packages across God's Own Country, thoughtfully designed to honor Kerala’s rich cultural tapestry while keeping you in expert, caring hands
+              {/* Subtitle / Description */}
+              <p className="hero-text-reveal text-sm sm:text-base md:text-lg text-white font-medium max-w-xl mx-auto drop-shadow-md leading-relaxed">
+                Explore verified venues & bespoke Kerala wedding packages
               </p>
-            </div>
 
-            {/* RIGHT COLUMN: Stacked Destination Wedding Image Animation (Moved Upwards) & Controls */}
-            <div className="lg:col-span-5 hero-animate w-full flex flex-col items-center lg:items-end -mt-1 lg:-mt-4">
-              <StackedDestinationImages />
-
-              {/* MOVED SECTION: Directly under stacked images */}
-              <div className="w-full max-w-md mt-6 space-y-4 text-left">
-                {/* Action CTAs */}
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
-                  <Link
-                    to="/packages"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-brand-secondary via-amber-400 to-brand-secondary text-brand-dark font-bold text-xs sm:text-sm shadow-lg hover:shadow-brand-secondary/20 hover:scale-[1.02] transition-all"
-                  >
-                    <Package className="w-4 h-4" />
-                    <span>Explore Wedding Packages</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (gridRef.current) {
-                        gridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                      }
-                    }}
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-emerald-950/70 hover:bg-emerald-900/90 text-emerald-100 border border-emerald-700/50 font-semibold text-xs sm:text-sm transition-all"
-                  >
-                    <Building2 className="w-4 h-4 text-brand-secondary" />
-                    <span>Browse Venues</span>
-                  </button>
-                </div>
-
-                {/* Quick City Selector Chips */}
-                <div className="pt-1 text-left">
-                  <p className="text-xs uppercase tracking-wider text-brand-secondary mb-2 font-semibold text-center lg:text-left">
-                    Popular Kerala Locations
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
-                    {!isCitiesLoading &&
-                      popularCities.map((city) => {
-                        const isSelected = !isNearMeActive && (selectedCity?.id === city.id || selectedCity?.slug === city.slug)
-                        return (
-                          <button
-                            key={city.id}
-                            type="button"
-                            onClick={() => {
-                              setIsNearMeActive(false)
-                              setCity({
-                                id: city.id,
-                                name: city.name,
-                                slug: city.slug,
-                              })
-                            }}
-                            className={`px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
-                              isSelected
-                                ? 'bg-gradient-to-r from-[#C8901F] via-[#E0B12D] to-[#C8901F] text-brand-dark font-bold shadow-md scale-105 border border-[#D8A629]/70'
-                                : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
-                            }`}
-                          >
-                            {city.name}
-                          </button>
-                        )
-                      })}
-
-                    {/* If selected city is outside the top 4 popular cities, display it as selected */}
-                    {!isNearMeActive && selectedCity && !popularCities.some((c) => c.slug === selectedCity.slug || c.id === selectedCity.id) && (
-                      <button
-                        type="button"
-                        className="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all bg-gradient-to-r from-[#C8901F] via-[#E0B12D] to-[#C8901F] text-brand-dark shadow-md scale-105 border border-[#D8A629]/70"
-                      >
-                        {selectedCity.name}
-                      </button>
-                    )}
-                  </div>
-                </div>
+              {/* Solid Golden CTA Button */}
+              <div className="hero-text-reveal pt-3 sm:pt-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }}
+                  className="px-8 sm:px-10 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#D8A629] via-[#E8BA45] to-[#D8A629] hover:from-[#E8BA45] hover:to-[#D8A629] text-brand-dark font-bold text-sm sm:text-base shadow-xl hover:shadow-brand-secondary/40 hover:scale-105 active:scale-95 transition-all"
+                >
+                  Explore Venues
+                </button>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* EXPLORE CATEGORIES SECTION */}
+        <div className="categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-10">
+          <h2
+            className="text-2xl sm:text-3xl font-bold text-[#E0B12D] mb-4 sm:mb-5 tracking-wide text-left"
+            style={{ fontFamily: "'Cinzel', serif" }}
+          >
+            Explore Categories
+          </h2>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 md:gap-5 items-stretch">
+            {CATEGORIES.map((cat) => (
+              <div
+                key={cat.id}
+                onClick={() => handleCategorySelect(cat.query)}
+                className="category-card-animate group relative w-full aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer shadow-lg border-0 outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0 select-none transition-transform duration-300 active:scale-[0.98]"
+                style={{ WebkitTapHighlightColor: 'transparent', outline: 'none' }}
+              >
+                <img
+                  src={cat.image}
+                  alt={cat.title}
+                  className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500"
+                  loading="eager"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 pointer-events-none" />
+
+                {/* Top Pill Badge */}
+                <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] sm:text-xs font-semibold text-white/90 border border-white/10 pointer-events-none">
+                  {cat.badge}
+                </div>
+
+                {/* Large Bottom Title in Gold Serif */}
+                <div className="absolute bottom-3 left-2.5 right-2.5 text-center pointer-events-none">
+                  <h3
+                    className="text-sm sm:text-base md:text-lg font-bold text-[#F3CE65] drop-shadow-md tracking-wide leading-tight"
+                    style={{ fontFamily: "'Cinzel', serif" }}
+                  >
+                    {cat.title}
+                  </h3>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* EDITORIAL CULTURAL DESCRIPTION — Monumental Brutalist Headline Typography on the Description */}
+        <div className="editorial-quote-section editorial-quote-card max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-8">
+          {/* Top Technical Meta Bar */}
+          <div className="flex items-center justify-between border-b border-white/15 pb-3 mb-6 sm:mb-8 text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-white/50">
+            <span>MANA VENUES • EDITORIAL</span>
+            <span className="hidden sm:inline">KERALA • 2026</span>
+            <span>CURATED DESTINATIONS</span>
+          </div>
+
+          {/* Description in Massive Heading Typography with Highlighted Sentences */}
+          <div className="text-left">
+            <h2
+              className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[76px] font-black uppercase tracking-tighter leading-[0.96] sm:leading-[0.92]"
+              style={{ fontFamily: "'Archivo', sans-serif" }}
+            >
+              {/* Highlighted core sentence in radiant royal gold */}
+              <span className="text-[#F3CE65]">
+                {`Your celebration deserves the warmth and safety of home.`
+                  .split(' ')
+                  .map((word, i) => (
+                    <span key={`h1-${i}`} className="editorial-word inline-block mr-[0.22em]">
+                      {word}
+                    </span>
+                  ))}
+              </span>{' '}
+              {/* Crisp high-contrast white text */}
+              <span className="text-white">
+                {`Explore verified venues and bespoke destination wedding packages across God's Own Country,`
+                  .split(' ')
+                  .map((word, i) => (
+                    <span key={`w1-${i}`} className="editorial-word inline-block mr-[0.22em]">
+                      {word}
+                    </span>
+                  ))}
+              </span>
+              <span className="block my-3 sm:my-5" />
+              {/* Highlighted cultural statement in radiant royal gold */}
+              <span className="text-[#F3CE65]">
+                {`thoughtfully designed to honor Kerala's rich cultural tapestry`
+                  .split(' ')
+                  .map((word, i) => (
+                    <span key={`h2-${i}`} className="editorial-word inline-block mr-[0.22em]">
+                      {word}
+                    </span>
+                  ))}
+              </span>{' '}
+              {/* Crisp high-contrast white text */}
+              <span className="text-white">
+                {`while keeping you in expert, caring hands.`
+                  .split(' ')
+                  .map((word, i) => (
+                    <span key={`w2-${i}`} className="editorial-word inline-block mr-[0.22em]">
+                      {word}
+                    </span>
+                  ))}
+              </span>
+            </h2>
           </div>
         </div>
       </section>
@@ -346,8 +480,8 @@ export default function HomePage() {
                 {isNearMeActive
                   ? 'Venues Near You'
                   : selectedCity
-                  ? `Venues in ${selectedCity.name}`
-                  : 'Wedding Venues in Kerala'}
+                    ? `Venues in ${selectedCity.name}`
+                    : 'Wedding Venues in Kerala'}
               </h2>
               {!isLoading && (
                 <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-green-900/40 text-brand-secondary border border-green-700/40">
@@ -361,8 +495,8 @@ export default function HomePage() {
               {isNearMeActive
                 ? 'Showing curated auditoriums closest to your current location (sorted by proximity)'
                 : selectedCity
-                ? `Showing curated auditoriums in ${selectedCity.name}`
-                : 'Showing verified wedding auditoriums across Kerala'}
+                  ? `Showing curated auditoriums in ${selectedCity.name}`
+                  : 'Showing verified wedding auditoriums across Kerala'}
               {searchQuery ? ` matching "${searchQuery}"` : ''}
             </p>
 
@@ -372,11 +506,10 @@ export default function HomePage() {
                 type="button"
                 onClick={handleNearMeClick}
                 disabled={isLocating}
-                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${
-                  isNearMeActive
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${isNearMeActive
                     ? 'bg-brand-secondary text-brand-dark ring-2 ring-brand-secondary/70 shadow-md scale-105'
                     : 'bg-green-900/50 hover:bg-green-800/70 text-green-100 hover:text-brand-secondary border border-green-700/60'
-                }`}
+                  }`}
               >
                 <MapPin
                   className={`w-3.5 h-3.5 ${isNearMeActive ? 'fill-current' : ''}`}
@@ -385,8 +518,8 @@ export default function HomePage() {
                   {isLocating
                     ? 'Detecting Location...'
                     : isNearMeActive
-                    ? 'Near Me (Active)'
-                    : 'Near Me'}
+                      ? 'Near Me (Active)'
+                      : 'Near Me'}
                 </span>
               </button>
 
