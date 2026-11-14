@@ -39,7 +39,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 bg-brand-dark/95 backdrop-blur-md border-t border-green-900/50 z-50 md:hidden pb-safe"
+      className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200/80 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] z-50 md:hidden pb-safe"
       aria-label="Mobile Navigation"
     >
       <div className="flex items-center justify-around h-16 px-2">
@@ -50,13 +50,13 @@ export default function BottomNav() {
               key={tab.label}
               type="button"
               onClick={tab.onClick}
-              className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors ${
+              className={`flex-1 flex flex-col items-center justify-center py-1 transition-all active:scale-95 ${
                 tab.isActive
-                  ? 'text-brand-secondary font-semibold'
-                  : 'text-green-300/60 hover:text-green-100'
+                  ? 'text-brand-primary font-bold'
+                  : 'text-gray-400 hover:text-gray-600 font-medium'
               }`}
             >
-              <Icon className="w-5 h-5 mb-1" />
+              <Icon className={`w-5 h-5 mb-1 ${tab.isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
               <span className="text-[11px] leading-tight">{tab.label}</span>
             </button>
           )
