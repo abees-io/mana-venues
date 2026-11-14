@@ -96,7 +96,7 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
   return (
     <Link
       to={`/auditorium/${auditorium.slug}`}
-      className="auditorium-card group block bg-brand-dark/85 backdrop-blur-md rounded-xl overflow-hidden border border-green-800/40 shadow-xl hover:shadow-2xl hover:border-brand-secondary/50 hover:-translate-y-1 transition-all duration-200"
+      className="auditorium-card group block bg-brand-dark/85 backdrop-blur-md rounded-xl overflow-hidden border border-green-800/40 shadow-xl hover:shadow-2xl hover:border-green-700/60 hover:-translate-y-1 focus:outline-none focus:ring-0 active:outline-none transition-all duration-200"
     >
       {/* 16:9 Thumbnail Header with In-Place Photo Gallery */}
       <div className="relative aspect-video w-full overflow-hidden bg-brand-dark/90 group/img">
