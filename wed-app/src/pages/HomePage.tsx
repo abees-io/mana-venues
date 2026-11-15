@@ -203,63 +203,65 @@ export default function HomePage() {
       hasRevealed = true
 
       ctx = gsap.context(() => {
-        // 1. Shimmer/Loading bar sweep
-        gsap.fromTo(
-          '.page-loading-bar',
-          { scaleX: 0, opacity: 1 },
-          { scaleX: 1, opacity: 0, duration: 0.6, ease: 'power2.inOut' }
-        )
-
-        // 2. Hero Card entrance zoom/fade
+        // 1. Hero Card entrance zoom/fade (GPU accelerated for 60/120fps)
         gsap.fromTo(
           '.hero-card-animate',
-          { scale: 0.94, opacity: 0, y: 22 },
-          { scale: 1, opacity: 1, y: 0, duration: 0.95, ease: 'power3.out' }
-        )
-
-        // 3. Loading text reveal on heading & subtitle
-        gsap.fromTo(
-          '.hero-text-reveal',
-          { y: 30, opacity: 0 },
+          { scale: 0.95, opacity: 0, y: 18 },
           {
-            y: 0,
+            scale: 1,
             opacity: 1,
-            duration: 0.8,
-            delay: 0.2,
-            stagger: 0.12,
+            y: 0,
+            duration: 0.85,
             ease: 'power3.out',
+            force3D: true,
           }
         )
 
-        // 4. Scroll reveal for categories — IntersectionObserver-driven stagger
-        const categoryCards = document.querySelectorAll<HTMLElement>('.category-card-animate')
-        if (categoryCards.length) {
-          // Set initial hidden state
-          gsap.set(categoryCards, { opacity: 0, y: 50, scale: 0.93 })
+        // 2. Loading text reveal on heading & subtitle
+        gsap.fromTo(
+          '.hero-text-reveal',
+          { y: 22, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            delay: 0.16,
+            stagger: 0.1,
+            ease: 'power3.out',
+            force3D: true,
+          }
+        )
 
-          const observer = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                  observer.disconnect()
-                  gsap.to(categoryCards, {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: 0.7,
-                    ease: 'power3.out',
-                    stagger: 0.13,
-                    clearProps: 'all',
-                  })
-                }
-              })
-            },
-            { threshold: 0.15 }
-          )
+        // 3. Explore Categories Title & Cards — ultra-smooth mobile entrance cascade
+        gsap.fromTo(
+          '.category-title-animate',
+          { opacity: 0, y: 15 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            delay: 0.45,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+            force3D: true,
+          }
+        )
 
-          const section = document.querySelector('.categories-section')
-          if (section) observer.observe(section)
-        }
+        gsap.fromTo(
+          '.category-card-animate',
+          { opacity: 0, y: 30, scale: 0.95 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.6,
+            delay: 0.55,
+            ease: 'power3.out',
+            stagger: 0.08,
+            clearProps: 'transform,opacity',
+            force3D: true,
+          }
+        )
 
         // 5. Fade Scroll Scrub on Editorial Description (preserves inline text colors including gold highlights)
         const words = gsap.utils.toArray<HTMLElement>('.editorial-word')
@@ -336,7 +338,7 @@ export default function HomePage() {
       <section ref={heroRef} className="w-full pt-4 sm:pt-6 pb-4">
         {/* HERO CARD CONTAINER */}
         <div className="max-w-5xl mx-auto px-3 sm:px-6">
-          <div className="hero-card-animate relative rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/10] md:aspect-[2.1/1] min-h-[440px] sm:min-h-[460px] shadow-2xl border border-green-800/30 group">
+          <div className="hero-card-animate relative rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/10] md:aspect-[2.1/1] min-h-[440px] sm:min-h-[460px] shadow-2xl border border-green-800/30 group will-change-[transform,opacity] transform-gpu">
             {/* Background Mandap Image (Exact photo from user reference) */}
             <img
               src="/dest-wedding-1.jpg"
@@ -380,7 +382,7 @@ export default function HomePage() {
         {/* EXPLORE CATEGORIES SECTION */}
         <div className="categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-10" style={{ perspective: '800px' }}>
           <h2
-            className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent mb-4 sm:mb-5 tracking-wide text-left drop-shadow-sm inline-block"
+            className="category-title-animate text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent mb-4 sm:mb-5 tracking-wide text-left drop-shadow-sm inline-block"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
             Explore Categories
@@ -391,7 +393,7 @@ export default function HomePage() {
               <div
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat.query)}
-                className="category-card-animate group relative w-full aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer shadow-lg border-0 outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0 select-none transition-transform duration-300 active:scale-[0.98]"
+                className="category-card-animate group relative w-full aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer shadow-lg border-0 outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0 select-none will-change-[transform,opacity] transform-gpu active:opacity-95"
                 style={{ WebkitTapHighlightColor: 'transparent', outline: 'none' }}
               >
                 <img

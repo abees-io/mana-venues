@@ -2,12 +2,10 @@ import { useState, useId } from 'react'
 import Layout from '../components/layout/Layout'
 import StackedDestinationImages from '../components/home/StackedDestinationImages'
 import {
-  Sparkles,
   MapPin,
   Users,
   CheckCircle2,
   Calendar,
-  Send,
   X,
   Search,
   Phone,
@@ -171,8 +169,15 @@ export default function PackagesPage() {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    // Sanitize input values
+    const sanitizedName = formData.fullName.trim().slice(0, 80)
+    const sanitizedPhone = formData.phone.trim().slice(0, 20)
+    const sanitizedEmail = formData.email.trim().slice(0, 100)
+
+    if (!sanitizedName || !sanitizedPhone || !sanitizedEmail) return
+
     setFormSubmitting(true)
-    // Simulate inquiry submission
+    // Simulate inquiry submission with sanitized payload
     setTimeout(() => {
       setFormSubmitting(false)
       setInquirySuccess(true)
@@ -211,8 +216,7 @@ export default function PackagesPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left Column: Text & Filters */}
             <div className="lg:col-span-7 text-left space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/80 border border-brand-secondary/50 text-xs font-semibold text-brand-secondary">
-                <Sparkles className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-emerald-950/80 border border-brand-secondary/50 text-xs font-semibold text-brand-secondary">
                 <span>God’s Own Country Destination Weddings</span>
               </div>
 
@@ -365,8 +369,7 @@ export default function PackagesPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/20 to-transparent" />
 
                   {/* Backdrop Badge */}
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-dark/90 backdrop-blur-md border border-brand-secondary/60 text-xs font-semibold text-brand-secondary shadow-md">
-                    <Sparkles className="w-3.5 h-3.5 text-brand-secondary" />
+                  <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-brand-dark/90 backdrop-blur-md border border-brand-secondary/60 text-xs font-semibold text-brand-secondary shadow-md">
                     <span>{pkg.backdrop} Experience</span>
                   </div>
 
@@ -385,10 +388,10 @@ export default function PackagesPage() {
                 <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300">
-                      <MapPin className="w-3.5 h-3.5 text-brand-secondary shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-white/80 shrink-0" />
                       <span>{pkg.location}</span>
                       <span className="text-emerald-700">•</span>
-                      <Users className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <Users className="w-3.5 h-3.5 text-white/80 shrink-0" />
                       <span>{pkg.guestCapacity}</span>
                     </div>
 
@@ -408,8 +411,8 @@ export default function PackagesPage() {
                     </p>
                     <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-emerald-100/90">
                       {pkg.inclusions.map((inc, idx) => (
-                        <li key={idx} className="flex items-start gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-brand-secondary shrink-0 mt-0.5" />
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-secondary/80 shrink-0 mt-1.5" />
                           <span>{inc}</span>
                         </li>
                       ))}
@@ -426,10 +429,9 @@ export default function PackagesPage() {
                     <button
                       type="button"
                       onClick={() => handleInquireClick(pkg)}
-                      className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] hover:from-[#FFF566] hover:to-[#FFB000] text-brand-dark font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center gap-1.5 shrink-0"
+                      className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] hover:from-[#FFF566] hover:to-[#FFB000] text-brand-dark font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0"
                     >
                       <span>Inquire Package</span>
-                      <Send className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -502,6 +504,7 @@ export default function PackagesPage() {
                         id={fullNameId}
                         type="text"
                         required
+                        maxLength={80}
                         value={formData.fullName}
                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         placeholder="e.g. Anjali Nair"
@@ -521,6 +524,7 @@ export default function PackagesPage() {
                           id={phoneId}
                           type="tel"
                           required
+                          maxLength={20}
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                           placeholder="+91 98765 43210"
@@ -539,6 +543,7 @@ export default function PackagesPage() {
                           id={emailId}
                           type="email"
                           required
+                          maxLength={100}
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           placeholder="anjali@example.com"
@@ -574,6 +579,7 @@ export default function PackagesPage() {
                         <input
                           id={guestCountId}
                           type="text"
+                          maxLength={10}
                           value={formData.guestCount}
                           onChange={(e) => setFormData({ ...formData, guestCount: e.target.value })}
                           placeholder="e.g. 250"
@@ -591,6 +597,7 @@ export default function PackagesPage() {
                     <textarea
                       id={notesId}
                       rows={3}
+                      maxLength={1000}
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                       placeholder="Share details on traditions (Sadya preferences, musical welcome, temple rituals, etc.)"
