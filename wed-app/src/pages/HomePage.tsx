@@ -421,8 +421,8 @@ export default function HomePage() {
           {/* Description in Massive Heading Typography with Highlighted Sentences */}
           <div className="text-left">
             <h2
-              className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[76px] font-black uppercase tracking-tighter leading-[0.96] sm:leading-[0.92]"
-              style={{ fontFamily: "'Archivo', sans-serif" }}
+              className="text-4xl sm:text-6xl md:text-7xl lg:text-[82px] font-normal tracking-normal leading-[1.05] text-white"
+              style={{ fontFamily: "'Italiana', serif" }}
             >
               {/* Highlighted core sentence in radiant royal gold */}
               <span className="text-[#F3CE65]">

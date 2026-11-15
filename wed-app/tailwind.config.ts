@@ -38,6 +38,7 @@ export default {
         oswald: ["'Oswald'", 'sans-serif'],
         bebas: ["'Bebas Neue'", 'sans-serif'],
         spaceGrotesk: ["'Space Grotesk'", 'sans-serif'],
+        italiana: ["'Italiana'", 'serif'],
         script: ["'Great Vibes'", "'Pinyon Script'", 'cursive'],
       },
     },
