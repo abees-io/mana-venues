@@ -231,18 +231,22 @@ export default function HomePage() {
           }
         )
 
-        // 4. Scroll reveal for categories on scroll - perfectly level, straight alignment
+        // 4. Scroll reveal for categories — staggered motion with lift + scale
         gsap.fromTo(
           '.category-card-animate',
-          { opacity: 0 },
+          { opacity: 0, y: 60, scale: 0.92, rotateX: 8 },
           {
             opacity: 1,
-            duration: 0.45,
-            ease: 'power2.out',
+            y: 0,
+            scale: 1,
+            rotateX: 0,
+            duration: 0.65,
+            ease: 'power3.out',
+            stagger: 0.12,
             clearProps: 'all',
             scrollTrigger: {
               trigger: '.categories-section',
-              start: 'top 88%',
+              start: 'top 85%',
               toggleActions: 'play none none none',
             },
           }
@@ -317,8 +321,7 @@ export default function HomePage() {
 
   return (
     <Layout>
-      {/* Top Page Shimmer Loading Reveal Bar */}
-      <div className="page-loading-bar fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#FFC700] to-transparent z-50 origin-left pointer-events-none" />
+
 
       {/* SECTION 1: HERO & CATEGORIES (Matches User Reference Image) */}
       <section ref={heroRef} className="w-full pt-4 sm:pt-6 pb-4">
@@ -366,7 +369,7 @@ export default function HomePage() {
         </div>
 
         {/* EXPLORE CATEGORIES SECTION */}
-        <div className="categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-10">
+        <div className="categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-10" style={{ perspective: '800px' }}>
           <h2
             className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent mb-4 sm:mb-5 tracking-wide text-left drop-shadow-sm inline-block"
             style={{ fontFamily: "'Cinzel', serif" }}

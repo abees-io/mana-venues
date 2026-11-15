@@ -53,7 +53,7 @@ export default function Header() {
   const isVendor = profile?.role === 'vendor' || user?.user_metadata?.role === 'vendor'
 
   return (
-    <header className="sticky top-0 z-40 bg-brand-dark/95 backdrop-blur-sm border-b border-green-900/40 shadow-lg w-full">
+    <header className="sticky top-0 z-40 bg-brand-dark/95 backdrop-blur-sm shadow-lg w-full">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
         {/* Left: Logo + City Selector */}
         <div className="flex items-center gap-2 sm:gap-4 shrink min-w-0">
