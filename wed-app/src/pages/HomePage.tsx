@@ -231,26 +231,35 @@ export default function HomePage() {
           }
         )
 
-        // 4. Scroll reveal for categories — staggered motion with lift + scale
-        gsap.fromTo(
-          '.category-card-animate',
-          { opacity: 0, y: 60, scale: 0.92, rotateX: 8 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            rotateX: 0,
-            duration: 0.65,
-            ease: 'power3.out',
-            stagger: 0.12,
-            clearProps: 'all',
-            scrollTrigger: {
-              trigger: '.categories-section',
-              start: 'top 85%',
-              toggleActions: 'play none none none',
+        // 4. Scroll reveal for categories — IntersectionObserver-driven stagger
+        const categoryCards = document.querySelectorAll<HTMLElement>('.category-card-animate')
+        if (categoryCards.length) {
+          // Set initial hidden state
+          gsap.set(categoryCards, { opacity: 0, y: 50, scale: 0.93 })
+
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  observer.disconnect()
+                  gsap.to(categoryCards, {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    duration: 0.7,
+                    ease: 'power3.out',
+                    stagger: 0.13,
+                    clearProps: 'all',
+                  })
+                }
+              })
             },
-          }
-        )
+            { threshold: 0.15 }
+          )
+
+          const section = document.querySelector('.categories-section')
+          if (section) observer.observe(section)
+        }
 
         // 5. Fade Scroll Scrub on Editorial Description (preserves inline text colors including gold highlights)
         const words = gsap.utils.toArray<HTMLElement>('.editorial-word')
