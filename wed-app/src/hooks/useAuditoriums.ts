@@ -137,5 +137,6 @@ export function useAuditoriums(citySlug?: string | null, filters?: Partial<Filte
       })
     },
     staleTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   })
 }

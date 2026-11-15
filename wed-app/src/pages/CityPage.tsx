@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { MapPin, SlidersHorizontal, Search, X, ChevronDown } from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import FilterPanel from '../components/filters/FilterPanel'
@@ -17,7 +17,6 @@ export default function CityPage() {
   const { slug } = useParams<{ slug: string }>()
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q')?.toLowerCase() ?? ''
-  const navigate = useNavigate()
 
   const { data: cities } = useCities()
   const selectedCity = useCityStore((state) => state.selectedCity)
@@ -50,16 +49,7 @@ export default function CityPage() {
     )
   }, [cities, slug])
 
-  // 1. If store selectedCity changes while on CityPage, navigate to the new city URL
-  useEffect(() => {
-    if (selectedCity?.slug && slug && selectedCity.slug.toLowerCase() !== slug.toLowerCase()) {
-      const q = searchParams.get('q')
-      const queryString = q ? `?q=${encodeURIComponent(q)}` : ''
-      navigate(`/city/${selectedCity.slug}${queryString}`, { replace: true })
-    }
-  }, [selectedCity?.slug, slug, navigate, searchParams])
-
-  // 2. If URL slug changes, sync store city
+  // Sync URL slug with cityStore whenever slug changes in URL
   useEffect(() => {
     if (matchedCity && matchedCity.slug.toLowerCase() !== selectedCity?.slug?.toLowerCase()) {
       setCity({
@@ -68,7 +58,10 @@ export default function CityPage() {
         slug: matchedCity.slug,
       })
     }
-  }, [matchedCity, selectedCity?.slug, setCity])
+    // Reset local mobile search query when city changes
+    setMobileSearchTerm('')
+    setIsMobileSearchOpen(false)
+  }, [slug, matchedCity?.slug])
 
   const cityName = matchedCity?.name ?? (slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : 'Kerala')
   const stateName = matchedCity?.state ?? 'Kerala'
@@ -284,7 +277,7 @@ export default function CityPage() {
             </div>
 
             {/* Auditoriums Grid or States */}
-            {isLoading ? (
+            {isLoading && !auditoriums ? (
               <AuditoriumCardSkeletonList count={6} />
             ) : sortedAuditoriums.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

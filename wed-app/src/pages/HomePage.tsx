@@ -577,7 +577,7 @@ export default function HomePage() {
         {/* FEED GRID / STATES */}
         <div ref={gridRef}>
           {/* Loading Skeleton */}
-          {isLoading && <AuditoriumCardSkeletonList count={6} />}
+          {isLoading && !auditoriums && <AuditoriumCardSkeletonList count={6} />}
 
           {/* Error State */}
           {isError && (
