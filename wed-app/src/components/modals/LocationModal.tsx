@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { MapPin, X, Check, RefreshCw, Search } from 'lucide-react'
 import { useCities } from '../../hooks/useCities'
 import { useCityStore } from '../../store/cityStore'
@@ -11,6 +12,8 @@ interface LocationModalProps {
 }
 
 export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
+  const navigate = useNavigate()
+  const location = useLocation()
   const { data: cities, isLoading, isError, refetch } = useCities()
   const { selectedCity, setCity } = useCityStore()
   const [searchTerm, setSearchTerm] = useState('')
@@ -63,6 +66,14 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       slug: city.slug,
     })
     onClose()
+
+    // If currently on any city search page, route immediately to the new city page
+    if (location.pathname.startsWith('/city')) {
+      const searchParams = new URLSearchParams(location.search)
+      const q = searchParams.get('q')
+      const queryString = q ? `?q=${encodeURIComponent(q)}` : ''
+      navigate(`/city/${city.slug}${queryString}`)
+    }
   }
 
   const modalContent = (

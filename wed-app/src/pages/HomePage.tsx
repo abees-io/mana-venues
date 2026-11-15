@@ -102,6 +102,13 @@ export default function HomePage() {
     refetch,
   } = useAuditoriums(isNearMeActive ? null : selectedCity?.slug, filterParams)
 
+  // When selectedCity changes, deactivate Near Me so city filter takes effect immediately
+  useEffect(() => {
+    if (selectedCity?.slug) {
+      setIsNearMeActive(false)
+    }
+  }, [selectedCity?.slug])
+
   // Handle clicking the "Near Me" button
   const handleNearMeClick = () => {
     if (isNearMeActive) {

@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
-import { MapPin, SlidersHorizontal, Search, X } from 'lucide-react'
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
+import { MapPin, SlidersHorizontal, Search, X, ChevronDown } from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import FilterPanel from '../components/filters/FilterPanel'
+import LocationModal from '../components/modals/LocationModal'
 import AuditoriumCard from '../components/cards/AuditoriumCard'
 import { AuditoriumCardSkeletonList } from '../components/cards/AuditoriumCardSkeleton'
-import { useCities } from '../hooks/useCities'
+import { useCities, KERALA_DISTRICTS_CITIES } from '../hooks/useCities'
 import { useAuditoriums } from '../hooks/useAuditoriums'
 import { useCityStore } from '../store/cityStore'
 import { useFilterStore } from '../store/filterStore'
@@ -16,8 +17,10 @@ export default function CityPage() {
   const { slug } = useParams<{ slug: string }>()
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q')?.toLowerCase() ?? ''
+  const navigate = useNavigate()
 
   const { data: cities } = useCities()
+  const selectedCity = useCityStore((state) => state.selectedCity)
   const setCity = useCityStore((state) => state.setCity)
 
   // Filter store
@@ -31,24 +34,41 @@ export default function CityPage() {
   // Local state
   const [sortBy, setSortBy] = useState<SortOption>('price_asc')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false)
   const [mobileSearchTerm, setMobileSearchTerm] = useState('')
 
-  // Sync selected city with cityStore
+  // Sync selected city with cityStore and fallback districts
   const matchedCity = useMemo(() => {
-    if (!cities || !slug) return null
-    return cities.find((c) => c.slug.toLowerCase() === slug.toLowerCase()) || null
+    if (!slug) return null
+    const list = cities && cities.length > 0 ? cities : KERALA_DISTRICTS_CITIES
+    const lowerSlug = slug.toLowerCase()
+    return (
+      list.find((c) => c.slug.toLowerCase() === lowerSlug) ||
+      list.find((c) => c.name.toLowerCase().includes(lowerSlug)) ||
+      null
+    )
   }, [cities, slug])
 
+  // 1. If store selectedCity changes while on CityPage, navigate to the new city URL
   useEffect(() => {
-    if (matchedCity) {
+    if (selectedCity?.slug && slug && selectedCity.slug.toLowerCase() !== slug.toLowerCase()) {
+      const q = searchParams.get('q')
+      const queryString = q ? `?q=${encodeURIComponent(q)}` : ''
+      navigate(`/city/${selectedCity.slug}${queryString}`, { replace: true })
+    }
+  }, [selectedCity?.slug, slug, navigate, searchParams])
+
+  // 2. If URL slug changes, sync store city
+  useEffect(() => {
+    if (matchedCity && matchedCity.slug.toLowerCase() !== selectedCity?.slug?.toLowerCase()) {
       setCity({
         id: matchedCity.id,
         name: matchedCity.name,
         slug: matchedCity.slug,
       })
     }
-  }, [matchedCity, setCity])
+  }, [matchedCity, selectedCity?.slug, setCity])
 
   const cityName = matchedCity?.name ?? (slug ? slug.charAt(0).toUpperCase() + slug.slice(1) : 'Kerala')
   const stateName = matchedCity?.state ?? 'Kerala'
@@ -112,9 +132,17 @@ export default function CityPage() {
         {!isMobileSearchOpen ? (
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <h1 className="text-xs sm:text-sm font-bold text-white truncate">
-                Venues in {cityName}
-              </h1>
+              <button
+                type="button"
+                onClick={() => setIsLocationModalOpen(true)}
+                className="flex items-center gap-1 text-left group cursor-pointer max-w-[calc(100%-2rem)]"
+                aria-label={`Change city, currently ${cityName}`}
+              >
+                <h1 className="text-xs sm:text-sm font-bold text-white group-hover:text-brand-secondary transition-colors truncate">
+                  Venues in {cityName}
+                </h1>
+                <ChevronDown className="w-3.5 h-3.5 text-green-400 group-hover:text-brand-secondary transition-colors shrink-0" />
+              </button>
               {/* Small search icon on the side of Venues in Palakkad (mobile only) */}
               <button
                 type="button"
@@ -213,12 +241,17 @@ export default function CityPage() {
             {/* Desktop City Header */}
             <div className="hidden md:flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-brand-dark/85 backdrop-blur-md p-5 rounded-xl border border-green-800/40 shadow-xl">
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-brand-secondary mb-1">
+                <button
+                  type="button"
+                  onClick={() => setIsLocationModalOpen(true)}
+                  className="flex items-center gap-1.5 text-xs font-medium text-brand-secondary hover:text-[#FFF04B] mb-1 cursor-pointer transition-colors group"
+                >
                   <MapPin className="w-3.5 h-3.5 shrink-0" />
                   <span>
                     {cityName}, {stateName}
                   </span>
-                </div>
+                  <ChevronDown className="w-3 h-3 group-hover:translate-y-0.5 transition-transform" />
+                </button>
                 <div className="flex items-center gap-3">
                   <h1 className="text-xl sm:text-2xl font-bold text-white">
                     Venues in {cityName}
@@ -284,6 +317,12 @@ export default function CityPage() {
           </div>
         </div>
       </div>
+
+      {/* Location Modal for City Selection */}
+      <LocationModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+      />
     </Layout>
   )
 }
