@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { MapPin, Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Package } from 'lucide-react'
+import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Package } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
 import LocationModal from '../modals/LocationModal'
@@ -67,7 +67,7 @@ export default function Header() {
               className="text-base sm:text-lg font-bold tracking-widest text-white leading-tight hidden md:block"
               style={{ fontFamily: "'Cinzel', serif", letterSpacing: '0.15em' }}
             >
-              MANA <span className="text-brand-secondary">VENUES</span>
+              MANA <span className="bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] bg-clip-text text-transparent">VENUES</span>
             </span>
           </Link>
 
@@ -78,7 +78,6 @@ export default function Header() {
             className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-green-900/40 hover:bg-green-900/60 text-green-100 transition-colors text-xs sm:text-sm font-medium border border-green-700/40 shrink min-w-0"
             aria-label="Select City"
           >
-            <MapPin className="w-3.5 h-3.5 text-brand-secondary shrink-0" />
             <span className="max-w-[75px] xs:max-w-[100px] sm:max-w-none truncate">
               {selectedCity?.name ?? 'Select City'}
             </span>
@@ -105,9 +104,9 @@ export default function Header() {
           {/* Destination Packages Link */}
           <Link
             to="/packages"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-brand-secondary hover:text-white border border-brand-secondary/40 hover:border-brand-secondary hover:bg-brand-secondary/10 transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-green-100 border border-green-700/40 hover:bg-green-900/40 hover:text-white transition-colors shrink-0"
           >
-            <Package className="w-3.5 h-3.5" />
+            <Package className="w-3.5 h-3.5 text-green-300" />
             <span>Packages</span>
           </Link>
 
@@ -230,7 +229,7 @@ export default function Header() {
               </Link>
               <Link
                 to="/auth/register"
-                className="px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-medium text-brand-dark bg-brand-secondary rounded-lg hover:bg-brand-secondary/90 transition-colors shadow-sm shrink-0"
+                className="px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-medium text-green-100 border border-green-700/40 rounded-lg hover:bg-green-900/40 hover:text-white transition-colors shrink-0"
               >
                 Register
               </Link>

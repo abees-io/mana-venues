@@ -426,7 +426,7 @@ export default function PackagesPage() {
                     <button
                       type="button"
                       onClick={() => handleInquireClick(pkg)}
-                      className="px-5 py-2.5 rounded-full bg-brand-secondary hover:bg-brand-secondary/90 text-brand-dark font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center gap-1.5 shrink-0"
+                      className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] hover:from-[#FFF566] hover:to-[#FFB000] text-brand-dark font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center gap-1.5 shrink-0"
                     >
                       <span>Inquire Package</span>
                       <Send className="w-3.5 h-3.5" />
@@ -610,7 +610,7 @@ export default function PackagesPage() {
                   <button
                     type="submit"
                     disabled={formSubmitting}
-                    className="px-6 py-2.5 rounded-full bg-brand-secondary hover:bg-brand-secondary/90 text-brand-dark font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 disabled:opacity-50"
+                    className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] hover:from-[#FFF566] hover:to-[#FFB000] text-brand-dark font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 disabled:opacity-50"
                   >
                     {formSubmitting ? 'Sending Request...' : 'Submit Inquiry'}
                   </button>

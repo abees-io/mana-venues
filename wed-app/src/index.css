@@ -58,3 +58,27 @@
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+/* Bright Rush Yellow Gradient utilities */
+.bg-gradient-rush {
+  background: linear-gradient(135deg, #FFF04B 0%, #FFC700 50%, #FFA000 100%);
+}
+
+.bg-gradient-rush-r {
+  background: linear-gradient(90deg, #FFF04B 0%, #FFC700 50%, #FFA000 100%);
+}
+
+.text-gradient-rush {
+  background: linear-gradient(135deg, #FFF566 0%, #FFCC00 50%, #FFA000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.rush-word {
+  background: linear-gradient(135deg, #FFF566 0%, #FFCC00 50%, #FFA000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+}

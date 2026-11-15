@@ -318,7 +318,7 @@ export default function HomePage() {
   return (
     <Layout>
       {/* Top Page Shimmer Loading Reveal Bar */}
-      <div className="page-loading-bar fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#E8BA45] to-transparent z-50 origin-left pointer-events-none" />
+      <div className="page-loading-bar fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#FFC700] to-transparent z-50 origin-left pointer-events-none" />
 
       {/* SECTION 1: HERO & CATEGORIES (Matches User Reference Image) */}
       <section ref={heroRef} className="w-full pt-4 sm:pt-6 pb-4">
@@ -336,27 +336,27 @@ export default function HomePage() {
 
             {/* Centered Hero Content */}
             <div className="relative h-full flex flex-col items-center justify-center text-center p-6 sm:p-10 z-10 space-y-3 sm:space-y-4">
-              {/* Grand Venues Heading */}
+              {/* Grand Venues Heading — Top-to-Bottom (180°) Metallic Gold Gradient */}
               <h1
-                className="hero-text-reveal text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide leading-tight bg-[linear-gradient(135deg,#FFAE00_0%,#F9E866_100%)] bg-clip-text text-transparent drop-shadow-lg"
+                className="hero-text-reveal text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide leading-tight bg-gradient-to-b from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent drop-shadow-sm"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 GRAND VENUES FOR YOUR BIG DAYS
               </h1>
 
-              {/* Subtitle / Description */}
-              <p className="hero-text-reveal text-sm sm:text-base md:text-lg text-white font-medium max-w-xl mx-auto drop-shadow-md leading-relaxed">
+              {/* Subtitle / Description — Matching Hero Title Rush Gold */}
+              <p className="hero-text-reveal text-sm sm:text-base md:text-lg font-bold max-w-xl mx-auto drop-shadow-md leading-relaxed bg-gradient-to-r from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent">
                 Explore verified venues & bespoke Kerala wedding packages
               </p>
 
-              {/* Solid Golden CTA Button */}
+              {/* CTA Button — Decreased Exposure with Refined Warm Gold Tone */}
               <div className="hero-text-reveal pt-3 sm:pt-5">
                 <button
                   type="button"
                   onClick={() => {
                     gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                   }}
-                  className="px-8 sm:px-10 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#D8A629] via-[#E8BA45] to-[#D8A629] hover:from-[#E8BA45] hover:to-[#D8A629] text-brand-dark font-bold text-sm sm:text-base shadow-xl hover:shadow-brand-secondary/40 hover:scale-105 active:scale-95 transition-all"
+                  className="px-8 sm:px-10 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#EBB522] via-[#DF9F10] to-[#CC8805] hover:from-[#F3BE2D] hover:to-[#D99209] text-brand-dark font-extrabold text-sm sm:text-base shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/50 hover:scale-105 active:scale-95 transition-all"
                 >
                   Explore Venues
                 </button>
@@ -368,7 +368,7 @@ export default function HomePage() {
         {/* EXPLORE CATEGORIES SECTION */}
         <div className="categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-10">
           <h2
-            className="text-2xl sm:text-3xl font-bold text-[#E0B12D] mb-4 sm:mb-5 tracking-wide text-left"
+            className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent mb-4 sm:mb-5 tracking-wide text-left drop-shadow-sm inline-block"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
             Explore Categories
@@ -395,10 +395,10 @@ export default function HomePage() {
                   {cat.badge}
                 </div>
 
-                {/* Large Bottom Title in Gold Serif */}
+                {/* Large Bottom Title in Bright Rush Yellow Gradient */}
                 <div className="absolute bottom-3 left-2.5 right-2.5 text-center pointer-events-none">
                   <h3
-                    className="text-sm sm:text-base md:text-lg font-bold text-[#F3CE65] drop-shadow-md tracking-wide leading-tight"
+                    className="text-sm sm:text-base md:text-lg font-bold bg-gradient-to-r from-[#FFF566] via-[#FFD000] to-[#FFA000] bg-clip-text text-transparent drop-shadow-md tracking-wide leading-tight"
                     style={{ fontFamily: "'Cinzel', serif" }}
                   >
                     {cat.title}
@@ -424,12 +424,12 @@ export default function HomePage() {
               className="text-4xl sm:text-6xl md:text-7xl lg:text-[82px] font-normal tracking-normal leading-[1.05] text-white"
               style={{ fontFamily: "'Italiana', serif" }}
             >
-              {/* Highlighted core sentence in radiant royal gold */}
-              <span className="text-[#F3CE65]">
+              {/* Highlighted core sentence in bright rush yellow gradient */}
+              <span className="inline">
                 {`Your celebration deserves the warmth and safety of home.`
                   .split(' ')
                   .map((word, i) => (
-                    <span key={`h1-${i}`} className="editorial-word inline-block mr-[0.22em]">
+                    <span key={`h1-${i}`} className="editorial-word rush-word mr-[0.22em]">
                       {word}
                     </span>
                   ))}
@@ -445,12 +445,12 @@ export default function HomePage() {
                   ))}
               </span>
               <span className="block my-3 sm:my-5" />
-              {/* Highlighted cultural statement in radiant royal gold */}
-              <span className="text-[#F3CE65]">
+              {/* Highlighted cultural statement in bright rush yellow gradient */}
+              <span className="inline">
                 {`thoughtfully designed to honor Kerala's rich cultural tapestry`
                   .split(' ')
                   .map((word, i) => (
-                    <span key={`h2-${i}`} className="editorial-word inline-block mr-[0.22em]">
+                    <span key={`h2-${i}`} className="editorial-word rush-word mr-[0.22em]">
                       {word}
                     </span>
                   ))}
@@ -484,7 +484,7 @@ export default function HomePage() {
                     : 'Wedding Venues in Kerala'}
               </h2>
               {!isLoading && (
-                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-green-900/40 text-brand-secondary border border-green-700/40">
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-green-900/40 text-emerald-300 border border-green-700/40">
                   {displayedAuditoriums.length}
                 </span>
               )}
@@ -506,13 +506,14 @@ export default function HomePage() {
                 type="button"
                 onClick={handleNearMeClick}
                 disabled={isLocating}
-                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${isNearMeActive
-                    ? 'bg-brand-secondary text-brand-dark ring-2 ring-brand-secondary/70 shadow-md scale-105'
-                    : 'bg-green-900/50 hover:bg-green-800/70 text-green-100 hover:text-brand-secondary border border-green-700/60'
-                  }`}
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${
+                  isNearMeActive
+                    ? 'bg-emerald-600 text-white ring-2 ring-emerald-500/70 shadow-md scale-105'
+                    : 'bg-green-900/50 hover:bg-green-800/70 text-green-100 hover:text-white border border-green-700/60'
+                }`}
               >
                 <MapPin
-                  className={`w-3.5 h-3.5 ${isNearMeActive ? 'fill-current' : ''}`}
+                  className={`w-3.5 h-3.5 text-white ${isNearMeActive ? 'fill-current' : ''}`}
                 />
                 <span>
                   {isLocating
@@ -545,9 +546,8 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setIsLocationModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-green-100 bg-green-900/40 border border-green-700/40 hover:bg-green-800/50 hover:text-brand-secondary transition-all shadow-xs"
+              className="inline-flex items-center px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-green-100 bg-green-900/40 border border-green-700/40 hover:bg-green-800/50 hover:text-white transition-all shadow-xs"
             >
-              <MapPin className="w-4 h-4 text-brand-secondary" />
               <span>{selectedCity && !isNearMeActive ? 'Change City' : 'Select City'}</span>
             </button>
           </div>
@@ -573,7 +573,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => refetch()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-secondary hover:bg-brand-secondary/90 text-brand-dark font-bold text-sm transition-all shadow-sm"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-all shadow-sm"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>Retry</span>
@@ -584,7 +584,7 @@ export default function HomePage() {
           {/* Empty State */}
           {!isLoading && !isError && displayedAuditoriums.length === 0 && (
             <div className="text-center py-16 bg-brand-dark/90 backdrop-blur-md rounded-2xl border border-green-800/40 shadow-xl max-w-lg mx-auto p-8 space-y-4">
-              <div className="w-14 h-14 rounded-full bg-green-900/40 text-brand-secondary mx-auto flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-green-900/40 text-white mx-auto flex items-center justify-center">
                 <Building2 className="w-7 h-7" />
               </div>
               <h3 className="text-lg font-bold text-white">
@@ -609,7 +609,7 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => clearCity()}
-                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-brand-dark bg-brand-secondary hover:bg-brand-secondary/90 transition-colors shadow-sm"
+                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors shadow-sm"
                   >
                     View All Cities
                   </button>
@@ -617,7 +617,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setIsLocationModalOpen(true)}
-                  className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-brand-secondary bg-green-950/80 hover:bg-green-900/60 transition-colors border border-green-700/50"
+                  className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-emerald-300 bg-green-950/80 hover:bg-green-900/60 transition-colors border border-green-700/50"
                 >
                   Switch City
                 </button>
