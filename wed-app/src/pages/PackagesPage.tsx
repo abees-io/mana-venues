@@ -42,7 +42,6 @@ import {
   Monitor,
   Smartphone,
   Check,
-  Lock,
   CopyCheck,
 } from 'lucide-react'
 
@@ -179,23 +178,17 @@ export default function PackagesPage() {
   const saveDesktopEdits = usePackagesStore((s) => s.saveDesktopEdits)
   const saveMobileEdits = usePackagesStore((s) => s.saveMobileEdits)
   const applyLayoutToAllPackages = usePackagesStore((s) => s.applyLayoutToAllPackages)
-  const [saveFeedback, setSaveFeedback] = useState<'desktop' | 'mobile' | null>(null)
+  const [saveFeedback, setSaveFeedback] = useState<boolean>(false)
   const [hasSavedSession, setHasSavedSession] = useState(false)
   const [lastEditedPkgId, setLastEditedPkgId] = useState<string | null>(null)
   const [appliedAllPkgId, setAppliedAllPkgId] = useState<string | null>(null)
 
-  const handleSaveDesktop = () => {
+  const handleSaveEdits = () => {
     saveDesktopEdits()
-    setHasSavedSession(true)
-    setSaveFeedback('desktop')
-    setTimeout(() => setSaveFeedback(null), 2200)
-  }
-
-  const handleSaveMobile = () => {
     saveMobileEdits()
     setHasSavedSession(true)
-    setSaveFeedback('mobile')
-    setTimeout(() => setSaveFeedback(null), 2200)
+    setSaveFeedback(true)
+    setTimeout(() => setSaveFeedback(false), 2200)
   }
 
   const handleApplyToAll = (pkgId?: string | null) => {
@@ -491,18 +484,12 @@ export default function PackagesPage() {
         {/* Admin Controls Bar (Visible only to Admin users) */}
         {isAdmin && (
           <div className="mb-8 p-4 rounded-2xl bg-emerald-950/60 border border-brand-secondary/40 flex flex-wrap items-center justify-between gap-3">
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-brand-secondary">
-                  Admin Package &amp; Reel Studio
-                </p>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/90 border border-emerald-600/50 text-[10px] font-semibold text-emerald-200">
-                  <Lock className="w-3 h-3 text-brand-secondary" />
-                  <span>Mobile Layout Frozen</span>
-                </span>
-              </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-brand-secondary">
+                Admin Package &amp; Reel Studio
+              </p>
               <p className="text-xs text-emerald-200/80">
-                Add packages, upload photos, arrange desktop text/videos, and save edits for Desktop or Mobile.
+                Add packages, upload photos, arrange desktop text/videos, and save edits.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -530,23 +517,28 @@ export default function PackagesPage() {
                 <span>Add Reel Video</span>
               </button>
 
-              {/* Separate Save Button for Desktop */}
+              {/* Unified Save Button for Desktop & Mobile */}
               <button
                 type="button"
-                onClick={handleSaveDesktop}
-                title={savedDesktopAt ? `Last saved: ${new Date(savedDesktopAt).toLocaleTimeString()}` : 'Save Desktop edits'}
+                onClick={handleSaveEdits}
+                title={
+                  savedDesktopAt || savedMobileAt
+                    ? `Last saved: ${new Date(savedDesktopAt || savedMobileAt || '').toLocaleTimeString()}`
+                    : 'Save Desktop & Mobile edits'
+                }
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-900 hover:bg-emerald-800 text-brand-secondary font-bold text-xs border border-brand-secondary/50 shadow-md active:scale-95 transition-all"
               >
-                {saveFeedback === 'desktop' ? (
+                {saveFeedback ? (
                   <Check className="w-3.5 h-3.5 text-emerald-300" />
                 ) : (
                   <Save className="w-3.5 h-3.5" />
                 )}
                 <Monitor className="w-3.5 h-3.5" />
-                <span>{saveFeedback === 'desktop' ? 'Saved Desktop!' : 'Save Desktop'}</span>
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>{saveFeedback ? 'Saved!' : 'Save Desktop & Mobile'}</span>
               </button>
 
-              {/* Apply to All Button — Appears between Save Desktop & Save Mobile after saving */}
+              {/* Apply to All Button — Appears after saving */}
               {(hasSavedSession || Boolean(savedDesktopAt) || Boolean(savedMobileAt)) && (
                 <button
                   type="button"
@@ -562,22 +554,6 @@ export default function PackagesPage() {
                   <span>{appliedAllPkgId ? 'Applied to All!' : 'Apply to All'}</span>
                 </button>
               )}
-
-              {/* Separate Save Button for Mobile */}
-              <button
-                type="button"
-                onClick={handleSaveMobile}
-                title={savedMobileAt ? `Last saved: ${new Date(savedMobileAt).toLocaleTimeString()}` : 'Save Mobile edits'}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-900 hover:bg-emerald-800 text-brand-secondary font-bold text-xs border border-brand-secondary/50 shadow-md active:scale-95 transition-all"
-              >
-                {saveFeedback === 'mobile' ? (
-                  <Check className="w-3.5 h-3.5 text-emerald-300" />
-                ) : (
-                  <Save className="w-3.5 h-3.5" />
-                )}
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>{saveFeedback === 'mobile' ? 'Saved Mobile!' : 'Save Mobile'}</span>
-              </button>
             </div>
           </div>
         )}
