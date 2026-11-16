@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
@@ -10,6 +11,7 @@ import Layout from '../components/layout/Layout'
 import AuditoriumCard from '../components/cards/AuditoriumCard'
 import { AuditoriumCardSkeletonList } from '../components/cards/AuditoriumCardSkeleton'
 import LocationModal from '../components/modals/LocationModal'
+import { useAuth } from '../contexts/AuthContext'
 import { useAuditoriums } from '../hooks/useAuditoriums'
 import { useCityStore } from '../store/cityStore'
 import { useFilterStore } from '../store/filterStore'
@@ -63,6 +65,9 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
 }
 
 export default function HomePage() {
+  const navigate = useNavigate()
+  const { user, profile } = useAuth()
+  const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
   const { selectedCity, clearCity } = useCityStore()
 
   const capacityMin = useFilterStore((state) => state.capacityMin)
@@ -333,6 +338,10 @@ export default function HomePage() {
   }, [displayedAuditoriums.length, isLoading, selectedCity?.slug, isNearMeActive])
 
   const handleCategorySelect = (query: string) => {
+    if (!isAdmin) {
+      navigate('/packages')
+      return
+    }
     setSearchQuery(query)
     gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
@@ -375,11 +384,15 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => {
-                    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    if (!isAdmin) {
+                      navigate('/packages')
+                    } else {
+                      gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    }
                   }}
                   className="px-8 sm:px-10 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#EBB522] via-[#DF9F10] to-[#CC8805] hover:from-[#F3BE2D] hover:to-[#D99209] text-brand-dark font-extrabold text-sm sm:text-base shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/50 hover:scale-105 active:scale-95 transition-all"
                 >
-                  Explore Venues
+                  {!isAdmin ? 'Explore Packages' : 'Explore Venues'}
                 </button>
               </div>
             </div>
@@ -502,7 +515,7 @@ export default function HomePage() {
                   ? 'Venues Near You'
                   : selectedCity
                     ? `Venues in ${selectedCity.name}`
-                    : 'Wedding Venues in Kerala'}
+                    : 'Find Your Venues in Kerala'}
               </h2>
               {!isLoading && (
                 <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-green-900/40 text-emerald-300 border border-green-700/40">
