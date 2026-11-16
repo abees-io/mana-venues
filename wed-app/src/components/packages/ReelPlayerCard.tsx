@@ -241,10 +241,12 @@ export default function ReelPlayerCard({
               }}
               className="w-full h-full object-cover"
             />
-            {/* 5s Dummy Reel Badge */}
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-black/55 backdrop-blur-md border border-white/15 text-[10px] font-mono text-white/90 pointer-events-none">
-              0:0{currentSec} / 0:05
-            </div>
+            {/* 5s Dummy Reel Badge — Admin only */}
+            {isAdmin && (
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-black/55 backdrop-blur-md border border-white/15 text-[10px] font-mono text-white/90 pointer-events-none">
+                0:0{currentSec} / 0:05
+              </div>
+            )}
           </div>
         )}
 
@@ -363,8 +365,8 @@ export default function ReelPlayerCard({
           </h4>
         </div>
 
-        {/* Bottom 5s Progress Bar */}
-        {useDummyPlayer && (
+        {/* Bottom 5s Progress Bar — Admin only */}
+        {isAdmin && useDummyPlayer && (
           <div className="absolute bottom-2 left-3 right-3 h-1 rounded-full bg-white/25 overflow-hidden pointer-events-none">
             <div
               className="h-full bg-brand-secondary transition-all duration-100"

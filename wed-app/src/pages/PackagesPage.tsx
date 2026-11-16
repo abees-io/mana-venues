@@ -62,7 +62,16 @@ function PackageImageGallery({
   const safeIdx = photoIdx < photos.length ? photoIdx : 0
 
   return (
-    <div className="relative aspect-[16/10] sm:aspect-video lg:aspect-auto lg:h-full lg:min-h-[340px] w-full overflow-hidden bg-brand-dark">
+    <div
+      onClick={() => {
+        if (photos.length > 1) {
+          setPhotoIdx((prev) => (prev + 1) % photos.length)
+        }
+      }}
+      className={`relative aspect-[16/10] sm:aspect-video lg:aspect-auto lg:h-full lg:min-h-[340px] w-full overflow-hidden bg-brand-dark ${
+        photos.length > 1 ? 'cursor-pointer' : ''
+      }`}
+    >
       <img
         src={photos[safeIdx]}
         alt={pkg.title}
@@ -78,7 +87,10 @@ function PackageImageGallery({
 
       {/* Admin Edit / Delete Controls */}
       {isAdmin && (
-        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+        <div
+          className="absolute top-3 right-3 flex items-center gap-1.5 z-10"
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             type="button"
             onClick={onEdit}
@@ -98,8 +110,8 @@ function PackageImageGallery({
         </div>
       )}
 
-      {/* Multi-Image Carousel Controls */}
-      {photos.length > 1 && (
+      {/* Multi-Image Carousel Arrows (Admin only — regular users tap image to switch) */}
+      {isAdmin && photos.length > 1 && (
         <>
           <button
             type="button"
@@ -123,17 +135,21 @@ function PackageImageGallery({
           >
             <ChevronRight className="w-4 h-4" />
           </button>
-          <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
-            {photos.map((_, idx) => (
-              <span
-                key={idx}
-                className={`h-1.5 rounded-full transition-all ${
-                  idx === safeIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/45'
-                }`}
-              />
-            ))}
-          </div>
         </>
+      )}
+
+      {/* Photo indicator dots */}
+      {photos.length > 1 && (
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 pointer-events-none">
+          {photos.map((_, idx) => (
+            <span
+              key={idx}
+              className={`h-1.5 rounded-full transition-all ${
+                idx === safeIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/45'
+              }`}
+            />
+          ))}
+        </div>
       )}
 
       {/* Pricing tag */}
