@@ -400,7 +400,15 @@ export default function HomePage() {
         </div>
 
         {/* EXPLORE CATEGORIES SECTION */}
-        <div className="categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-10" style={{ perspective: '800px' }}>
+        <div
+          onClick={() => {
+            if (!isAdmin) navigate('/packages')
+          }}
+          className={`categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-10 ${
+            !isAdmin ? 'cursor-pointer' : ''
+          }`}
+          style={{ perspective: '800px' }}
+        >
           <h2
             className="category-title-animate text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent mb-4 sm:mb-5 tracking-wide text-left drop-shadow-sm inline-block"
             style={{ fontFamily: "'Cinzel', serif" }}
