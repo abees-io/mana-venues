@@ -1,4 +1,5 @@
-import { useState, useId } from 'react'
+import { useState, useId, useEffect, useRef } from 'react'
+import gsap from 'gsap'
 import Layout from '../components/layout/Layout'
 import StackedDestinationImages from '../components/home/StackedDestinationImages'
 import ReelPlayerCard from '../components/packages/ReelPlayerCard'
@@ -167,6 +168,62 @@ function PackageImageGallery({
 export default function PackagesPage() {
   const { user, profile } = useAuth()
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
+  const pageRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // 1. Hero text & controls starting reveal
+      gsap.fromTo(
+        '.packages-hero-reveal',
+        { y: 24, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.72,
+          stagger: 0.1,
+          ease: 'power3.out',
+          force3D: true,
+          clearProps: 'transform,opacity',
+        }
+      )
+
+      // 2. Stacked destination images entrance animation
+      gsap.fromTo(
+        '.packages-stack-animate',
+        { scale: 0.9, y: 28, opacity: 0, rotate: -2 },
+        {
+          scale: 1,
+          y: 0,
+          opacity: 1,
+          rotate: 0,
+          duration: 0.85,
+          delay: 0.18,
+          ease: 'power3.out',
+          force3D: true,
+          clearProps: 'transform,opacity',
+        }
+      )
+
+      // 3. Package cards staggered stack entrance
+      gsap.fromTo(
+        '.package-card-animate',
+        { y: 30, opacity: 0, scale: 0.98 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.65,
+          delay: 0.3,
+          stagger: 0.1,
+          ease: 'power3.out',
+          force3D: true,
+          clearProps: 'transform,opacity',
+        }
+      )
+    }, pageRef)
+
+    return () => ctx.revert()
+  }, [])
 
   const packages = usePackagesStore((s) => s.packages)
   const past = usePackagesStore((s) => s.past)
@@ -398,6 +455,7 @@ export default function PackagesPage() {
 
   return (
     <Layout>
+      <div ref={pageRef}>
       {/* Top Hero Banner with Destination Wedding Showcase */}
       <section className="relative overflow-hidden bg-brand-dark py-12 sm:py-16 px-4 sm:px-6 lg:px-8 border-b border-green-900/40">
         <div className="absolute inset-0 pointer-events-none opacity-20">
@@ -409,25 +467,25 @@ export default function PackagesPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left Column: Text & Filters */}
             <div className="lg:col-span-7 text-left space-y-4">
-              <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-emerald-950/80 border border-brand-secondary/50 text-xs font-semibold text-brand-secondary">
+              <div className="packages-hero-reveal inline-flex items-center px-3.5 py-1 rounded-full bg-emerald-950/80 border border-brand-secondary/50 text-xs font-semibold text-brand-secondary will-change-[transform,opacity]">
                 <span>God’s Own Country Destination Weddings</span>
               </div>
 
               <h1
-                className="text-3xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-wide leading-tight bg-[linear-gradient(135deg,#FFAE00_0%,#F9E866_100%)] bg-clip-text text-transparent drop-shadow-md"
+                className="packages-hero-reveal text-3xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-wide leading-tight bg-[linear-gradient(135deg,#FFAE00_0%,#F9E866_100%)] bg-clip-text text-transparent drop-shadow-md will-change-[transform,opacity]"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 Bespoke Destination Wedding Packages
               </h1>
 
-              <p className="text-sm sm:text-base lg:text-lg text-emerald-100/90 font-medium leading-relaxed">
+              <p className="packages-hero-reveal text-sm sm:text-base lg:text-lg text-emerald-100/90 font-medium leading-relaxed will-change-[transform,opacity]">
                 Your celebration deserves the warmth and safety of home. Explore verified venues and
                 bespoke destination wedding packages across God's Own Country, thoughtfully designed to
                 honor Kerala’s rich cultural tapestry while keeping you in expert, caring hands.
               </p>
 
               {/* Quick Filter & Search Bar */}
-              <div className="pt-3 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+              <div className="packages-hero-reveal pt-3 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between will-change-[transform,opacity]">
                 {/* Search Input */}
                 <div className="relative flex-1 max-w-md">
                   <input
@@ -472,7 +530,7 @@ export default function PackagesPage() {
             </div>
 
             {/* Right Column: Stacked Destination Images Showcase (Mobile & Desktop) */}
-            <div className="lg:col-span-5 w-full flex items-center justify-center lg:justify-end pt-4 lg:pt-0">
+            <div className="packages-stack-animate lg:col-span-5 w-full flex items-center justify-center lg:justify-end pt-4 lg:pt-0 will-change-[transform,opacity]">
               <StackedDestinationImages />
             </div>
           </div>
@@ -626,7 +684,7 @@ export default function PackagesPage() {
             {filteredPackages.map((pkg) => (
               <article
                 key={pkg.id}
-                className="group rounded-2xl overflow-hidden bg-brand-dark/85 backdrop-blur-md border border-green-800/50 shadow-xl hover:border-brand-secondary/60 hover:shadow-2xl transition-all duration-300 flex flex-col"
+                className="package-card-animate group rounded-2xl overflow-hidden bg-brand-dark/85 backdrop-blur-md border border-green-800/50 shadow-xl hover:border-brand-secondary/60 hover:shadow-2xl transition-all duration-300 flex flex-col will-change-[transform,opacity]"
               >
                 {/* Top Row: Photo on Left + Details on Right (or Swapped by Admin) */}
                 <div
@@ -1187,6 +1245,7 @@ export default function PackagesPage() {
         packageId={reelTargetPackageId}
         initialReel={editingReel}
       />
+      </div>
     </Layout>
   )
 }
