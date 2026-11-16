@@ -1,6 +1,16 @@
 import { useState, useId } from 'react'
 import Layout from '../components/layout/Layout'
 import StackedDestinationImages from '../components/home/StackedDestinationImages'
+import ReelPlayerCard from '../components/packages/ReelPlayerCard'
+import PackageFormModal from '../components/modals/PackageFormModal'
+import ReelFormModal from '../components/modals/ReelFormModal'
+import { useAuth } from '../contexts/AuthContext'
+import {
+  usePackagesStore,
+  type WeddingPackage,
+  type PackageReel,
+  type PackageTextGroup,
+} from '../store/packagesStore'
 import {
   MapPin,
   Users,
@@ -14,121 +24,295 @@ import {
   AlertCircle,
   RefreshCw,
   Package,
+  Plus,
+  Pencil,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Film,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeftRight,
+  GripVertical,
+  Undo2,
+  Redo2,
+  RotateCcw,
+  Move,
+  Save,
+  Monitor,
+  Smartphone,
+  Check,
+  Lock,
+  CopyCheck,
 } from 'lucide-react'
 
-export interface WeddingPackage {
-  id: string
-  title: string
-  tagline: string
-  backdrop: 'Backwaters' | 'Coast' | 'Hills' | 'Heritage'
-  location: string
-  startingPrice: string
-  guestCapacity: string
-  image: string
-  description: string
-  inclusions: string[]
-  partnerPlanner: string
-  verified: boolean
+function PackageImageGallery({
+  pkg,
+  isAdmin,
+  onEdit,
+  onDelete,
+}: {
+  pkg: WeddingPackage
+  isAdmin: boolean
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  const photos = pkg.images?.length ? pkg.images : [pkg.image]
+  const [photoIdx, setPhotoIdx] = useState(0)
+  const safeIdx = photoIdx < photos.length ? photoIdx : 0
+
+  return (
+    <div className="relative aspect-[16/10] sm:aspect-video lg:aspect-auto lg:h-full lg:min-h-[340px] w-full overflow-hidden bg-brand-dark">
+      <img
+        src={photos[safeIdx]}
+        alt={pkg.title}
+        loading="lazy"
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/20 to-transparent pointer-events-none" />
+
+      {/* Backdrop Badge */}
+      <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-brand-dark/90 backdrop-blur-md border border-brand-secondary/60 text-xs font-semibold text-brand-secondary shadow-md">
+        <span>{pkg.backdrop} Experience</span>
+      </div>
+
+      {/* Admin Edit / Delete Controls */}
+      {isAdmin && (
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+          <button
+            type="button"
+            onClick={onEdit}
+            aria-label={`Edit ${pkg.title}`}
+            className="p-2 rounded-full bg-brand-dark/90 backdrop-blur-md text-brand-secondary hover:bg-black border border-brand-secondary/50 shadow-md transition-colors"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            aria-label={`Delete ${pkg.title}`}
+            className="p-2 rounded-full bg-brand-dark/90 backdrop-blur-md text-red-400 hover:bg-red-950 border border-red-500/40 shadow-md transition-colors"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Multi-Image Carousel Controls */}
+      {photos.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              setPhotoIdx((prev) => (prev - 1 + photos.length) % photos.length)
+            }}
+            aria-label="Previous package photo"
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/50 hover:bg-black/75 text-white backdrop-blur-xs transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              setPhotoIdx((prev) => (prev + 1) % photos.length)
+            }}
+            aria-label="Next package photo"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/50 hover:bg-black/75 text-white backdrop-blur-xs transition-colors"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+          <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
+            {photos.map((_, idx) => (
+              <span
+                key={idx}
+                className={`h-1.5 rounded-full transition-all ${
+                  idx === safeIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/45'
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Pricing tag */}
+      <div className="absolute bottom-3 right-3 px-3.5 py-1.5 rounded-lg bg-brand-dark/95 backdrop-blur-md border border-emerald-700/50 shadow-md text-right">
+        <span className="block text-[10px] uppercase tracking-wider text-emerald-300">
+          Starting From
+        </span>
+        <span className="text-base sm:text-lg font-extrabold text-brand-secondary">
+          {pkg.startingPrice}
+        </span>
+      </div>
+    </div>
+  )
 }
 
-export const WEDDING_PACKAGES: WeddingPackage[] = [
-  {
-    id: 'alleppey-serenade',
-    title: 'Alleppey Backwater Serenade',
-    tagline: 'Houseboat reception, emerald waterways & swaying palms',
-    backdrop: 'Backwaters',
-    location: 'Vembanad Lake, Alleppey & Kumarakom',
-    startingPrice: '₹8,50,000',
-    guestCapacity: '150 - 350 Guests',
-    image: '/dest-wedding-2.jpg',
-    description:
-      'Immerse your wedding party in the serene calm of Kerala’s backwaters. Featuring a sunset lakefront mandap, decorated luxury ketuvallam houseboats for the baraat/bridal entry, and traditional banana-leaf feasts with live instrumental fusion.',
-    inclusions: [
-      'Lakefront venue & luxury houseboats access',
-      'Artisanal water-lily & jasmine floral mandap',
-      'Grand Kerala Sadya & coastal fusion banquets',
-      'Chenda Melam & classical Mohiniyattam welcome',
-      'Dedicated guest transport & backwater shikaras',
-      'Full event coordination & ritual support',
-    ],
-    partnerPlanner: 'Heritage Palms Events (Verified)',
-    verified: true,
-  },
-  {
-    id: 'kovalam-sunset',
-    title: 'Kovalam Beachside Vows & Romance',
-    tagline: 'Golden sands, Arabian sea horizon & cliffside panoramas',
-    backdrop: 'Coast',
-    location: 'Kovalam & Marari Coastline',
-    startingPrice: '₹12,00,000',
-    guestCapacity: '200 - 600 Guests',
-    image: '/dest-wedding-3.jpg',
-    description:
-      'Say "I do" as the sun dips into the Arabian Sea. A bespoke beachfront affair complete with ivory silk canopies, imported coastal blooms, live acoustic music, and curated seafood delicacies beneath illuminated coconut palms.',
-    inclusions: [
-      'Private beach sanctuary venue reservation',
-      'Coastal driftwood & blush-rose pavilion canopy',
-      'Seafood grill, continental & Kerala buffet stations',
-      'Sunset acoustic ensemble & firework finale',
-      'Drone cinematography & candid photo crew',
-      'On-site hospitality team & concierge desk',
-    ],
-    partnerPlanner: 'Coastline Luxe Weddings (Verified)',
-    verified: true,
-  },
-  {
-    id: 'wayanad-mist',
-    title: 'Munnar & Wayanad Misty Estate',
-    tagline: 'High-altitude tea gardens, cool mountain breeze & stone chalets',
-    backdrop: 'Hills',
-    location: 'Vythiri, Wayanad & Munnar Heights',
-    startingPrice: '₹9,80,000',
-    guestCapacity: '100 - 300 Guests',
-    image: '/dest-wedding-1.jpg',
-    description:
-      'A fairytale highland retreat set amid undulating tea plantations and eucalyptus mist. Perfect for couples seeking an intimate, cool-climate royal celebration surrounded by Western Ghats biodiversity.',
-    inclusions: [
-      'Estate bungalow & mountain lawn amphitheater',
-      'Wildflower, eucalyptus & brass lamp floral design',
-      'Warm spice-infused banquet & plantation barbecue',
-      'Evening amphitheater bonfire & live acoustic ghazals',
-      'Guest estate shuttle & cottage lodging support',
-      'Traditional Nadaswaram & Panchavadyam artists',
-    ],
-    partnerPlanner: 'Highland Blooms Studio (Verified)',
-    verified: true,
-  },
-  {
-    id: 'kochi-royal',
-    title: 'Fort Kochi Royal Nalukettu Heritage',
-    tagline: 'Colonial opulence, antique carved wood & temple courtyards',
-    backdrop: 'Heritage',
-    location: 'Fort Kochi & Mattancherry Heritage Quarter',
-    startingPrice: '₹14,50,000',
-    guestCapacity: '300 - 1,200 Guests',
-    image: '/dest-wedding-1.jpg',
-    description:
-      'Honor Kerala’s royal legacy inside restored ancestral courtyards. Hand-carved teakwood pillars, thousands of traditional brass oil lamps (Agal Vilakku), and a ceremonial royal procession fit for royalty.',
-    inclusions: [
-      'Heritage Nalukettu palace courtyard booking',
-      '1,000 brass oil lamp illumination decor',
-      'Traditional 28-dish royal Sadya dining service',
-      'Kathakali dancers & royal trumpet fanfare',
-      'Bespoke bridal styling suite & guest lounge',
-      'VIP protocol security & concierge staff',
-    ],
-    partnerPlanner: 'Royal Travancore Curators (Verified)',
-    verified: true,
-  },
-]
-
 export default function PackagesPage() {
+  const { user, profile } = useAuth()
+  const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
+
+  const packages = usePackagesStore((s) => s.packages)
+  const past = usePackagesStore((s) => s.past)
+  const future = usePackagesStore((s) => s.future)
+  const undo = usePackagesStore((s) => s.undo)
+  const redo = usePackagesStore((s) => s.redo)
+  const savedDesktopAt = usePackagesStore((s) => s.savedDesktopAt)
+  const savedMobileAt = usePackagesStore((s) => s.savedMobileAt)
+  const saveDesktopEdits = usePackagesStore((s) => s.saveDesktopEdits)
+  const saveMobileEdits = usePackagesStore((s) => s.saveMobileEdits)
+  const applyLayoutToAllPackages = usePackagesStore((s) => s.applyLayoutToAllPackages)
+  const [saveFeedback, setSaveFeedback] = useState<'desktop' | 'mobile' | null>(null)
+  const [hasSavedSession, setHasSavedSession] = useState(false)
+  const [lastEditedPkgId, setLastEditedPkgId] = useState<string | null>(null)
+  const [appliedAllPkgId, setAppliedAllPkgId] = useState<string | null>(null)
+
+  const handleSaveDesktop = () => {
+    saveDesktopEdits()
+    setHasSavedSession(true)
+    setSaveFeedback('desktop')
+    setTimeout(() => setSaveFeedback(null), 2200)
+  }
+
+  const handleSaveMobile = () => {
+    saveMobileEdits()
+    setHasSavedSession(true)
+    setSaveFeedback('mobile')
+    setTimeout(() => setSaveFeedback(null), 2200)
+  }
+
+  const handleApplyToAll = (pkgId?: string | null) => {
+    const targetId = pkgId || lastEditedPkgId || packages[0]?.id
+    if (!targetId) return
+    applyLayoutToAllPackages(targetId)
+    setAppliedAllPkgId(targetId)
+    setTimeout(() => setAppliedAllPkgId(null), 2200)
+  }
+  const updatePackage = usePackagesStore((s) => s.updatePackage)
+  const deletePackage = usePackagesStore((s) => s.deletePackage)
+  const updatePackageReel = usePackagesStore((s) => s.updatePackageReel)
+  const deletePackageReel = usePackagesStore((s) => s.deletePackageReel)
+  const reorderPackageReels = usePackagesStore((s) => s.reorderPackageReels)
+  const movePackageReel = usePackagesStore((s) => s.movePackageReel)
+
+  // Cursor Drag-and-Drop states (Admin only)
+  const [draggedTextGroup, setDraggedTextGroup] = useState<{
+    pkgId: string
+    group: PackageTextGroup
+  } | null>(null)
+  const [freeDragState, setFreeDragState] = useState<{
+    pkgId: string
+    group: PackageTextGroup
+    x: number
+    y: number
+  } | null>(null)
+  const [draggedReel, setDraggedReel] = useState<{
+    pkgId: string
+    reelId: string
+    index: number
+  } | null>(null)
+
+  const handleFreeMoveStart = (
+    pkg: WeddingPackage,
+    group: PackageTextGroup,
+    e: React.PointerEvent<HTMLSpanElement>
+  ) => {
+    if (!isAdmin) return
+    e.stopPropagation()
+    e.preventDefault()
+
+    const currentOffset = pkg.textOffsets?.[group] || { x: 0, y: 0 }
+    const startX = e.clientX
+    const startY = e.clientY
+    let latest = { ...currentOffset }
+
+    setFreeDragState({ pkgId: pkg.id, group, x: latest.x, y: latest.y })
+
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      const dx = moveEvent.clientX - startX
+      const dy = moveEvent.clientY - startY
+      latest = {
+        x: Math.round(currentOffset.x + dx),
+        y: Math.round(currentOffset.y + dy),
+      }
+      setFreeDragState({ pkgId: pkg.id, group, x: latest.x, y: latest.y })
+    }
+
+    const onPointerUp = () => {
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', onPointerUp)
+      setFreeDragState(null)
+      setLastEditedPkgId(pkg.id)
+      updatePackage(pkg.id, {
+        textOffsets: {
+          ...(pkg.textOffsets || {}),
+          [group]: latest,
+        },
+      })
+    }
+
+    window.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointerup', onPointerUp)
+  }
+
+  const handleMoveTextGroup = (
+    pkg: WeddingPackage,
+    group: PackageTextGroup,
+    direction: -1 | 1
+  ) => {
+    const order: PackageTextGroup[] = pkg.textOrder?.length
+      ? [...pkg.textOrder]
+      : ['header', 'inclusions', 'footer']
+    const idx = order.indexOf(group)
+    const targetIdx = idx + direction
+    if (idx === -1 || targetIdx < 0 || targetIdx >= order.length) return
+    const next = [...order]
+    ;[next[idx], next[targetIdx]] = [next[targetIdx], next[idx]]
+    updatePackage(pkg.id, { textOrder: next })
+  }
+
+  const handleDropTextGroup = (pkg: WeddingPackage, targetGroup: PackageTextGroup) => {
+    if (!draggedTextGroup || draggedTextGroup.pkgId !== pkg.id) return
+    if (draggedTextGroup.group === targetGroup) return
+    const order: PackageTextGroup[] = pkg.textOrder?.length
+      ? [...pkg.textOrder]
+      : ['header', 'inclusions', 'footer']
+    const fromIdx = order.indexOf(draggedTextGroup.group)
+    const toIdx = order.indexOf(targetGroup)
+    if (fromIdx === -1 || toIdx === -1) return
+    const next = [...order]
+    const [moved] = next.splice(fromIdx, 1)
+    next.splice(toIdx, 0, moved)
+    updatePackage(pkg.id, { textOrder: next })
+    setDraggedTextGroup(null)
+  }
+
+  const handleDropReel = (targetPkgId: string, targetIndex?: number) => {
+    if (!draggedReel) return
+    if (draggedReel.pkgId === targetPkgId) {
+      if (typeof targetIndex === 'number' && draggedReel.index !== targetIndex) {
+        reorderPackageReels(targetPkgId, draggedReel.index, targetIndex)
+      }
+    } else {
+      movePackageReel(draggedReel.pkgId, targetPkgId, draggedReel.reelId, targetIndex)
+    }
+    setDraggedReel(null)
+  }
+
   const [selectedBackdrop, setSelectedBackdrop] = useState<string>('All')
   const [searchFilter, setSearchFilter] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [hasError, setHasError] = useState<boolean>(false)
   const [inquiryPackage, setInquiryPackage] = useState<WeddingPackage | null>(null)
   const [inquirySuccess, setInquirySuccess] = useState<boolean>(false)
+
+  // Admin Modals State
+  const [isPkgModalOpen, setIsPkgModalOpen] = useState(false)
+  const [editingPackage, setEditingPackage] = useState<WeddingPackage | null>(null)
+  const [isReelModalOpen, setIsReelModalOpen] = useState(false)
+  const [reelTargetPackageId, setReelTargetPackageId] = useState<string | null>(null)
+  const [editingReel, setEditingReel] = useState<PackageReel | null>(null)
 
   // Form states
   const [formData, setFormData] = useState({
@@ -193,7 +377,7 @@ export default function PackagesPage() {
   }
 
   // Filter packages based on backdrop and search
-  const filteredPackages = WEDDING_PACKAGES.filter((pkg) => {
+  const filteredPackages = packages.filter((pkg) => {
     const matchesBackdrop =
       selectedBackdrop === 'All' || pkg.backdrop.toLowerCase() === selectedBackdrop.toLowerCase()
     const matchesSearch =
@@ -288,6 +472,100 @@ export default function PackagesPage() {
 
       {/* Main Packages Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        {/* Admin Controls Bar (Visible only to Admin users) */}
+        {isAdmin && (
+          <div className="mb-8 p-4 rounded-2xl bg-emerald-950/60 border border-brand-secondary/40 flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-brand-secondary">
+                  Admin Package &amp; Reel Studio
+                </p>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/90 border border-emerald-600/50 text-[10px] font-semibold text-emerald-200">
+                  <Lock className="w-3 h-3 text-brand-secondary" />
+                  <span>Mobile Layout Frozen</span>
+                </span>
+              </div>
+              <p className="text-xs text-emerald-200/80">
+                Add packages, upload photos, arrange desktop text/videos, and save edits for Desktop or Mobile.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingPackage(null)
+                  setIsPkgModalOpen(true)
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] text-brand-dark font-extrabold text-xs shadow-md hover:brightness-105 active:scale-95 transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Package</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setReelTargetPackageId(null)
+                  setEditingReel(null)
+                  setIsReelModalOpen(true)
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-800/80 hover:bg-emerald-700 text-white font-bold text-xs border border-emerald-600/50 shadow-md active:scale-95 transition-all"
+              >
+                <Film className="w-4 h-4 text-brand-secondary" />
+                <span>Add Reel Video</span>
+              </button>
+
+              {/* Separate Save Button for Desktop */}
+              <button
+                type="button"
+                onClick={handleSaveDesktop}
+                title={savedDesktopAt ? `Last saved: ${new Date(savedDesktopAt).toLocaleTimeString()}` : 'Save Desktop edits'}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-900 hover:bg-emerald-800 text-brand-secondary font-bold text-xs border border-brand-secondary/50 shadow-md active:scale-95 transition-all"
+              >
+                {saveFeedback === 'desktop' ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-300" />
+                ) : (
+                  <Save className="w-3.5 h-3.5" />
+                )}
+                <Monitor className="w-3.5 h-3.5" />
+                <span>{saveFeedback === 'desktop' ? 'Saved Desktop!' : 'Save Desktop'}</span>
+              </button>
+
+              {/* Apply to All Button — Appears between Save Desktop & Save Mobile after saving */}
+              {(hasSavedSession || Boolean(savedDesktopAt) || Boolean(savedMobileAt)) && (
+                <button
+                  type="button"
+                  onClick={() => handleApplyToAll()}
+                  title="Apply your saved layout & reel settings to all packages"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-brand-secondary/20 hover:bg-brand-secondary/35 text-brand-secondary font-extrabold text-xs border border-brand-secondary/60 shadow-md active:scale-95 transition-all"
+                >
+                  {appliedAllPkgId ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-300" />
+                  ) : (
+                    <CopyCheck className="w-3.5 h-3.5" />
+                  )}
+                  <span>{appliedAllPkgId ? 'Applied to All!' : 'Apply to All'}</span>
+                </button>
+              )}
+
+              {/* Separate Save Button for Mobile */}
+              <button
+                type="button"
+                onClick={handleSaveMobile}
+                title={savedMobileAt ? `Last saved: ${new Date(savedMobileAt).toLocaleTimeString()}` : 'Save Mobile edits'}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-900 hover:bg-emerald-800 text-brand-secondary font-bold text-xs border border-brand-secondary/50 shadow-md active:scale-95 transition-all"
+              >
+                {saveFeedback === 'mobile' ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-300" />
+                ) : (
+                  <Save className="w-3.5 h-3.5" />
+                )}
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>{saveFeedback === 'mobile' ? 'Saved Mobile!' : 'Save Mobile'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Loading State */}
         {isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8" aria-label="Loading packages">
@@ -350,91 +628,360 @@ export default function PackagesPage() {
           </div>
         )}
 
-        {/* Package Cards Grid */}
+        {/* Package Cards List — Horizontal card on desktop, with its own horizontally-ordered Reels section under it */}
         {!isLoading && !hasError && filteredPackages.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="flex flex-col gap-10">
             {filteredPackages.map((pkg) => (
               <article
                 key={pkg.id}
                 className="group rounded-2xl overflow-hidden bg-brand-dark/85 backdrop-blur-md border border-green-800/50 shadow-xl hover:border-brand-secondary/60 hover:shadow-2xl transition-all duration-300 flex flex-col"
               >
-                {/* Photo & Badge */}
-                <div className="relative aspect-[16/10] sm:aspect-video w-full overflow-hidden bg-brand-dark">
-                  <img
-                    src={pkg.image}
-                    alt={pkg.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/20 to-transparent" />
-
-                  {/* Backdrop Badge */}
-                  <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-brand-dark/90 backdrop-blur-md border border-brand-secondary/60 text-xs font-semibold text-brand-secondary shadow-md">
-                    <span>{pkg.backdrop} Experience</span>
+                {/* Top Row: Photo on Left + Details on Right (or Swapped by Admin) */}
+                <div
+                  className={`flex flex-col ${
+                    pkg.reverseDesktopLayout ? 'lg:flex-row-reverse' : 'lg:flex-row'
+                  }`}
+                >
+                  {/* Left: Photo Gallery & Admin Controls */}
+                  <div className="w-full lg:w-[44%] shrink-0">
+                    <PackageImageGallery
+                      pkg={pkg}
+                      isAdmin={Boolean(isAdmin)}
+                      onEdit={() => {
+                        setEditingPackage(pkg)
+                        setIsPkgModalOpen(true)
+                      }}
+                      onDelete={() => {
+                        if (window.confirm(`Delete package "${pkg.title}"?`)) {
+                          deletePackage(pkg.id)
+                        }
+                      }}
+                    />
                   </div>
 
-                  {/* Pricing tag */}
-                  <div className="absolute bottom-3 right-3 px-3.5 py-1.5 rounded-lg bg-brand-dark/95 backdrop-blur-md border border-emerald-700/50 shadow-md text-right">
-                    <span className="block text-[10px] uppercase tracking-wider text-emerald-300">
-                      Starting From
-                    </span>
-                    <span className="text-base sm:text-lg font-extrabold text-brand-secondary">
-                      {pkg.startingPrice}
-                    </span>
+                  {/* Right: Package Content with Admin-Movable Text Groups */}
+                  <div className="p-5 sm:p-6 lg:p-7 flex-1 flex flex-col justify-between space-y-4 min-w-0">
+                    {isAdmin && (
+                      <div className="hidden lg:flex flex-wrap items-center justify-end gap-2">
+                        {pkg.textOffsets && Object.keys(pkg.textOffsets).length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => updatePackage(pkg.id, { textOffsets: {} })}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-950/80 hover:bg-emerald-900 text-amber-300 text-[10px] font-semibold border border-amber-600/40 transition-colors"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                            <span>Reset Text Positions</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updatePackage(pkg.id, {
+                              reverseDesktopLayout: !pkg.reverseDesktopLayout,
+                            })
+                          }
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-950/80 hover:bg-emerald-900 text-emerald-200 text-[10px] font-semibold border border-emerald-700/50 transition-colors"
+                        >
+                          <ArrowLeftRight className="w-3 h-3 text-brand-secondary" />
+                          <span>Swap Image / Text Side</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleApplyToAll(pkg.id)}
+                          title="Apply this package's layout & reel settings to all packages"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-secondary/20 hover:bg-brand-secondary/35 text-brand-secondary text-[10px] font-bold border border-brand-secondary/50 transition-colors"
+                        >
+                          {appliedAllPkgId === pkg.id ? (
+                            <Check className="w-3 h-3 text-emerald-300" />
+                          ) : (
+                            <CopyCheck className="w-3 h-3" />
+                          )}
+                          <span>
+                            {appliedAllPkgId === pkg.id ? 'Applied to All!' : 'Apply to All Packages'}
+                          </span>
+                        </button>
+                      </div>
+                    )}
+
+                    {(pkg.textOrder?.length
+                      ? pkg.textOrder
+                      : (['header', 'inclusions', 'footer'] as PackageTextGroup[])
+                    ).map((groupKey, gIdx, arr) => {
+                      const activeFreeOffset =
+                        freeDragState?.pkgId === pkg.id && freeDragState.group === groupKey
+                          ? { x: freeDragState.x, y: freeDragState.y }
+                          : pkg.textOffsets?.[groupKey]
+
+                      // Scope free-drag offsets to Desktop (lg:) so Mobile alignment remains 100% frozen
+                      const hasOffset =
+                        activeFreeOffset && (activeFreeOffset.x !== 0 || activeFreeOffset.y !== 0)
+                      const freeStyle = hasOffset
+                        ? ({
+                            '--pkg-tx': `${activeFreeOffset.x}px`,
+                            '--pkg-ty': `${activeFreeOffset.y}px`,
+                            zIndex: freeDragState?.group === groupKey ? 30 : 10,
+                          } as React.CSSProperties)
+                        : undefined
+                      const freeClass = hasOffset
+                        ? 'lg:relative lg:[transform:translate3d(var(--pkg-tx,0px),var(--pkg-ty,0px),0)]'
+                        : ''
+
+                      const moveControls = isAdmin ? (
+                        <div className="hidden lg:flex items-center gap-1 shrink-0">
+                          <span
+                            onPointerDown={(e) => handleFreeMoveStart(pkg, groupKey, e)}
+                            title="Grab & drag anywhere on this package"
+                            className="inline-flex items-center gap-0.5 px-1.5 py-1 rounded bg-brand-secondary/20 text-brand-secondary hover:bg-brand-secondary/35 cursor-move border border-brand-secondary/50 select-none"
+                          >
+                            <Move className="w-3 h-3" />
+                            <span className="text-[9px] font-bold">Move</span>
+                          </span>
+                          <span
+                            title="Drag to swap vertical order"
+                            className="p-1 rounded bg-emerald-950/80 text-emerald-200 cursor-grab active:cursor-grabbing border border-emerald-800/60"
+                          >
+                            <GripVertical className="w-3 h-3" />
+                          </span>
+                          <button
+                            type="button"
+                            disabled={gIdx === 0}
+                            onClick={() => handleMoveTextGroup(pkg, groupKey, -1)}
+                            aria-label={`Move ${groupKey} up`}
+                            className="p-1 rounded bg-emerald-950/80 text-emerald-200 hover:text-brand-secondary border border-emerald-800/60 disabled:opacity-30"
+                          >
+                            <ArrowUp className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={gIdx === arr.length - 1}
+                            onClick={() => handleMoveTextGroup(pkg, groupKey, 1)}
+                            aria-label={`Move ${groupKey} down`}
+                            className="p-1 rounded bg-emerald-950/80 text-emerald-200 hover:text-brand-secondary border border-emerald-800/60 disabled:opacity-30"
+                          >
+                            <ArrowDown className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : null
+
+                      const dragWrapperProps = isAdmin
+                        ? {
+                            draggable: true,
+                            onDragStart: (e: React.DragEvent) => {
+                              e.stopPropagation()
+                              setDraggedTextGroup({ pkgId: pkg.id, group: groupKey })
+                            },
+                            onDragOver: (e: React.DragEvent) => {
+                              if (draggedTextGroup?.pkgId === pkg.id) {
+                                e.preventDefault()
+                              }
+                            },
+                            onDrop: (e: React.DragEvent) => {
+                              e.preventDefault()
+                              handleDropTextGroup(pkg, groupKey)
+                            },
+                            onDragEnd: () => setDraggedTextGroup(null),
+                          }
+                        : {}
+
+                      const isBeingDragged =
+                        draggedTextGroup?.pkgId === pkg.id && draggedTextGroup.group === groupKey
+
+                      if (groupKey === 'header') {
+                        return (
+                          <div
+                            key="header"
+                            {...dragWrapperProps}
+                            style={freeStyle}
+                            className={`space-y-2 rounded-xl transition-shadow ${freeClass} ${
+                              isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-emerald-700/70 lg:p-1 lg:-m-1' : ''
+                            } ${isBeingDragged ? 'opacity-45' : ''}`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300 flex-wrap">
+                                <MapPin className="w-3.5 h-3.5 text-white/80 shrink-0" />
+                                <span>{pkg.location}</span>
+                                <span className="text-emerald-700">•</span>
+                                <Users className="w-3.5 h-3.5 text-white/80 shrink-0" />
+                                <span>{pkg.guestCapacity}</span>
+                              </div>
+                              {moveControls}
+                            </div>
+
+                            <h2 className="text-xl sm:text-2xl font-bold text-white group-hover:text-brand-secondary transition-colors leading-snug">
+                              {pkg.title}
+                            </h2>
+
+                            <p className="text-xs sm:text-sm text-gray-300/90 leading-relaxed">
+                              {pkg.description}
+                            </p>
+                          </div>
+                        )
+                      }
+
+                      if (groupKey === 'inclusions') {
+                        return (
+                          <div
+                            key="inclusions"
+                            {...dragWrapperProps}
+                            style={freeStyle}
+                            className={`space-y-2 pt-2 border-t border-emerald-900/60 rounded-xl transition-shadow ${freeClass} ${
+                              isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-emerald-700/70 lg:p-1 lg:-m-1' : ''
+                            } ${isBeingDragged ? 'opacity-45' : ''}`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-xs font-bold uppercase tracking-wider text-brand-secondary">
+                                Bespoke Inclusions
+                              </p>
+                              {moveControls}
+                            </div>
+                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-emerald-100/90">
+                              {pkg.inclusions.map((inc, idx) => (
+                                <li key={idx} className="flex items-start gap-2">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-brand-secondary/80 shrink-0 mt-1.5" />
+                                  <span>{inc}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )
+                      }
+
+                      return (
+                        <div
+                          key="footer"
+                          {...dragWrapperProps}
+                          style={freeStyle}
+                          className={`pt-3 border-t border-emerald-900/60 flex items-center justify-between gap-4 rounded-xl transition-shadow ${freeClass} ${
+                            isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-emerald-700/70 lg:p-1 lg:-m-1' : ''
+                          } ${isBeingDragged ? 'opacity-45' : ''}`}
+                        >
+                          <div className="text-[11px] text-emerald-400/80">
+                            <span>Curated by </span>
+                            <strong className="text-emerald-200">{pkg.partnerPlanner}</strong>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            {moveControls}
+                            <button
+                              type="button"
+                              onClick={() => handleInquireClick(pkg)}
+                              className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] hover:from-[#FFF566] hover:to-[#FFB000] text-brand-dark font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0"
+                            >
+                              <span>Inquire Package</span>
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300">
-                      <MapPin className="w-3.5 h-3.5 text-white/80 shrink-0" />
-                      <span>{pkg.location}</span>
-                      <span className="text-emerald-700">•</span>
-                      <Users className="w-3.5 h-3.5 text-white/80 shrink-0" />
-                      <span>{pkg.guestCapacity}</span>
-                    </div>
+                {/* Bottom Row: Reels Section directly UNDER this package (Horizontally ordered on web, vertical on mobile) */}
+                {((pkg.reels && pkg.reels.length > 0) || isAdmin) && (
+                  <div
+                    onDragOver={(e) => {
+                      if (isAdmin && draggedReel) e.preventDefault()
+                    }}
+                    onDrop={(e) => {
+                      if (!isAdmin || !draggedReel) return
+                      e.preventDefault()
+                      handleDropReel(pkg.id)
+                    }}
+                    className="p-5 sm:p-6 lg:px-7 border-t border-emerald-900/60 bg-emerald-950/20 space-y-4"
+                  >
+                    {isAdmin && (
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          disabled={past.length === 0}
+                          onClick={undo}
+                          title="Undo"
+                          aria-label="Undo last change"
+                          className="p-1.5 rounded-full bg-emerald-900/80 hover:bg-emerald-800 text-emerald-100 hover:text-brand-secondary border border-emerald-700/50 disabled:opacity-35 transition-colors"
+                        >
+                          <Undo2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={future.length === 0}
+                          onClick={redo}
+                          title="Redo"
+                          aria-label="Redo last undone change"
+                          className="p-1.5 rounded-full bg-emerald-900/80 hover:bg-emerald-800 text-emerald-100 hover:text-brand-secondary border border-emerald-700/50 disabled:opacity-35 transition-colors"
+                        >
+                          <Redo2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReelTargetPackageId(pkg.id)
+                            setEditingReel(null)
+                            setIsReelModalOpen(true)
+                          }}
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-900/80 hover:bg-emerald-800 text-brand-secondary text-[11px] font-bold border border-brand-secondary/35 transition-colors"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>Add Reel</span>
+                        </button>
+                      </div>
+                    )}
 
-                    <h2 className="text-xl sm:text-2xl font-bold text-white group-hover:text-brand-secondary transition-colors leading-snug">
-                      {pkg.title}
-                    </h2>
-
-                    <p className="text-xs sm:text-sm text-gray-300/90 leading-relaxed">
-                      {pkg.description}
-                    </p>
+                    {pkg.reels && pkg.reels.length > 0 ? (
+                      <div className="flex flex-col md:flex-row md:flex-wrap items-center md:items-start gap-5">
+                        {pkg.reels.map((reel, rIdx) => (
+                          <div
+                            key={reel.id}
+                            draggable={Boolean(isAdmin)}
+                            onDragStart={(e) => {
+                              e.stopPropagation()
+                              setDraggedReel({ pkgId: pkg.id, reelId: reel.id, index: rIdx })
+                            }}
+                            onDragOver={(e) => {
+                              if (isAdmin && draggedReel) e.preventDefault()
+                            }}
+                            onDrop={(e) => {
+                              if (!isAdmin || !draggedReel) return
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleDropReel(pkg.id, rIdx)
+                            }}
+                            onDragEnd={() => setDraggedReel(null)}
+                            className={`w-full md:w-auto flex justify-center md:justify-start transition-opacity ${
+                              draggedReel?.reelId === reel.id ? 'opacity-45' : ''
+                            }`}
+                          >
+                            <ReelPlayerCard
+                              reel={reel}
+                              isAdmin={Boolean(isAdmin)}
+                              canMoveLeft={rIdx > 0}
+                              canMoveRight={rIdx < pkg.reels.length - 1}
+                              onMoveLeft={() => reorderPackageReels(pkg.id, rIdx, rIdx - 1)}
+                              onMoveRight={() => reorderPackageReels(pkg.id, rIdx, rIdx + 1)}
+                              onEdit={(r) => {
+                                setReelTargetPackageId(pkg.id)
+                                setEditingReel(r)
+                                setIsReelModalOpen(true)
+                              }}
+                              onDelete={(reelId) => {
+                                if (window.confirm(`Delete reel "${reel.title}"?`)) {
+                                  deletePackageReel(pkg.id, reelId)
+                                }
+                              }}
+                              onUpdateSettings={(reelId, updates) => {
+                                setLastEditedPkgId(pkg.id)
+                                updatePackageReel(pkg.id, reelId, updates)
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-emerald-300/60 italic">
+                        No reels added yet. Click &quot;Add Reel&quot; to attach a 5s dummy or custom video.
+                      </p>
+                    )}
                   </div>
-
-                  {/* Curated Inclusions */}
-                  <div className="space-y-2 pt-2 border-t border-emerald-900/60">
-                    <p className="text-xs font-bold uppercase tracking-wider text-brand-secondary">
-                      Bespoke Inclusions
-                    </p>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-emerald-100/90">
-                      {pkg.inclusions.map((inc, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-brand-secondary/80 shrink-0 mt-1.5" />
-                          <span>{inc}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Footer & Action Button */}
-                  <div className="pt-3 border-t border-emerald-900/60 flex items-center justify-between gap-4">
-                    <div className="text-[11px] text-emerald-400/80">
-                      <span>Curated by </span>
-                      <strong className="text-emerald-200">{pkg.partnerPlanner}</strong>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleInquireClick(pkg)}
-                      className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] hover:from-[#FFF566] hover:to-[#FFB000] text-brand-dark font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0"
-                    >
-                      <span>Inquire Package</span>
-                    </button>
-                  </div>
-                </div>
+                )}
               </article>
             ))}
           </div>
@@ -627,6 +1174,27 @@ export default function PackagesPage() {
           </div>
         </div>
       )}
+      {/* Admin Package Add/Edit Modal */}
+      <PackageFormModal
+        isOpen={isPkgModalOpen}
+        onClose={() => {
+          setIsPkgModalOpen(false)
+          setEditingPackage(null)
+        }}
+        initialPackage={editingPackage}
+      />
+
+      {/* Admin Reel Add/Edit Modal */}
+      <ReelFormModal
+        isOpen={isReelModalOpen}
+        onClose={() => {
+          setIsReelModalOpen(false)
+          setEditingReel(null)
+          setReelTargetPackageId(null)
+        }}
+        packageId={reelTargetPackageId}
+        initialReel={editingReel}
+      />
     </Layout>
   )
 }

@@ -1,13 +1,16 @@
 import { useState } from 'react'
-import { Building2, MapPin, Check, Loader2, AlertCircle, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Building2, MapPin, Check, Loader2, AlertCircle, X, Package, Film } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
 import AddVenueModal from '../modals/AddVenueModal'
+import PackageFormModal from '../modals/PackageFormModal'
+import ReelFormModal from '../modals/ReelFormModal'
 
 export function AdminManageEntities() {
   const queryClient = useQueryClient()
 
-  const [activeModal, setActiveModal] = useState<'city' | 'venue' | null>(null)
+  const [activeModal, setActiveModal] = useState<'city' | 'venue' | 'package' | 'reel' | null>(null)
 
   // City form state
   const [cityName, setCityName] = useState('')
@@ -76,6 +79,31 @@ export function AdminManageEntities() {
           <MapPin className="w-4 h-4 text-brand-primary" />
           <span>Add New City</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveModal('package')}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-brand-dark font-semibold text-sm rounded-xl hover:bg-gray-50 shadow-sm transition-all active:scale-95"
+        >
+          <Package className="w-4 h-4 text-brand-primary" />
+          <span>Add Package</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveModal('reel')}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-brand-dark font-semibold text-sm rounded-xl hover:bg-gray-50 shadow-sm transition-all active:scale-95"
+        >
+          <Film className="w-4 h-4 text-brand-primary" />
+          <span>Add Reel Video</span>
+        </button>
+
+        <Link
+          to="/packages"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-50 border border-amber-200 text-amber-900 font-semibold text-sm rounded-xl hover:bg-amber-100 shadow-sm transition-all"
+        >
+          <span>Edit Packages &amp; Reels →</span>
+        </Link>
       </div>
 
       {/* ── MODAL 1: ADD CITY ── */}
@@ -167,6 +195,18 @@ export function AdminManageEntities() {
       {/* ── MODAL 2: ADD VENUE (DIRECT PHOTO UPLOADER) ── */}
       <AddVenueModal
         isOpen={activeModal === 'venue'}
+        onClose={() => setActiveModal(null)}
+      />
+
+      {/* ── MODAL 3: ADD PACKAGE ── */}
+      <PackageFormModal
+        isOpen={activeModal === 'package'}
+        onClose={() => setActiveModal(null)}
+      />
+
+      {/* ── MODAL 4: ADD REEL VIDEO ── */}
+      <ReelFormModal
+        isOpen={activeModal === 'reel'}
         onClose={() => setActiveModal(null)}
       />
     </>
