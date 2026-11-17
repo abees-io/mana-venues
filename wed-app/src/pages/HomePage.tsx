@@ -6,15 +6,18 @@ import {
   MapPin,
   RefreshCw,
   Building2,
+  Camera,
 } from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import AuditoriumCard from '../components/cards/AuditoriumCard'
 import { AuditoriumCardSkeletonList } from '../components/cards/AuditoriumCardSkeleton'
 import LocationModal from '../components/modals/LocationModal'
+import HomeImageModal, { type HomeImageTarget } from '../components/modals/HomeImageModal'
 import { useAuth } from '../contexts/AuthContext'
 import { useAuditoriums } from '../hooks/useAuditoriums'
 import { useCityStore } from '../store/cityStore'
 import { useFilterStore } from '../store/filterStore'
+import { useHomeMediaStore } from '../store/homeMediaStore'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -89,6 +92,9 @@ export default function HomePage() {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
+  const [editingImageTarget, setEditingImageTarget] = useState<HomeImageTarget | null>(null)
+  const heroImage = useHomeMediaStore((s) => s.heroImage)
+  const categoryImages = useHomeMediaStore((s) => s.categoryImages)
 
   // Near Me Geolocation States
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null)
@@ -355,12 +361,29 @@ export default function HomePage() {
         {/* HERO CARD CONTAINER */}
         <div className="max-w-5xl mx-auto px-3 sm:px-6">
           <div className="hero-card-animate relative rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/10] md:aspect-[2.1/1] min-h-[440px] sm:min-h-[460px] shadow-2xl border border-green-800/30 group will-change-[transform,opacity] transform-gpu">
-            {/* Background Mandap Image (Exact photo from user reference) */}
+            {/* Background Mandap Image */}
             <img
-              src="/dest-wedding-1.jpg"
-              alt="Grand Venues for Your Big Days"
+              src={heroImage}
+              alt="Curated Kerala Weddings"
               className="absolute inset-0 w-full h-full object-cover object-center scale-100 group-hover:scale-105 transition-transform duration-1000"
             />
+            {/* Admin: Change Hero Image Button */}
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() =>
+                  setEditingImageTarget({
+                    type: 'hero',
+                    id: 'hero',
+                    label: 'Hero Banner',
+                  })
+                }
+                className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-dark/90 backdrop-blur-md text-brand-secondary hover:bg-black text-xs font-bold border border-brand-secondary/50 shadow-lg transition-colors"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>Change Photo</span>
+              </button>
+            )}
             {/* Vignette Overlay for Crisp Readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25 pointer-events-none" />
 
@@ -371,12 +394,12 @@ export default function HomePage() {
                 className="hero-text-reveal text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide leading-tight bg-gradient-to-b from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent drop-shadow-sm"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
-                GRAND VENUES FOR YOUR BIG DAYS
+                CURATED KERALA WEDDINGS, MADE EFFORTLESS
               </h1>
 
               {/* Subtitle / Description — Matching Hero Title Rush Gold */}
               <p className="hero-text-reveal text-sm sm:text-base md:text-lg font-bold max-w-xl mx-auto drop-shadow-md leading-relaxed bg-gradient-to-r from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent">
-                Explore verified venues & bespoke Kerala wedding packages
+                From backwater resorts to top destination wedding planners all in one place
               </p>
 
               {/* CTA Button — Decreased Exposure with Refined Warm Gold Tone */}
@@ -424,12 +447,31 @@ export default function HomePage() {
                 style={{ WebkitTapHighlightColor: 'transparent', outline: 'none' }}
               >
                 <img
-                  src={cat.image}
+                  src={categoryImages[cat.id] || cat.image}
                   alt={cat.title}
                   className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500"
                   loading="eager"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 pointer-events-none" />
+
+                {/* Admin: Change Category Image Button */}
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setEditingImageTarget({
+                        type: 'category',
+                        id: cat.id,
+                        label: cat.title,
+                      })
+                    }}
+                    aria-label={`Change ${cat.title} photo`}
+                    className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-brand-dark/90 backdrop-blur-md text-brand-secondary hover:bg-black border border-brand-secondary/50 shadow-md transition-colors"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </button>
+                )}
 
                 {/* Top Pill Badge */}
                 <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] sm:text-xs font-semibold text-white/90 border border-white/10 pointer-events-none">
@@ -686,6 +728,12 @@ export default function HomePage() {
       <LocationModal
         isOpen={isLocationModalOpen}
         onClose={() => setIsLocationModalOpen(false)}
+      />
+
+      {/* Admin Front Page Image Modal */}
+      <HomeImageModal
+        target={editingImageTarget}
+        onClose={() => setEditingImageTarget(null)}
       />
     </Layout>
   )
