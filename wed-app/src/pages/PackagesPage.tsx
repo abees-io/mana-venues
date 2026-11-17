@@ -553,6 +553,28 @@ export default function PackagesPage() {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
+                disabled={past.length === 0}
+                onClick={undo}
+                title="Undo last package edit"
+                aria-label="Undo"
+                className="inline-flex items-center gap-1 px-3 py-2 rounded-full bg-white hover:bg-[#F0F9F8] text-black font-bold text-xs border border-[#D8F0EC] shadow-sm disabled:opacity-35 disabled:cursor-not-allowed active:scale-95 transition-all"
+              >
+                <Undo2 className="w-3.5 h-3.5 text-[#C83B68]" />
+                <span>Undo</span>
+              </button>
+              <button
+                type="button"
+                disabled={future.length === 0}
+                onClick={redo}
+                title="Redo last package edit"
+                aria-label="Redo"
+                className="inline-flex items-center gap-1 px-3 py-2 rounded-full bg-white hover:bg-[#F0F9F8] text-black font-bold text-xs border border-[#D8F0EC] shadow-sm disabled:opacity-35 disabled:cursor-not-allowed active:scale-95 transition-all"
+              >
+                <Redo2 className="w-3.5 h-3.5 text-[#C83B68]" />
+                <span>Redo</span>
+              </button>
+              <button
+                type="button"
                 onClick={() => {
                   setEditingPackage(null)
                   setIsPkgModalOpen(true)

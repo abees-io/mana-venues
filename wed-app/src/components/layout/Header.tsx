@@ -1,13 +1,26 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard } from 'lucide-react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Undo2, Redo2 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
+import { usePackagesStore } from '../../store/packagesStore'
+import { useHomeMediaStore } from '../../store/homeMediaStore'
 
 export default function Header() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, profile, signOut } = useAuth()
   const selectedCity = useCityStore((state) => state.selectedCity)
+
+  const pkgPast = usePackagesStore((s) => s.past)
+  const pkgFuture = usePackagesStore((s) => s.future)
+  const pkgUndo = usePackagesStore((s) => s.undo)
+  const pkgRedo = usePackagesStore((s) => s.redo)
+
+  const homePast = useHomeMediaStore((s) => s.past)
+  const homeFuture = useHomeMediaStore((s) => s.future)
+  const homeUndo = useHomeMediaStore((s) => s.undo)
+  const homeRedo = useHomeMediaStore((s) => s.redo)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
@@ -49,6 +62,30 @@ export default function Header() {
   const userInitial = (displayName?.[0] || 'U').toUpperCase()
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
   const isVendor = profile?.role === 'vendor' || user?.user_metadata?.role === 'vendor'
+
+  const isPackagesRoute = location.pathname.startsWith('/packages')
+  const canUndo = pkgPast.length > 0 || homePast.length > 0
+  const canRedo = pkgFuture.length > 0 || homeFuture.length > 0
+
+  const handleGlobalUndo = () => {
+    if (isPackagesRoute) {
+      if (pkgPast.length > 0) pkgUndo()
+      else if (homePast.length > 0) homeUndo()
+    } else {
+      if (homePast.length > 0) homeUndo()
+      else if (pkgPast.length > 0) pkgUndo()
+    }
+  }
+
+  const handleGlobalRedo = () => {
+    if (isPackagesRoute) {
+      if (pkgFuture.length > 0) pkgRedo()
+      else if (homeFuture.length > 0) homeRedo()
+    } else {
+      if (homeFuture.length > 0) homeRedo()
+      else if (pkgFuture.length > 0) pkgRedo()
+    }
+  }
 
   return (
     <header className="sticky top-0 z-40 bg-[#F0F9F8]/95 backdrop-blur-sm w-full">
@@ -93,6 +130,34 @@ export default function Header() {
           >
             <span>Packages</span>
           </Link>
+
+          {/* Admin-only Global Undo / Redo Buttons */}
+          {user && isAdmin && (
+            <div className="inline-flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                disabled={!canUndo}
+                onClick={handleGlobalUndo}
+                title="Undo last admin edit"
+                aria-label="Undo"
+                className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold text-black bg-white/90 hover:bg-white border border-[#D8F0EC] shadow-2xs disabled:opacity-35 disabled:cursor-not-allowed transition-all active:scale-95"
+              >
+                <Undo2 className="w-3.5 h-3.5 text-[#C83B68]" />
+                <span className="hidden lg:inline">Undo</span>
+              </button>
+              <button
+                type="button"
+                disabled={!canRedo}
+                onClick={handleGlobalRedo}
+                title="Redo last admin edit"
+                aria-label="Redo"
+                className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold text-black bg-white/90 hover:bg-white border border-[#D8F0EC] shadow-2xs disabled:opacity-35 disabled:cursor-not-allowed transition-all active:scale-95"
+              >
+                <Redo2 className="w-3.5 h-3.5 text-[#C83B68]" />
+                <span className="hidden lg:inline">Redo</span>
+              </button>
+            </div>
+          )}
 
           {/* Quick Admin Dashboard Link for Admin Users */}
           {user && isAdmin && (
