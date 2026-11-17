@@ -211,12 +211,6 @@ export default function Header() {
               >
                 Login
               </Link>
-              <Link
-                to="/auth/register"
-                className="px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-medium text-green-100 border border-green-700/40 rounded-lg hover:bg-green-900/40 hover:text-white transition-colors shrink-0"
-              >
-                Register
-              </Link>
             </div>
           )}
         </div>
