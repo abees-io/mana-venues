@@ -404,9 +404,8 @@ export default function HomePage() {
           onClick={() => {
             if (!isAdmin) navigate('/packages')
           }}
-          className={`categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-10 ${
-            !isAdmin ? 'cursor-pointer' : ''
-          }`}
+          className={`categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-10 ${!isAdmin ? 'cursor-pointer' : ''
+            }`}
           style={{ perspective: '800px' }}
         >
           <h2
@@ -522,7 +521,7 @@ export default function HomePage() {
                 {isNearMeActive
                   ? 'Venues Near You'
                   : selectedCity
-                    ? `Venues in ${selectedCity.name}`
+                    ? `find your Venues in ${selectedCity.name}`
                     : 'Find Your Venues in Kerala'}
               </h2>
               {!isLoading && (
@@ -548,11 +547,10 @@ export default function HomePage() {
                 type="button"
                 onClick={handleNearMeClick}
                 disabled={isLocating}
-                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${
-                  isNearMeActive
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${isNearMeActive
                     ? 'bg-emerald-600 text-white ring-2 ring-emerald-500/70 shadow-md scale-105'
                     : 'bg-green-900/50 hover:bg-green-800/70 text-green-100 hover:text-white border border-green-700/60'
-                }`}
+                  }`}
               >
                 <MapPin
                   className={`w-3.5 h-3.5 text-white ${isNearMeActive ? 'fill-current' : ''}`}
