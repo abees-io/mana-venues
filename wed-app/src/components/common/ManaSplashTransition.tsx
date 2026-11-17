@@ -53,24 +53,24 @@ export const ManaSplashTransition: React.FC = () => {
             transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
           }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center select-none overflow-hidden cursor-pointer bg-[#07170E]"
+          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center select-none overflow-hidden cursor-pointer bg-gradient-to-br from-[#F3A2BE] via-[#E06A94] to-[#B83865]"
           onClick={handleSkip}
         >
-          {/* Ambient Luxury Emerald & Gold Radial Glow */}
+          {/* Ambient Bubble Gum & Candy Floss Radial Glow */}
           <motion.div
             animate={{
               scale: phase === 'reveal' ? 1.5 : [1, 1.2, 1],
-              opacity: phase === 'reveal' ? 0 : 0.8,
+              opacity: phase === 'reveal' ? 0 : 0.75,
             }}
             transition={{
               scale: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
               opacity: { duration: 0.8 },
             }}
-            className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-[#FFAE00]/20 via-emerald-600/25 to-[#F9E866]/15 blur-[120px] pointer-events-none"
+            className="absolute w-[340px] h-[340px] sm:w-[520px] sm:h-[520px] rounded-full bg-gradient-to-tr from-[#F0F9F8]/30 via-[#F3A2BE]/40 to-white/25 blur-[100px] sm:blur-[120px] pointer-events-none"
           />
 
-          {/* Deep Radial Vignette */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,#05120B_80%)] pointer-events-none" />
+          {/* Soft Radial Vignette for Mobile & Desktop Depth */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_25%,rgba(126,31,62,0.35)_90%)] pointer-events-none" />
 
           {/* Center Logo Showcase with Cinematic Zoom Transition */}
           <motion.div
@@ -138,7 +138,7 @@ export const ManaSplashTransition: React.FC = () => {
                         }
                       : { x: '-130%' }
                   }
-                  className="w-full h-full bg-gradient-to-r from-transparent via-[#FFF8BA] to-transparent skew-x-[-25deg] opacity-95"
+                  className="w-full h-full bg-gradient-to-r from-transparent via-[#F0F9F8] to-transparent skew-x-[-25deg] opacity-95"
                 />
               </div>
             </div>
@@ -155,16 +155,16 @@ export const ManaSplashTransition: React.FC = () => {
               className="mt-6 text-center"
             >
               <h1
-                className="text-3xl sm:text-4xl font-extrabold tracking-[0.22em] uppercase bg-gradient-to-r from-[#FFAE00] via-[#FCE881] to-[#FFAE00] bg-clip-text text-transparent drop-shadow-md"
+                className="text-3xl sm:text-4xl font-extrabold tracking-[0.22em] uppercase text-[#F0F9F8] drop-shadow-md"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 MANA
               </h1>
               <motion.p
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.85 }}
+                animate={{ opacity: 0.95 }}
                 transition={{ delay: 0.35, duration: 0.5 }}
-                className="text-[11px] sm:text-xs uppercase tracking-[0.3em] text-emerald-200/90 font-medium mt-1.5"
+                className="text-[11px] sm:text-xs uppercase tracking-[0.3em] text-[#F0F9F8] font-medium mt-1.5 drop-shadow-xs"
               >
                 Luxury Wedding Venues
               </motion.p>
@@ -172,7 +172,7 @@ export const ManaSplashTransition: React.FC = () => {
           </motion.div>
 
           {/* Discreet Hint */}
-          <div className="absolute bottom-8 text-[11px] uppercase tracking-widest text-emerald-400/50 font-medium">
+          <div className="absolute bottom-8 text-[11px] uppercase tracking-widest text-[#F0F9F8]/80 font-medium">
             Tap anywhere to enter
           </div>
         </motion.div>

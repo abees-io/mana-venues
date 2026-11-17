@@ -68,7 +68,7 @@ function PackageImageGallery({
           setPhotoIdx((prev) => (prev + 1) % photos.length)
         }
       }}
-      className={`relative aspect-[16/10] sm:aspect-video lg:aspect-auto lg:h-full lg:min-h-[340px] w-full overflow-hidden bg-brand-dark ${
+      className={`relative aspect-[16/10] sm:aspect-video lg:aspect-auto lg:h-full lg:min-h-[340px] w-full overflow-hidden bg-[#FDF0F4] ${
         photos.length > 1 ? 'cursor-pointer' : ''
       }`}
     >
@@ -78,10 +78,10 @@ function PackageImageGallery({
         loading="lazy"
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
 
       {/* Backdrop Badge */}
-      <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-brand-dark/90 backdrop-blur-md border border-brand-secondary/60 text-xs font-semibold text-brand-secondary shadow-md">
+      <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-[#D8F0EC] text-xs font-semibold text-[#7E1F3E] shadow-md">
         <span>{pkg.backdrop} Experience</span>
       </div>
 
@@ -95,7 +95,7 @@ function PackageImageGallery({
             type="button"
             onClick={onEdit}
             aria-label={`Edit ${pkg.title}`}
-            className="p-2 rounded-full bg-brand-dark/90 backdrop-blur-md text-brand-secondary hover:bg-black border border-brand-secondary/50 shadow-md transition-colors"
+            className="p-2 rounded-full bg-white/90 backdrop-blur-md text-[#C83B68] hover:bg-white border border-[#D8F0EC] shadow-md transition-colors"
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>
@@ -103,7 +103,7 @@ function PackageImageGallery({
             type="button"
             onClick={onDelete}
             aria-label={`Delete ${pkg.title}`}
-            className="p-2 rounded-full bg-brand-dark/90 backdrop-blur-md text-red-400 hover:bg-red-950 border border-red-500/40 shadow-md transition-colors"
+            className="p-2 rounded-full bg-white/90 backdrop-blur-md text-red-500 hover:bg-red-50 border border-red-200 shadow-md transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -153,11 +153,11 @@ function PackageImageGallery({
       )}
 
       {/* Pricing tag */}
-      <div className="absolute bottom-3 right-3 px-3.5 py-1.5 rounded-lg bg-brand-dark/95 backdrop-blur-md border border-emerald-700/50 shadow-md text-right">
-        <span className="block text-[10px] uppercase tracking-wider text-emerald-300">
+      <div className="absolute bottom-3 right-3 px-3.5 py-1.5 rounded-lg bg-white/95 backdrop-blur-md border border-[#D8F0EC] shadow-md text-right">
+        <span className="block text-[10px] uppercase tracking-wider text-[#7E1F3E]/80 font-semibold">
           Starting From
         </span>
-        <span className="text-base sm:text-lg font-extrabold text-brand-secondary">
+        <span className="text-base sm:text-lg font-extrabold text-[#C83B68]">
           {pkg.startingPrice}
         </span>
       </div>
@@ -457,35 +457,35 @@ export default function PackagesPage() {
     <Layout>
       <div ref={pageRef}>
       {/* Top Hero Banner with Destination Wedding Showcase */}
-      <section className="relative overflow-hidden bg-brand-dark py-12 sm:py-16 px-4 sm:px-6 lg:px-8 border-b border-green-900/40">
-        <div className="absolute inset-0 pointer-events-none opacity-20">
-          <div className="absolute top-0 right-1/4 w-80 h-80 rounded-full bg-brand-secondary/30 blur-3xl" />
-          <div className="absolute bottom-0 left-1/4 w-96 h-96 rounded-full bg-emerald-600/20 blur-3xl" />
+      <section className="relative overflow-hidden bg-[#F0F9F8] py-12 sm:py-16 px-4 sm:px-6 lg:px-8 border-b border-[#D8F0EC]">
+        <div className="absolute inset-0 pointer-events-none opacity-25">
+          <div className="absolute top-0 right-1/4 w-80 h-80 rounded-full bg-[#D8F0EC]/60 blur-3xl" />
+          <div className="absolute bottom-0 left-1/4 w-96 h-96 rounded-full bg-[#D8F0EC]/50 blur-3xl" />
         </div>
 
         <div className="relative max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-12 items-center">
             {/* Left Column: Text & Filters */}
             <div className="lg:col-span-7 text-left space-y-4">
-              <div className="packages-hero-reveal inline-flex items-center px-3.5 py-1 rounded-full bg-emerald-950/80 border border-brand-secondary/50 text-xs font-semibold text-brand-secondary will-change-[transform,opacity]">
+              <div className="packages-hero-reveal inline-flex items-center px-3.5 py-1 rounded-full bg-white/90 border border-[#D8F0EC] text-xs font-semibold text-black will-change-[transform,opacity]">
                 <span>God’s Own Country Destination Weddings</span>
               </div>
 
               <h1
-                className="packages-hero-reveal text-3xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-wide leading-tight bg-[linear-gradient(135deg,#FFAE00_0%,#F9E866_100%)] bg-clip-text text-transparent drop-shadow-md will-change-[transform,opacity]"
+                className="packages-hero-reveal text-3xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-wide leading-tight text-black drop-shadow-xs will-change-[transform,opacity]"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 Bespoke Destination Wedding Packages
               </h1>
 
-              <p className="packages-hero-reveal text-sm sm:text-base lg:text-lg text-emerald-100/90 font-medium leading-relaxed will-change-[transform,opacity]">
+              <p className="packages-hero-reveal text-sm sm:text-base lg:text-lg text-black font-medium leading-relaxed will-change-[transform,opacity]">
                 Your celebration deserves the warmth and safety of home. Explore verified venues and
                 bespoke destination wedding packages across God's Own Country, thoughtfully designed to
                 honor Kerala’s rich cultural tapestry while keeping you in expert, caring hands.
               </p>
 
-              {/* Quick Filter & Search Bar */}
-              <div className="packages-hero-reveal pt-3 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between will-change-[transform,opacity]">
+              {/* Quick Filter & Search Bar — Desktop & Tablet only (hidden on mobile) */}
+              <div className="packages-hero-reveal hidden md:flex pt-3 flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between will-change-[transform,opacity]">
                 {/* Search Input */}
                 <div className="relative flex-1 max-w-md">
                   <input
@@ -494,9 +494,9 @@ export default function PackagesPage() {
                     onChange={(e) => setSearchFilter(e.target.value)}
                     placeholder="Search packages by location or style..."
                     aria-label="Search destination packages"
-                    className="w-full pl-10 pr-4 py-2 text-sm bg-brand-dark/90 border border-green-700/50 rounded-full text-white placeholder-emerald-400/50 focus:outline-none focus:ring-2 focus:ring-brand-secondary/40"
+                    className="w-full pl-10 pr-4 py-2 text-sm bg-white border border-[#A42A51]/30 rounded-full text-black placeholder-black/50 focus:outline-none focus:ring-2 focus:ring-[#E05A85]/40 shadow-xs"
                   />
-                  <Search className="w-4 h-4 text-emerald-400/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-[#A42A51]/60 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   {searchFilter && (
                     <button
                       type="button"
@@ -518,8 +518,8 @@ export default function PackagesPage() {
                       onClick={() => handleBackdropChange(tab)}
                       className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                         selectedBackdrop === tab
-                          ? 'bg-brand-secondary text-brand-dark font-bold shadow-md'
-                          : 'bg-emerald-950/60 text-emerald-200 hover:bg-emerald-900 border border-emerald-800/40'
+                          ? 'bg-[#C83B68] text-white font-bold shadow-md'
+                          : 'bg-white text-[#7E1F3E] hover:bg-[#A42A51]/10 border border-[#A42A51]/30'
                       }`}
                     >
                       {tab === 'All' ? 'All Backdrops' : tab}
@@ -530,7 +530,7 @@ export default function PackagesPage() {
             </div>
 
             {/* Right Column: Stacked Destination Images Showcase (Mobile & Desktop) */}
-            <div className="packages-stack-animate lg:col-span-5 w-full flex items-center justify-center lg:justify-end pt-4 lg:pt-0 will-change-[transform,opacity]">
+            <div className="packages-stack-animate lg:col-span-5 w-full flex items-center justify-center lg:justify-end pt-0 will-change-[transform,opacity]">
               <StackedDestinationImages />
             </div>
           </div>
@@ -541,12 +541,12 @@ export default function PackagesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
         {/* Admin Controls Bar (Visible only to Admin users) */}
         {isAdmin && (
-          <div className="mb-8 p-4 rounded-2xl bg-emerald-950/60 border border-brand-secondary/40 flex flex-wrap items-center justify-between gap-3">
+          <div className="mb-8 p-4 rounded-2xl bg-[#F0F9F8] border border-[#D8F0EC] flex flex-wrap items-center justify-between gap-3 shadow-xs">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-brand-secondary">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#C83B68]">
                 Admin Package &amp; Reel Studio
               </p>
-              <p className="text-xs text-emerald-200/80">
+              <p className="text-xs text-[#5A172D]/80">
                 Add packages, upload photos, arrange desktop text/videos, and save edits.
               </p>
             </div>
@@ -557,7 +557,7 @@ export default function PackagesPage() {
                   setEditingPackage(null)
                   setIsPkgModalOpen(true)
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] text-brand-dark font-extrabold text-xs shadow-md hover:brightness-105 active:scale-95 transition-all"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-[#E05A85] via-[#F3A2BE] to-[#E05A85] text-white font-extrabold text-xs shadow-md hover:brightness-105 active:scale-95 transition-all"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Package</span>
@@ -569,9 +569,9 @@ export default function PackagesPage() {
                   setEditingReel(null)
                   setIsReelModalOpen(true)
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-800/80 hover:bg-emerald-700 text-white font-bold text-xs border border-emerald-600/50 shadow-md active:scale-95 transition-all"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#C83B68] hover:bg-[#A42A51] text-white font-bold text-xs border border-[#D8F0EC] shadow-md active:scale-95 transition-all"
               >
-                <Film className="w-4 h-4 text-brand-secondary" />
+                <Film className="w-4 h-4 text-white" />
                 <span>Add Reel Video</span>
               </button>
 
@@ -584,10 +584,10 @@ export default function PackagesPage() {
                     ? `Last saved: ${new Date(savedDesktopAt || savedMobileAt || '').toLocaleTimeString()}`
                     : 'Save Desktop & Mobile edits'
                 }
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-900 hover:bg-emerald-800 text-brand-secondary font-bold text-xs border border-brand-secondary/50 shadow-md active:scale-95 transition-all"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white hover:bg-[#F0F9F8] text-[#C83B68] font-bold text-xs border border-[#D8F0EC] shadow-md active:scale-95 transition-all"
               >
                 {saveFeedback ? (
-                  <Check className="w-3.5 h-3.5 text-emerald-300" />
+                  <Check className="w-3.5 h-3.5 text-[#C83B68]" />
                 ) : (
                   <Save className="w-3.5 h-3.5" />
                 )}
@@ -602,10 +602,10 @@ export default function PackagesPage() {
                   type="button"
                   onClick={() => handleApplyToAll()}
                   title="Apply your saved layout & reel settings to all packages"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-brand-secondary/20 hover:bg-brand-secondary/35 text-brand-secondary font-extrabold text-xs border border-brand-secondary/60 shadow-md active:scale-95 transition-all"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#F3A2BE]/20 hover:bg-[#F3A2BE]/35 text-[#C83B68] font-extrabold text-xs border border-[#D8F0EC] shadow-md active:scale-95 transition-all"
                 >
                   {appliedAllPkgId ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-300" />
+                    <Check className="w-3.5 h-3.5 text-[#C83B68]" />
                   ) : (
                     <CopyCheck className="w-3.5 h-3.5" />
                   )}
@@ -622,14 +622,14 @@ export default function PackagesPage() {
             {[1, 2].map((n) => (
               <div
                 key={n}
-                className="rounded-2xl border border-green-800/40 bg-brand-dark/70 p-6 animate-pulse space-y-4"
+                className="rounded-2xl border border-[#D8F0EC] bg-[#FFF2F6] p-6 animate-pulse space-y-4"
               >
-                <div className="aspect-video w-full bg-emerald-950/60 rounded-xl" />
-                <div className="h-6 w-3/4 bg-emerald-950/80 rounded" />
-                <div className="h-4 w-1/2 bg-emerald-950/60 rounded" />
+                <div className="aspect-video w-full bg-[#E2F4F2] rounded-xl" />
+                <div className="h-6 w-3/4 bg-[#E2F4F2] rounded" />
+                <div className="h-4 w-1/2 bg-[#E2F4F2] rounded" />
                 <div className="space-y-2 pt-2">
-                  <div className="h-3 w-full bg-emerald-950/40 rounded" />
-                  <div className="h-3 w-5/6 bg-emerald-950/40 rounded" />
+                  <div className="h-3 w-full bg-[#E2F4F2] rounded" />
+                  <div className="h-3 w-5/6 bg-[#E2F4F2] rounded" />
                 </div>
               </div>
             ))}
@@ -638,17 +638,17 @@ export default function PackagesPage() {
 
         {/* Error State */}
         {hasError && !isLoading && (
-          <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-8 text-center max-w-lg mx-auto space-y-4">
-            <AlertCircle className="w-12 h-12 text-red-400 mx-auto" />
-            <h3 className="text-lg font-bold text-white">Unable to Load Packages</h3>
-            <p className="text-sm text-red-200/80">
+          <div className="rounded-2xl border border-red-200 bg-[#FFF2F6] p-8 text-center max-w-lg mx-auto space-y-4">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
+            <h3 className="text-lg font-bold text-[#5A172D]">Unable to Load Packages</h3>
+            <p className="text-sm text-[#7E1F3E]/80">
               We encountered a temporary network issue while fetching the destination wedding
               packages.
             </p>
             <button
               type="button"
               onClick={() => setHasError(false)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-secondary text-brand-dark font-bold text-sm shadow-md hover:bg-brand-secondary/90 transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#C83B68] hover:bg-[#A42A51] text-white font-bold text-sm shadow-md transition-all"
             >
               <RefreshCw className="w-4 h-4" />
               <span>Retry Loading</span>
@@ -658,10 +658,10 @@ export default function PackagesPage() {
 
         {/* Empty State */}
         {!isLoading && !hasError && filteredPackages.length === 0 && (
-          <div className="rounded-2xl border border-emerald-800/40 bg-brand-dark/80 p-10 text-center max-w-md mx-auto space-y-4">
-            <Package className="w-12 h-12 text-brand-secondary mx-auto opacity-70" />
-            <h3 className="text-lg font-bold text-white">No Matching Packages Found</h3>
-            <p className="text-sm text-emerald-200/80">
+          <div className="rounded-2xl border border-[#D8F0EC] bg-[#FFF2F6] p-10 text-center max-w-md mx-auto space-y-4 shadow-sm">
+            <Package className="w-12 h-12 text-[#C83B68] mx-auto opacity-70" />
+            <h3 className="text-lg font-bold text-[#5A172D]">No Matching Packages Found</h3>
+            <p className="text-sm text-[#7E1F3E]/80">
               We could not find any destination packages matching "{searchFilter || selectedBackdrop}
               ". Try selecting another backdrop or clear your search query.
             </p>
@@ -671,7 +671,7 @@ export default function PackagesPage() {
                 setSelectedBackdrop('All')
                 setSearchFilter('')
               }}
-              className="px-5 py-2 rounded-full bg-emerald-900 text-emerald-100 hover:bg-emerald-800 font-semibold text-xs border border-emerald-700/50 transition-all"
+              className="px-5 py-2 rounded-full bg-[#C83B68] text-white hover:bg-[#A42A51] font-semibold text-xs border border-[#D8F0EC] transition-all shadow-sm"
             >
               Reset Filters
             </button>
@@ -684,7 +684,7 @@ export default function PackagesPage() {
             {filteredPackages.map((pkg) => (
               <article
                 key={pkg.id}
-                className="package-card-animate group rounded-2xl overflow-hidden bg-brand-dark/85 backdrop-blur-md border border-green-800/50 shadow-xl hover:border-brand-secondary/60 hover:shadow-2xl transition-all duration-300 flex flex-col will-change-[transform,opacity]"
+                className="package-card-animate group rounded-2xl overflow-hidden bg-white backdrop-blur-md border border-[#D8F0EC] shadow-xl hover:border-[#BBE8E0] hover:shadow-2xl transition-all duration-300 flex flex-col will-change-[transform,opacity]"
               >
                 {/* Top Row: Photo on Left + Details on Right (or Swapped by Admin) */}
                 <div
@@ -717,7 +717,7 @@ export default function PackagesPage() {
                           <button
                             type="button"
                             onClick={() => updatePackage(pkg.id, { textOffsets: {} })}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-950/80 hover:bg-emerald-900 text-amber-300 text-[10px] font-semibold border border-amber-600/40 transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-[#F0F9F8] text-[#C83B68] text-[10px] font-semibold border border-[#D8F0EC] transition-colors"
                           >
                             <RotateCcw className="w-3 h-3" />
                             <span>Reset Text Positions</span>
@@ -730,7 +730,7 @@ export default function PackagesPage() {
                               reverseDesktopLayout: !pkg.reverseDesktopLayout,
                             })
                           }
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-950/80 hover:bg-emerald-900 text-emerald-200 text-[10px] font-semibold border border-emerald-700/50 transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-[#F0F9F8] text-[#7E1F3E] text-[10px] font-semibold border border-[#D8F0EC] transition-colors"
                         >
                           <ArrowLeftRight className="w-3 h-3 text-brand-secondary" />
                           <span>Swap Image / Text Side</span>
@@ -843,25 +843,25 @@ export default function PackagesPage() {
                             {...dragWrapperProps}
                             style={freeStyle}
                             className={`space-y-2 rounded-xl transition-shadow ${freeClass} ${
-                              isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-emerald-700/70 lg:p-1 lg:-m-1' : ''
+                              isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-[#C83B68]/70 lg:p-1 lg:-m-1' : ''
                             } ${isBeingDragged ? 'opacity-45' : ''}`}
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300 flex-wrap">
-                                <MapPin className="w-3.5 h-3.5 text-white/80 shrink-0" />
+                              <div className="flex items-center gap-2 text-xs font-semibold text-black flex-wrap">
+                                <MapPin className="w-3.5 h-3.5 text-[#C83B68] shrink-0" />
                                 <span>{pkg.location}</span>
-                                <span className="text-emerald-700">•</span>
-                                <Users className="w-3.5 h-3.5 text-white/80 shrink-0" />
+                                <span className="text-black">•</span>
+                                <Users className="w-3.5 h-3.5 text-[#C83B68] shrink-0" />
                                 <span>{pkg.guestCapacity}</span>
                               </div>
                               {moveControls}
                             </div>
 
-                            <h2 className="text-xl sm:text-2xl font-bold text-white group-hover:text-brand-secondary transition-colors leading-snug">
+                            <h2 className="text-xl sm:text-2xl font-bold text-black transition-colors leading-snug">
                               {pkg.title}
                             </h2>
 
-                            <p className="text-xs sm:text-sm text-gray-300/90 leading-relaxed">
+                            <p className="text-xs sm:text-sm text-black leading-relaxed">
                               {pkg.description}
                             </p>
                           </div>
@@ -874,20 +874,20 @@ export default function PackagesPage() {
                             key="inclusions"
                             {...dragWrapperProps}
                             style={freeStyle}
-                            className={`space-y-2 pt-2 border-t border-emerald-900/60 rounded-xl transition-shadow ${freeClass} ${
-                              isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-emerald-700/70 lg:p-1 lg:-m-1' : ''
+                            className={`space-y-2 pt-2 border-t border-[#D8F0EC] rounded-xl transition-shadow ${freeClass} ${
+                              isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-[#C83B68]/70 lg:p-1 lg:-m-1' : ''
                             } ${isBeingDragged ? 'opacity-45' : ''}`}
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <p className="text-xs font-bold uppercase tracking-wider text-brand-secondary">
+                              <p className="text-xs font-bold uppercase tracking-wider text-black">
                                 Bespoke Inclusions
                               </p>
                               {moveControls}
                             </div>
-                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-emerald-100/90">
+                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-black">
                               {pkg.inclusions.map((inc, idx) => (
                                 <li key={idx} className="flex items-start gap-2">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-brand-secondary/80 shrink-0 mt-1.5" />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-black shrink-0 mt-1.5" />
                                   <span>{inc}</span>
                                 </li>
                               ))}
@@ -901,13 +901,13 @@ export default function PackagesPage() {
                           key="footer"
                           {...dragWrapperProps}
                           style={freeStyle}
-                          className={`pt-3 border-t border-emerald-900/60 flex items-center justify-between gap-4 rounded-xl transition-shadow ${freeClass} ${
-                            isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-emerald-700/70 lg:p-1 lg:-m-1' : ''
+                          className={`pt-3 border-t border-[#D8F0EC] flex items-center justify-between gap-4 rounded-xl transition-shadow ${freeClass} ${
+                            isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-[#C83B68]/70 lg:p-1 lg:-m-1' : ''
                           } ${isBeingDragged ? 'opacity-45' : ''}`}
                         >
-                          <div className="text-[11px] text-emerald-400/80">
+                          <div className="text-[11px] text-black">
                             <span>Curated by </span>
-                            <strong className="text-emerald-200">{pkg.partnerPlanner}</strong>
+                            <strong className="text-black">{pkg.partnerPlanner}</strong>
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
@@ -915,7 +915,7 @@ export default function PackagesPage() {
                             <button
                               type="button"
                               onClick={() => handleInquireClick(pkg)}
-                              className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] hover:from-[#FFF566] hover:to-[#FFB000] text-brand-dark font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0"
+                              className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#E05A85] via-[#F3A2BE] to-[#E05A85] hover:brightness-105 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0"
                             >
                               <span>Inquire Package</span>
                             </button>
@@ -937,7 +937,7 @@ export default function PackagesPage() {
                       e.preventDefault()
                       handleDropReel(pkg.id)
                     }}
-                    className="p-5 sm:p-6 lg:px-7 border-t border-emerald-900/60 bg-emerald-950/20 space-y-4"
+                    className="p-5 sm:p-6 lg:px-7 border-t border-[#D8F0EC] bg-[#F0F9F8]/60 space-y-4"
                   >
                     {isAdmin && (
                       <div className="flex items-center justify-end gap-1.5">
@@ -1046,12 +1046,12 @@ export default function PackagesPage() {
           aria-modal="true"
           aria-labelledby="inquiry-modal-title"
         >
-          <div className="relative w-full max-w-lg rounded-2xl bg-brand-dark border border-brand-secondary/50 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-lg rounded-2xl bg-[#FFF2F6] border border-[#D8F0EC] shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
             {/* Close Button */}
             <button
               type="button"
               onClick={handleCloseModal}
-              className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-white rounded-full bg-emerald-950/60 border border-emerald-800/40"
+              className="absolute top-4 right-4 p-1.5 text-[#7E1F3E] hover:text-[#5A172D] rounded-full bg-white border border-[#D8F0EC]"
               aria-label="Close modal"
             >
               <X className="w-5 h-5" />
@@ -1059,20 +1059,20 @@ export default function PackagesPage() {
 
             {inquirySuccess ? (
               <div className="py-6 text-center space-y-4">
-                <div className="w-14 h-14 rounded-full bg-emerald-900/80 border border-brand-secondary flex items-center justify-center mx-auto text-brand-secondary">
+                <div className="w-14 h-14 rounded-full bg-white border border-[#D8F0EC] flex items-center justify-center mx-auto text-[#C83B68]">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-bold text-white">Inquiry Received with Warmth</h3>
-                <p className="text-sm text-emerald-100/90 leading-relaxed">
+                <h3 className="text-xl font-bold text-[#5A172D]">Inquiry Received with Warmth</h3>
+                <p className="text-sm text-[#7E1F3E]/90 leading-relaxed">
                   Thank you! Our dedicated Kerala destination wedding concierges and verified vendor
                   partners have received your inquiry for{' '}
-                  <strong className="text-brand-secondary">{inquiryPackage.title}</strong>. We will
+                  <strong className="text-[#C83B68]">{inquiryPackage.title}</strong>. We will
                   reach out to you within 24 hours.
                 </p>
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-6 py-2.5 rounded-full bg-brand-secondary text-brand-dark font-bold text-sm hover:bg-brand-secondary/90 transition-all shadow-md"
+                  className="px-6 py-2.5 rounded-full bg-[#C83B68] text-white font-bold text-sm hover:bg-[#A42A51] transition-all shadow-md"
                 >
                   Done
                 </button>
@@ -1080,20 +1080,20 @@ export default function PackagesPage() {
             ) : (
               <form onSubmit={handleFormSubmit} className="space-y-4 text-left">
                 <div className="space-y-1">
-                  <span className="text-xs uppercase tracking-wider text-brand-secondary font-semibold">
+                  <span className="text-xs uppercase tracking-wider text-[#C83B68] font-semibold">
                     Bespoke Consultation
                   </span>
-                  <h3 id="inquiry-modal-title" className="text-xl font-bold text-white">
+                  <h3 id="inquiry-modal-title" className="text-xl font-bold text-[#5A172D]">
                     Inquire: {inquiryPackage.title}
                   </h3>
-                  <p className="text-xs text-emerald-200/80">
+                  <p className="text-xs text-[#7E1F3E]/80">
                     Direct transparent connection with verified Kerala planners. Zero brokerage.
                   </p>
                 </div>
 
                 <div className="space-y-3 pt-2">
                   <div>
-                    <label htmlFor={fullNameId} className="block text-xs font-semibold text-emerald-200 mb-1">
+                    <label htmlFor={fullNameId} className="block text-xs font-semibold text-[#5A172D] mb-1">
                       Your Full Name *
                     </label>
                     <div className="relative">
@@ -1105,15 +1105,15 @@ export default function PackagesPage() {
                         value={formData.fullName}
                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         placeholder="e.g. Anjali Nair"
-                        className="w-full pl-9 pr-3 py-2 text-sm bg-brand-dark/90 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-brand-secondary/50"
+                        className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#D8F0EC] rounded-lg text-[#5A172D] placeholder-[#5A172D]/40 focus:outline-none focus:ring-2 focus:ring-[#C83B68]/50"
                       />
-                      <User className="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <User className="w-4 h-4 text-[#C83B68] absolute left-3 top-1/2 -translate-y-1/2" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label htmlFor={phoneId} className="block text-xs font-semibold text-emerald-200 mb-1">
+                      <label htmlFor={phoneId} className="block text-xs font-semibold text-[#5A172D] mb-1">
                         Phone / WhatsApp *
                       </label>
                       <div className="relative">
@@ -1125,14 +1125,14 @@ export default function PackagesPage() {
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                           placeholder="+91 98765 43210"
-                          className="w-full pl-9 pr-3 py-2 text-sm bg-brand-dark/90 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-brand-secondary/50"
+                          className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#D8F0EC] rounded-lg text-[#5A172D] placeholder-[#5A172D]/40 focus:outline-none focus:ring-2 focus:ring-[#C83B68]/50"
                         />
-                        <Phone className="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <Phone className="w-4 h-4 text-[#C83B68] absolute left-3 top-1/2 -translate-y-1/2" />
                       </div>
                     </div>
 
-                    <div>
-                      <label htmlFor={emailId} className="block text-xs font-semibold text-emerald-200 mb-1">
+                  <div>
+                      <label htmlFor={emailId} className="block text-xs font-semibold text-[#5A172D] mb-1">
                         Email Address *
                       </label>
                       <div className="relative">
@@ -1144,16 +1144,16 @@ export default function PackagesPage() {
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           placeholder="anjali@example.com"
-                          className="w-full pl-9 pr-3 py-2 text-sm bg-brand-dark/90 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-brand-secondary/50"
+                          className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#D8F0EC] rounded-lg text-[#5A172D] placeholder-[#5A172D]/40 focus:outline-none focus:ring-2 focus:ring-[#C83B68]/50"
                         />
-                        <Mail className="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <Mail className="w-4 h-4 text-[#C83B68] absolute left-3 top-1/2 -translate-y-1/2" />
                       </div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label htmlFor={eventDateId} className="block text-xs font-semibold text-emerald-200 mb-1">
+                      <label htmlFor={eventDateId} className="block text-xs font-semibold text-[#5A172D] mb-1">
                         Preferred Event Date
                       </label>
                       <div className="relative">
@@ -1162,14 +1162,14 @@ export default function PackagesPage() {
                           type="date"
                           value={formData.eventDate}
                           onChange={(e) => setFormData({ ...formData, eventDate: e.target.value })}
-                          className="w-full pl-9 pr-3 py-2 text-sm bg-brand-dark/90 border border-emerald-700/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-brand-secondary/50"
+                          className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#D8F0EC] rounded-lg text-[#5A172D] focus:outline-none focus:ring-2 focus:ring-[#C83B68]/50"
                         />
-                        <Calendar className="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <Calendar className="w-4 h-4 text-[#C83B68] absolute left-3 top-1/2 -translate-y-1/2" />
                       </div>
                     </div>
 
                     <div>
-                      <label htmlFor={guestCountId} className="block text-xs font-semibold text-emerald-200 mb-1">
+                      <label htmlFor={guestCountId} className="block text-xs font-semibold text-[#5A172D] mb-1">
                         Estimated Guests
                       </label>
                       <div className="relative">
@@ -1180,15 +1180,15 @@ export default function PackagesPage() {
                           value={formData.guestCount}
                           onChange={(e) => setFormData({ ...formData, guestCount: e.target.value })}
                           placeholder="e.g. 250"
-                          className="w-full pl-9 pr-3 py-2 text-sm bg-brand-dark/90 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-brand-secondary/50"
+                          className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#D8F0EC] rounded-lg text-[#5A172D] placeholder-[#5A172D]/40 focus:outline-none focus:ring-2 focus:ring-[#C83B68]/50"
                         />
-                        <Users className="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <Users className="w-4 h-4 text-[#C83B68] absolute left-3 top-1/2 -translate-y-1/2" />
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor={notesId} className="block text-xs font-semibold text-emerald-200 mb-1">
+                    <label htmlFor={notesId} className="block text-xs font-semibold text-[#5A172D] mb-1">
                       Special Preferences or Rituals
                     </label>
                     <textarea
@@ -1198,7 +1198,7 @@ export default function PackagesPage() {
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                       placeholder="Share details on traditions (Sadya preferences, musical welcome, temple rituals, etc.)"
-                      className="w-full p-2.5 text-sm bg-brand-dark/90 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-brand-secondary/50"
+                      className="w-full p-2.5 text-sm bg-white border border-[#D8F0EC] rounded-lg text-[#5A172D] placeholder-[#5A172D]/40 focus:outline-none focus:ring-2 focus:ring-[#C83B68]/50"
                     />
                   </div>
                 </div>
@@ -1207,14 +1207,14 @@ export default function PackagesPage() {
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="px-4 py-2 text-xs font-semibold text-gray-300 hover:text-white"
+                    className="px-4 py-2 text-xs font-semibold text-[#7E1F3E] hover:text-[#5A172D]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={formSubmitting}
-                    className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] hover:from-[#FFF566] hover:to-[#FFB000] text-brand-dark font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 disabled:opacity-50"
+                    className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#E05A85] via-[#F3A2BE] to-[#E05A85] hover:brightness-105 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 disabled:opacity-50"
                   >
                     {formSubmitting ? 'Sending Request...' : 'Submit Inquiry'}
                   </button>

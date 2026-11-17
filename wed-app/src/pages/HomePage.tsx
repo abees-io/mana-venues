@@ -357,10 +357,10 @@ export default function HomePage() {
 
 
       {/* SECTION 1: HERO & CATEGORIES (Matches User Reference Image) */}
-      <section ref={heroRef} className="w-full pt-4 sm:pt-6 pb-4">
+      <section ref={heroRef} className="w-full pt-0 pb-4">
         {/* HERO CARD CONTAINER */}
         <div className="max-w-5xl mx-auto px-3 sm:px-6">
-          <div className="hero-card-animate relative rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/10] md:aspect-[2.1/1] min-h-[440px] sm:min-h-[460px] shadow-2xl border border-green-800/30 group will-change-[transform,opacity] transform-gpu">
+          <div className="hero-card-animate relative rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/10] md:aspect-[2.1/1] min-h-[440px] sm:min-h-[460px] shadow-2xl border border-[#D8F0EC] group will-change-[transform,opacity] transform-gpu">
             {/* Background Mandap Image */}
             <img
               src={heroImage}
@@ -389,20 +389,20 @@ export default function HomePage() {
 
             {/* Centered Hero Content */}
             <div className="relative h-full flex flex-col items-center justify-center text-center p-6 sm:p-10 z-10 space-y-3 sm:space-y-4">
-              {/* Grand Venues Heading — Top-to-Bottom (180°) Metallic Gold Gradient */}
+              {/* Grand Venues Heading — Bubble Gum & Candy Floss Crisp Gradient */}
               <h1
-                className="hero-text-reveal text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide leading-tight bg-gradient-to-b from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent drop-shadow-sm"
+                className="hero-text-reveal text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide leading-tight bg-gradient-to-r from-white via-[#F3A2BE] to-[#F0F9F8] bg-clip-text text-transparent drop-shadow-md"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 CURATED KERALA WEDDINGS, MADE EFFORTLESS
               </h1>
 
-              {/* Subtitle / Description — Matching Hero Title Rush Gold */}
-              <p className="hero-text-reveal text-sm sm:text-base md:text-lg font-bold max-w-xl mx-auto drop-shadow-md leading-relaxed bg-gradient-to-r from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent">
+              {/* Subtitle / Description */}
+              <p className="hero-text-reveal text-sm sm:text-base md:text-lg font-medium text-white/95 max-w-xl mx-auto drop-shadow-md leading-relaxed">
                 From backwater resorts to top destination wedding planners all in one place
               </p>
 
-              {/* CTA Button — Decreased Exposure with Refined Warm Gold Tone */}
+              {/* CTA Button — Rose Accent */}
               <div className="hero-text-reveal pt-3 sm:pt-5">
                 <button
                   type="button"
@@ -413,7 +413,7 @@ export default function HomePage() {
                       gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                     }
                   }}
-                  className="px-8 sm:px-10 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#EBB522] via-[#DF9F10] to-[#CC8805] hover:from-[#F3BE2D] hover:to-[#D99209] text-brand-dark font-extrabold text-sm sm:text-base shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/50 hover:scale-105 active:scale-95 transition-all"
+                  className="px-8 sm:px-10 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#E05A85] via-[#F3A2BE] to-[#E05A85] hover:brightness-105 text-white font-extrabold text-sm sm:text-base shadow-lg shadow-black/30 hover:shadow-xl hover:scale-105 active:scale-95 transition-all"
                 >
                   {!isAdmin ? 'Explore Packages' : 'Explore Venues'}
                 </button>
@@ -432,7 +432,7 @@ export default function HomePage() {
           style={{ perspective: '800px' }}
         >
           <h2
-            className="category-title-animate text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent mb-4 sm:mb-5 tracking-wide text-left drop-shadow-sm inline-block"
+            className="category-title-animate text-2xl sm:text-3xl font-bold text-[#7E1F3E] mb-4 sm:mb-5 tracking-wide text-left drop-shadow-xs inline-block"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
             Explore Categories
@@ -478,10 +478,10 @@ export default function HomePage() {
                   {cat.badge}
                 </div>
 
-                {/* Large Bottom Title in Bright Rush Yellow Gradient */}
+                {/* Bottom Title in Crisp Gradient */}
                 <div className="absolute bottom-3 left-2.5 right-2.5 text-center pointer-events-none">
                   <h3
-                    className="text-sm sm:text-base md:text-lg font-bold bg-gradient-to-r from-[#FFF566] via-[#FFD000] to-[#FFA000] bg-clip-text text-transparent drop-shadow-md tracking-wide leading-tight"
+                    className="text-sm sm:text-base md:text-lg font-bold bg-gradient-to-r from-white via-[#FCE7ED] to-white bg-clip-text text-transparent drop-shadow-md tracking-wide leading-tight"
                     style={{ fontFamily: "'Cinzel', serif" }}
                   >
                     {cat.title}
@@ -492,33 +492,33 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* EDITORIAL CULTURAL DESCRIPTION — Monumental Brutalist Headline Typography on the Description */}
+        {/* EDITORIAL CULTURAL DESCRIPTION */}
         <div className="editorial-quote-section editorial-quote-card max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-8">
           {/* Top Technical Meta Bar */}
-          <div className="flex items-center justify-between border-b border-white/15 pb-3 mb-6 sm:mb-8 text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-white/50">
+          <div className="flex items-center justify-between border-b border-[#A42A51]/20 pb-3 mb-6 sm:mb-8 text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-[#A42A51]/70">
             <span>MANA VENUES • EDITORIAL</span>
             <span className="hidden sm:inline">KERALA • 2026</span>
             <span>CURATED DESTINATIONS</span>
           </div>
 
-          {/* Description in Massive Heading Typography with Highlighted Sentences */}
+          {/* Description in Headline Typography */}
           <div className="text-left">
             <h2
-              className="text-4xl sm:text-6xl md:text-7xl lg:text-[82px] font-normal tracking-normal leading-[1.05] text-white"
+              className="text-4xl sm:text-6xl md:text-7xl lg:text-[82px] font-normal tracking-normal leading-[1.05] text-[#5A172D]"
               style={{ fontFamily: "'Italiana', serif" }}
             >
-              {/* Highlighted core sentence in bright rush yellow gradient */}
-              <span className="inline">
+              {/* Highlighted core sentence */}
+              <span className="inline text-[#C83B68]">
                 {`Your celebration deserves the warmth and safety of home.`
                   .split(' ')
                   .map((word, i) => (
-                    <span key={`h1-${i}`} className="editorial-word rush-word mr-[0.22em]">
+                    <span key={`h1-${i}`} className="editorial-word rush-word mr-[0.22em] text-[#C83B68] font-medium">
                       {word}
                     </span>
                   ))}
               </span>{' '}
-              {/* Crisp high-contrast white text */}
-              <span className="text-white">
+              {/* Deep wine text */}
+              <span className="text-[#5A172D]/90">
                 {`Explore verified venues and bespoke destination wedding packages across God's Own Country,`
                   .split(' ')
                   .map((word, i) => (
@@ -528,18 +528,18 @@ export default function HomePage() {
                   ))}
               </span>
               <span className="block my-3 sm:my-5" />
-              {/* Highlighted cultural statement in bright rush yellow gradient */}
-              <span className="inline">
+              {/* Highlighted cultural statement */}
+              <span className="inline text-[#C83B68]">
                 {`thoughtfully designed to honor Kerala's rich cultural tapestry`
                   .split(' ')
                   .map((word, i) => (
-                    <span key={`h2-${i}`} className="editorial-word rush-word mr-[0.22em]">
+                    <span key={`h2-${i}`} className="editorial-word rush-word mr-[0.22em] text-[#C83B68] font-medium">
                       {word}
                     </span>
                   ))}
               </span>{' '}
-              {/* Crisp high-contrast white text */}
-              <span className="text-white">
+              {/* Deep wine text */}
+              <span className="text-[#5A172D]/90">
                 {`while keeping you in expert, caring hands.`
                   .split(' ')
                   .map((word, i) => (
@@ -556,16 +556,16 @@ export default function HomePage() {
       {/* SECTION 2 & 3: FEED & GRID */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Feed Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-green-800/40 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-[#A42A51]/20 mb-8">
           <div>
             <p
-              className="text-2xl sm:text-3xl font-bold uppercase tracking-wide bg-gradient-to-r from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent mb-1 inline-block"
+              className="text-2xl sm:text-3xl font-bold uppercase tracking-wide text-[#7E1F3E] mb-1 inline-block"
               style={{ fontFamily: "'Cinzel', serif" }}
             >
               Find your venues
             </p>
             <div className="flex items-center gap-2.5">
-              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+              <h2 className="text-base sm:text-lg font-bold text-[#5A172D] tracking-tight">
                 {isNearMeActive
                   ? 'Venues Near You'
                   : selectedCity
@@ -573,14 +573,14 @@ export default function HomePage() {
                     : 'Venues in Kerala'}
               </h2>
               {!isLoading && (
-                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-green-900/40 text-emerald-300 border border-green-700/40">
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-[#A42A51]/15 text-[#7E1F3E] border border-[#A42A51]/30">
                   {displayedAuditoriums.length}
                 </span>
               )}
             </div>
 
             {/* Sub-heading */}
-            <p className="text-xs sm:text-sm text-green-200/70 mt-1">
+            <p className="text-xs sm:text-sm text-[#7E1F3E]/80 mt-1">
               {isNearMeActive
                 ? 'Showing curated auditoriums closest to your current location (sorted by proximity)'
                 : selectedCity
@@ -596,8 +596,8 @@ export default function HomePage() {
                 onClick={handleNearMeClick}
                 disabled={isLocating}
                 className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${isNearMeActive
-                    ? 'bg-emerald-600 text-white ring-2 ring-emerald-500/70 shadow-md scale-105'
-                    : 'bg-green-900/50 hover:bg-green-800/70 text-green-100 hover:text-white border border-green-700/60'
+                    ? 'bg-[#C83B68] text-white ring-2 ring-[#C83B68]/70 shadow-md scale-105'
+                    : 'bg-[#C83B68] hover:bg-[#A42A51] text-white border border-[#C83B68]'
                   }`}
               >
                 <MapPin
@@ -616,14 +616,14 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={handleClearNearMe}
-                  className="text-xs text-green-300/80 hover:text-white underline transition"
+                  className="text-xs text-[#C83B68] hover:text-[#7E1F3E] underline transition"
                 >
                   Clear Near Me
                 </button>
               )}
 
               {locationError && (
-                <span className="text-xs text-amber-300 bg-amber-950/70 border border-amber-800/60 px-2.5 py-1 rounded-md">
+                <span className="text-xs text-rose-800 bg-rose-100 border border-rose-300 px-2.5 py-1 rounded-md">
                   {locationError}
                 </span>
               )}
@@ -634,7 +634,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setIsLocationModalOpen(true)}
-              className="inline-flex items-center px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-green-100 bg-green-900/40 border border-green-700/40 hover:bg-green-800/50 hover:text-white transition-all shadow-xs"
+              className="inline-flex items-center px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#5A172D] bg-white border border-[#A42A51]/30 hover:bg-[#A42A51]/10 transition-all shadow-xs"
             >
               <span>{selectedCity && !isNearMeActive ? 'Change City' : 'Select City'}</span>
             </button>
@@ -661,7 +661,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => refetch()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-all shadow-sm"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#C83B68] hover:bg-[#A42A51] text-white font-bold text-sm transition-all shadow-sm"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>Retry</span>
@@ -671,14 +671,14 @@ export default function HomePage() {
 
           {/* Empty State */}
           {!isLoading && !isError && displayedAuditoriums.length === 0 && (
-            <div className="text-center py-16 bg-brand-dark/90 backdrop-blur-md rounded-2xl border border-green-800/40 shadow-xl max-w-lg mx-auto p-8 space-y-4">
-              <div className="w-14 h-14 rounded-full bg-green-900/40 text-white mx-auto flex items-center justify-center">
+            <div className="text-center py-16 bg-[#FFF2F6] backdrop-blur-md rounded-2xl border border-[#D8F0EC] shadow-xl max-w-lg mx-auto p-8 space-y-4">
+              <div className="w-14 h-14 rounded-full bg-[#F0F9F8] text-[#C83B68] border border-[#D8F0EC] mx-auto flex items-center justify-center">
                 <Building2 className="w-7 h-7" />
               </div>
-              <h3 className="text-lg font-bold text-white">
+              <h3 className="text-lg font-bold text-[#5A172D]">
                 No venues found {selectedCity ? `in ${selectedCity.name}` : ''}
               </h3>
-              <p className="text-sm text-green-200/70 max-w-sm mx-auto">
+              <p className="text-sm text-[#7E1F3E]/80 max-w-sm mx-auto">
                 {searchQuery
                   ? `No venues match the query "${searchQuery}". Try a different keyword or clear the search.`
                   : 'We could not find any active venues matching your criteria in this city.'}
@@ -688,7 +688,7 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-green-100 bg-green-900/40 hover:bg-green-800/60 border border-green-700/40 transition-colors"
+                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#5A172D] bg-[#F0F9F8] hover:bg-white border border-[#D8F0EC] transition-colors"
                   >
                     Clear Search
                   </button>
@@ -697,7 +697,7 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => clearCity()}
-                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors shadow-sm"
+                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#C83B68] hover:bg-[#A42A51] transition-colors shadow-sm"
                   >
                     View All Cities
                   </button>
@@ -705,7 +705,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setIsLocationModalOpen(true)}
-                  className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-emerald-300 bg-green-950/80 hover:bg-green-900/60 transition-colors border border-green-700/50"
+                  className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#7E1F3E] bg-[#F0F9F8] hover:bg-white transition-colors border border-[#D8F0EC]"
                 >
                   Switch City
                 </button>

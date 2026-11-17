@@ -214,7 +214,7 @@ export default function ReelPlayerCard({
       <div
         ref={containerRef}
         onClick={handleTogglePlay}
-        className={`group relative ${sizeClass} rounded-2xl overflow-hidden bg-brand-dark border border-green-800/60 shadow-xl cursor-pointer select-none transform-gpu transition-all duration-300`}
+        className={`group relative ${sizeClass} rounded-2xl overflow-hidden bg-brand-dark border border-[#D8F0EC] shadow-xl cursor-pointer select-none transform-gpu transition-all duration-300`}
       >
         {!useDummyPlayer ? (
           <video
@@ -349,7 +349,7 @@ export default function ReelPlayerCard({
             </span>
           )}
           <div
-            className={`flex items-center gap-1 text-[10px] font-medium text-emerald-300 mb-0.5 ${
+            className={`flex items-center gap-1 text-[10px] font-medium text-[#F0F9F8] mb-0.5 ${
               textAlign === 'center'
                 ? 'justify-center'
                 : textAlign === 'right'
@@ -379,13 +379,13 @@ export default function ReelPlayerCard({
       {/* Inline Admin Controls: Order, Ratio, Size, and Move Text Group */}
       {isAdmin && onUpdateSettings && (
         <div
-          className="flex flex-col gap-1.5 px-2.5 py-2 rounded-xl bg-emerald-950/80 border border-emerald-800/60 text-[10px] max-w-full"
+          className="flex flex-col gap-1.5 px-2.5 py-2 rounded-xl bg-white border border-[#D8F0EC] text-[10px] max-w-full text-[#5A172D] shadow-xs"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Reorder Video Row */}
-          <div className="flex items-center justify-between gap-2 pb-1 border-b border-emerald-800/50">
-            <span className="inline-flex items-center gap-1 text-emerald-200 font-semibold cursor-grab">
-              <GripVertical className="w-3 h-3 text-brand-secondary" />
+          <div className="flex items-center justify-between gap-2 pb-1 border-b border-[#D8F0EC]">
+            <span className="inline-flex items-center gap-1 text-[#5A172D] font-semibold cursor-grab">
+              <GripVertical className="w-3 h-3 text-[#C83B68]" />
               <span>Drag Video</span>
             </span>
             <div className="flex items-center gap-1">
@@ -394,7 +394,7 @@ export default function ReelPlayerCard({
                 disabled={!canMoveLeft}
                 onClick={onMoveLeft}
                 aria-label="Move video left"
-                className="p-1 rounded bg-brand-dark/80 text-emerald-200 hover:text-brand-secondary disabled:opacity-30"
+                className="p-1 rounded bg-[#F0F9F8] text-[#5A172D] hover:text-[#C83B68] disabled:opacity-30"
               >
                 <ArrowLeft className="w-3 h-3" />
               </button>
@@ -403,7 +403,7 @@ export default function ReelPlayerCard({
                 disabled={!canMoveRight}
                 onClick={onMoveRight}
                 aria-label="Move video right"
-                className="p-1 rounded bg-brand-dark/80 text-emerald-200 hover:text-brand-secondary disabled:opacity-30"
+                className="p-1 rounded bg-[#F0F9F8] text-[#5A172D] hover:text-[#C83B68] disabled:opacity-30"
               >
                 <ArrowRight className="w-3 h-3" />
               </button>
@@ -411,7 +411,7 @@ export default function ReelPlayerCard({
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-emerald-300/80 font-semibold mr-0.5">Ratio:</span>
+            <span className="text-[#7E1F3E]/80 font-semibold mr-0.5">Ratio:</span>
             {(['9:16', '16:9'] as ReelAspectRatio[]).map((ratio) => (
               <button
                 key={ratio}
@@ -419,16 +419,16 @@ export default function ReelPlayerCard({
                 onClick={() => onUpdateSettings(reel.id, { aspectRatio: ratio })}
                 className={`px-2 py-0.5 rounded font-bold transition-colors ${
                   aspectRatio === ratio
-                    ? 'bg-brand-secondary text-brand-dark'
-                    : 'bg-brand-dark/80 text-emerald-200 hover:bg-emerald-900'
+                    ? 'bg-[#C83B68] text-white'
+                    : 'bg-[#F0F9F8] text-[#5A172D] hover:bg-white border border-[#D8F0EC]'
                 }`}
               >
                 {ratio}
               </button>
             ))}
 
-            <span className="text-emerald-700 mx-0.5">|</span>
-            <span className="text-emerald-300/80 font-semibold mr-0.5">Size:</span>
+            <span className="text-[#D8F0EC] mx-0.5">|</span>
+            <span className="text-[#7E1F3E]/80 font-semibold mr-0.5">Size:</span>
             {SIZE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
@@ -436,8 +436,8 @@ export default function ReelPlayerCard({
                 onClick={() => onUpdateSettings(reel.id, { size: opt.value })}
                 className={`px-1.5 py-0.5 rounded font-bold transition-colors ${
                   size === opt.value
-                    ? 'bg-brand-secondary text-brand-dark'
-                    : 'bg-brand-dark/80 text-emerald-200 hover:bg-emerald-900'
+                    ? 'bg-[#C83B68] text-white'
+                    : 'bg-[#F0F9F8] text-[#5A172D] hover:bg-white border border-[#D8F0EC]'
                 }`}
               >
                 {opt.label}
@@ -446,7 +446,7 @@ export default function ReelPlayerCard({
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-emerald-300/80 font-semibold mr-0.5">Text:</span>
+            <span className="text-[#7E1F3E]/80 font-semibold mr-0.5">Text:</span>
             {(['top', 'center', 'bottom'] as ReelTextPosition[]).map((pos) => (
               <button
                 key={pos}
@@ -456,15 +456,15 @@ export default function ReelPlayerCard({
                 }
                 className={`px-1.5 py-0.5 rounded font-bold capitalize transition-colors ${
                   !activeTextPos && textPosition === pos
-                    ? 'bg-brand-secondary text-brand-dark'
-                    : 'bg-brand-dark/80 text-emerald-200 hover:bg-emerald-900'
+                    ? 'bg-[#C83B68] text-white'
+                    : 'bg-[#F0F9F8] text-[#5A172D] hover:bg-white border border-[#D8F0EC]'
                 }`}
               >
                 {pos}
               </button>
             ))}
 
-            <span className="text-emerald-700 mx-0.5">|</span>
+            <span className="text-[#D8F0EC] mx-0.5">|</span>
             {(['left', 'center', 'right'] as ReelTextAlign[]).map((align) => (
               <button
                 key={align}
@@ -472,8 +472,8 @@ export default function ReelPlayerCard({
                 onClick={() => onUpdateSettings(reel.id, { textAlign: align })}
                 className={`px-1.5 py-0.5 rounded font-bold uppercase transition-colors ${
                   textAlign === align
-                    ? 'bg-brand-secondary text-brand-dark'
-                    : 'bg-brand-dark/80 text-emerald-200 hover:bg-emerald-900'
+                    ? 'bg-[#C83B68] text-white'
+                    : 'bg-[#F0F9F8] text-[#5A172D] hover:bg-white border border-[#D8F0EC]'
                 }`}
               >
                 {align[0]}

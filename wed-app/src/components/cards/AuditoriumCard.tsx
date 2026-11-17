@@ -96,10 +96,10 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
   return (
     <Link
       to={`/auditorium/${auditorium.slug}`}
-      className="auditorium-card group block bg-brand-dark/85 backdrop-blur-md rounded-xl overflow-hidden border border-green-800/40 shadow-xl hover:shadow-2xl hover:border-green-700/60 hover:-translate-y-1 focus:outline-none focus:ring-0 active:outline-none transition-all duration-200"
+      className="auditorium-card group block bg-[#FFF2F6] hover:bg-[#FFEBF1] backdrop-blur-md rounded-2xl overflow-hidden border border-[#D8F0EC] shadow-md hover:shadow-xl hover:border-[#BBE8E0] hover:-translate-y-1 focus:outline-none focus:ring-0 active:outline-none transition-all duration-200"
     >
       {/* 16:9 Thumbnail Header with In-Place Photo Gallery */}
-      <div className="relative aspect-video w-full overflow-hidden bg-brand-dark/90 group/img">
+      <div className="relative aspect-video w-full overflow-hidden bg-[#FDF0F4] group/img">
         {hasPhoto && activePhoto ? (
           <img
             src={activePhoto}
@@ -111,9 +111,9 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
           />
         ) : (
           /* No-photo placeholder — shown when venue has no real photo available */
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-green-950/40">
-            <ImageOff className="w-10 h-10 text-green-700/60" />
-            <span className="text-[11px] text-green-600/70 font-medium">No photo available</span>
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-[#F0F9F8]">
+            <ImageOff className="w-10 h-10 text-[#7E1F3E]/40" />
+            <span className="text-[11px] text-[#7E1F3E]/70 font-medium">No photo available</span>
           </div>
         )}
 
@@ -125,22 +125,22 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
               onClick={handlePrevPhoto}
               title="Previous photo"
               aria-label="Previous photo"
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-brand-dark/85 hover:bg-emerald-700 text-white flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-all duration-150 shadow-lg backdrop-blur-xs z-20 border border-green-700/50"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/85 hover:bg-white text-[#7E1F3E] flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-all duration-150 shadow-md backdrop-blur-xs z-20 border border-[#D8F0EC]"
             >
-              <ChevronLeft className="w-4 h-4 text-white" />
+              <ChevronLeft className="w-4 h-4 text-[#7E1F3E]" />
             </button>
             <button
               type="button"
               onClick={handleNextPhoto}
               title="Next photo"
               aria-label="Next photo"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-brand-dark/85 hover:bg-emerald-700 text-white flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-all duration-150 shadow-lg backdrop-blur-xs z-20 border border-green-700/50"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/85 hover:bg-white text-[#7E1F3E] flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-all duration-150 shadow-md backdrop-blur-xs z-20 border border-[#D8F0EC]"
             >
-              <ChevronRight className="w-4 h-4 text-white" />
+              <ChevronRight className="w-4 h-4 text-[#7E1F3E]" />
             </button>
 
             {/* Photo Counter Pill */}
-            <div className="absolute bottom-2.5 right-3 flex items-center z-10 bg-brand-dark/90 backdrop-blur-xs px-2 py-0.5 rounded-full border border-green-700/60 shadow-md">
+            <div className="absolute bottom-2.5 right-3 flex items-center z-10 bg-[#5A172D]/85 backdrop-blur-xs px-2 py-0.5 rounded-full border border-white/20 shadow-md">
               <span className="text-[10px] font-bold text-white">
                 {effectiveIndex + 1}/{photosList.length}
               </span>
@@ -166,15 +166,15 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
         )}
 
         {/* Capacity badge */}
-        <div className="absolute top-3 right-3 bg-brand-dark/90 backdrop-blur-xs text-white border border-green-700/50 text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1 shadow-sm z-10">
-          <Users className="w-3.5 h-3.5 text-white" />
+        <div className="absolute top-3 right-3 bg-[#F0F9F8]/95 backdrop-blur-xs text-black border border-[#D8F0EC] text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1 shadow-sm z-10">
+          <Users className="w-3.5 h-3.5 text-black" />
           <span>{capacityValue.toLocaleString('en-IN')} guests</span>
         </div>
 
         {/* Distance Proximity badge (Near Me active) */}
         {auditorium.distanceKm !== undefined && auditorium.distanceKm !== null && (
-          <div className="absolute bottom-2.5 left-3 bg-brand-dark/95 backdrop-blur-xs text-white border border-green-700/60 text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 shadow-md z-10">
-            <Navigation className="w-3 h-3 text-white fill-current" />
+          <div className="absolute bottom-2.5 left-3 bg-[#F0F9F8]/95 backdrop-blur-xs text-black border border-[#D8F0EC] text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 shadow-md z-10">
+            <Navigation className="w-3 h-3 text-black fill-current" />
             <span>
               {auditorium.distanceKm < 1
                 ? `${Math.round(auditorium.distanceKm * 1000)} m away`
@@ -185,15 +185,15 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
       </div>
 
       {/* Card Body */}
-      <div className="p-4 space-y-2.5">
+      <div className="p-4 space-y-2.5 bg-[#FFF2F6]">
         {/* Title */}
-        <h3 className="font-bold text-base sm:text-lg text-green-50 truncate group-hover:text-emerald-300 transition-colors">
+        <h3 className="font-bold text-base sm:text-lg text-black truncate transition-colors">
           {auditorium.title || auditorium.name}
         </h3>
 
         {/* Location */}
-        <div className="flex items-center gap-1.5 text-xs text-green-200/70">
-          <MapPin className="w-3.5 h-3.5 shrink-0 text-white" />
+        <div className="flex items-center gap-1.5 text-xs text-black">
+          <MapPin className="w-3.5 h-3.5 shrink-0 text-black" />
           <span className="truncate">{cityDisplay}</span>
         </div>
 
@@ -203,13 +203,13 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
             {visibleAmenities.map((amenity, index) => (
               <span
                 key={index}
-                className="px-2 py-0.5 text-[11px] font-medium rounded-md bg-green-900/40 text-green-200 border border-green-700/40 truncate max-w-[120px]"
+                className="px-2 py-0.5 text-[11px] font-medium rounded-md bg-[#F0F9F8] text-black border border-[#D8F0EC] truncate max-w-[120px] shadow-2xs"
               >
                 {amenity}
               </span>
             ))}
             {remainingCount > 0 && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-green-950/60 text-green-300/70 border border-green-800/40">
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-[#F0F9F8] text-black border border-[#D8F0EC]">
                 +{remainingCount} more
               </span>
             )}
@@ -217,17 +217,17 @@ export default function AuditoriumCard({ auditorium }: AuditoriumCardProps) {
         )}
 
         {/* Card Footer: View Details & Contact CTA */}
-        <div className="pt-2.5 border-t border-green-900/40 flex items-center justify-between">
-          <span className="text-xs text-green-200 font-semibold group-hover:text-white transition-colors flex items-center gap-1">
+        <div className="pt-2.5 border-t border-[#D8F0EC] flex items-center justify-between">
+          <span className="text-xs text-black font-bold transition-colors flex items-center gap-1">
             <span>View Details</span>
-            <ChevronRight className="w-3.5 h-3.5 text-white" />
+            <ChevronRight className="w-3.5 h-3.5 text-black" />
           </span>
 
           {auditorium.phone_number && (
             <a
               href={`tel:${auditorium.phone_number}`}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] hover:from-[#FFF566] hover:to-[#FFB000] text-brand-dark font-bold text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all shrink-0 active:scale-95"
+              className="bg-gradient-to-r from-[#E05A85] via-[#F3A2BE] to-[#E05A85] hover:brightness-105 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all shrink-0 active:scale-95"
             >
               <Phone className="w-3.5 h-3.5" />
               <span>Contact Venue</span>

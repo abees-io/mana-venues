@@ -211,7 +211,7 @@ export default function HomeImageModal({ target, onClose }: HomeImageModalProps)
             <button
               type="button"
               onClick={handleReset}
-              className="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold text-amber-300 hover:text-amber-200"
+              className="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold text-rose-200 hover:text-white"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset Default</span>
@@ -228,7 +228,7 @@ export default function HomeImageModal({ target, onClose }: HomeImageModalProps)
               <button
                 type="submit"
                 disabled={isUploading}
-                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] hover:from-[#FFF566] hover:to-[#FFB000] text-brand-dark font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 disabled:opacity-50"
+                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#E05A85] via-[#F3A2BE] to-[#E05A85] hover:brightness-105 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 disabled:opacity-50"
               >
                 Save Photo
               </button>

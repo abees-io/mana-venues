@@ -1,5 +1,33 @@
 import type { Config } from 'tailwindcss'
 
+const candyScale = {
+  50: '#FFFFFF',
+  100: '#FAFDFD',
+  200: '#F5FBFA',
+  300: '#EBF7F5',
+  400: '#E2F4F2',
+  500: '#D5EFEB',
+  600: '#C7EAE5',
+  700: '#B8E4DD',
+  800: '#F0F9F8',  // Core Candy Floss
+  900: '#D8F0EC',
+  950: '#BBE6DF',
+}
+
+const roseScale = {
+  50: '#FFF0F5',   // Very soft pink (LavenderBlush)
+  100: '#FCE7ED',
+  200: '#FAD0DD',
+  300: '#F6A8C1',
+  400: '#EE759F',
+  500: '#E05A85',  // Core Vibrant Rose
+  600: '#C83B68',  // Rich Rose
+  700: '#A42A51',  // Deep Rose
+  800: '#7E1F3E',  // Royal Rose
+  900: '#5A172D',  // Wine Rose
+  950: '#3D0E1E',  // Darkest Plum Rose
+}
+
 export default {
   content: [
     "./index.html",
@@ -8,25 +36,37 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Swap green & emerald globally to Candy Floss
+        green: candyScale,
+        emerald: candyScale,
+        sky: roseScale,
+        blue: roseScale,
+        yellow: roseScale,
+        amber: roseScale,
         brand: {
-          primary: '#0D2818',    // deep forest green
-          secondary: '#FFC700',  // bright rush yellow (vibrant & luminous)
-          accent: '#F0F7F2',     // light forest tint
-          dark: '#0B1F12',       // darkest forest
+          primary: '#C83B68',    // Rich Rose
+          secondary: '#E05A85',  // Vibrant Rose
+          accent: '#F0F9F8',     // Candy Floss
+          dark: '#3D0E1E',       // Dark Wine Plum Rose
+          candy: '#F0F9F8',      // Candy Floss
+          rose: '#C83B68',       // Rose
+          softPink: '#FFF0F5',   // Lighter soft pink
+          lightPink: '#FFF2F6',  // Lighter soft pink
+          bubblegum: '#E05A85',  // Rose
           gold: {
-            light: '#FFF04B',    // bright rush yellow highlight
-            DEFAULT: '#FFC700',  // core bright rush yellow
-            dark: '#FFA000',     // deep amber rush
+            light: '#FAD0DD',
+            DEFAULT: '#E05A85',  // Rose
+            dark: '#7E1F3E',
           },
           rush: {
-            light: '#FFF566',
-            DEFAULT: '#FFCC00',
-            dark: '#FFA000',
+            light: '#FCE7ED',
+            DEFAULT: '#E05A85',
+            dark: '#A42A51',
           },
           forest: {
-            light: '#1B4332',
-            DEFAULT: '#0D2818',
-            dark: '#0B1F12',
+            light: '#F0F9F8',
+            DEFAULT: '#D8F0EC',
+            dark: '#BBE6DF',
           },
         },
       },

@@ -237,8 +237,8 @@ export default function StackedDestinationImages() {
 
               {/* Card Bottom Content */}
               <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 space-y-1 text-left">
-                <div className="flex items-center gap-1 text-[11px] sm:text-xs font-medium text-emerald-300/90">
-                  <MapPin className="w-3 h-3 text-emerald-400 shrink-0" />
+                <div className="flex items-center gap-1 text-[11px] sm:text-xs font-medium text-[#F0F9F8]">
+                  <MapPin className="w-3 h-3 text-[#F0F9F8] shrink-0" />
                   <span>{card.location}</span>
                 </div>
 
@@ -260,7 +260,7 @@ export default function StackedDestinationImages() {
                     to="/packages"
                     onClick={(e) => e.stopPropagation()}
                     tabIndex={isTop ? 0 : -1}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-300 hover:text-white transition-colors group/link"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#F0F9F8] hover:text-white transition-colors group/link"
                   >
                     <span>Explore Packages</span>
                     <ChevronRight className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" />
@@ -287,8 +287,8 @@ export default function StackedDestinationImages() {
               aria-label={`Jump to photo ${idx + 1}`}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 idx === activeIndex
-                  ? 'w-6 bg-white'
-                  : 'w-2 bg-white/30 hover:bg-white/50'
+                  ? 'w-6 bg-[#C83B68]'
+                  : 'w-2 bg-[#C83B68]/30 hover:bg-[#C83B68]/50'
               }`}
             />
           ))}
