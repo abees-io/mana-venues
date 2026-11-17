@@ -3,14 +3,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
-import LocationModal from '../modals/LocationModal'
 
 export default function Header() {
   const navigate = useNavigate()
   const { user, profile, signOut } = useAuth()
   const selectedCity = useCityStore((state) => state.selectedCity)
 
-  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -70,19 +68,6 @@ export default function Header() {
               MANA <span className="bg-gradient-to-r from-[#FFF04B] via-[#FFC700] to-[#FFA000] bg-clip-text text-transparent">VENUES</span>
             </span>
           </Link>
-
-          {/* City Badge Button */}
-          <button
-            type="button"
-            onClick={() => setIsLocationModalOpen(true)}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-green-900/40 hover:bg-green-900/60 text-green-100 transition-colors text-xs sm:text-sm font-medium border border-green-700/40 shrink min-w-0"
-            aria-label="Select City"
-          >
-            <span className="max-w-[75px] xs:max-w-[100px] sm:max-w-none truncate">
-              {selectedCity?.name ?? 'Select City'}
-            </span>
-            <ChevronDown className="w-3 h-3 text-green-400/60 shrink-0" />
-          </button>
         </div>
 
         {/* Center: Search Bar (Desktop / Tablet) */}
@@ -236,12 +221,6 @@ export default function Header() {
           )}
         </div>
       </div>
-
-      {/* Location Modal */}
-      <LocationModal
-        isOpen={isLocationModalOpen}
-        onClose={() => setIsLocationModalOpen(false)}
-      />
     </header>
   )
 }

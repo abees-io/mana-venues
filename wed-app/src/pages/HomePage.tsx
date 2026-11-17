@@ -516,13 +516,19 @@ export default function HomePage() {
         {/* Feed Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-green-800/40 mb-8">
           <div>
+            <p
+              className="text-2xl sm:text-3xl font-bold uppercase tracking-wide bg-gradient-to-r from-[#FFF566] via-[#FFCC00] to-[#FFA000] bg-clip-text text-transparent mb-1 inline-block"
+              style={{ fontFamily: "'Cinzel', serif" }}
+            >
+              Find your venues
+            </p>
             <div className="flex items-center gap-2.5">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
                 {isNearMeActive
                   ? 'Venues Near You'
                   : selectedCity
-                    ? `find your Venues in ${selectedCity.name}`
-                    : 'Find Your Venues in Kerala'}
+                    ? `Venues in ${selectedCity.name}`
+                    : 'Venues in Kerala'}
               </h2>
               {!isLoading && (
                 <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-green-900/40 text-emerald-300 border border-green-700/40">
