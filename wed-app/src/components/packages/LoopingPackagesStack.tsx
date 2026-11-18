@@ -1,10 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import {
-  MapPin,
-  Users,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react'
+import { MapPin, Users } from 'lucide-react'
 import type { WeddingPackage } from '../../store/packagesStore'
 
 interface LoopingPackagesStackProps {
@@ -81,61 +76,6 @@ export default function LoopingPackagesStack({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Top Package Switcher Pills & Autoplay Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 px-2">
-        {/* Package Tabs */}
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          {packages.map((pkg, idx) => {
-            const isCurrent = idx === activeIndex
-            return (
-              <button
-                key={pkg.id}
-                type="button"
-                onClick={() => {
-                  onActiveIndexChange(idx)
-                  if (onSelectPackage) onSelectPackage(pkg.id)
-                }}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 flex items-center gap-1.5 ${isCurrent
-                    ? 'bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] text-white font-bold shadow-md shadow-[#C83B68]/30 scale-105'
-                    : 'bg-white hover:bg-[#F0F9F8] text-[#5A172D] border border-[#D8F0EC]'
-                  }`}
-              >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${isCurrent ? 'bg-white' : 'bg-[#C83B68]'
-                    }`}
-                />
-                <span className="truncate max-w-[130px] sm:max-w-[170px]">
-                  {pkg.title.split(' ')[0]}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Prev / Next Arrows */}
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={handlePrev}
-            aria-label="Previous package"
-            className="p-1.5 rounded-full bg-white hover:bg-[#F0F9F8] text-[#7E1F3E] border border-[#D8F0EC] shadow-xs active:scale-95 transition-all"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <span className="text-xs font-mono font-bold text-[#A42A51] px-1.5">
-            {activeIndex + 1}/{total}
-          </span>
-          <button
-            type="button"
-            onClick={handleNext}
-            aria-label="Next package"
-            className="p-1.5 rounded-full bg-white hover:bg-[#F0F9F8] text-[#7E1F3E] border border-[#D8F0EC] shadow-xs active:scale-95 transition-all"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
       {/* 3D Coverflow Stage Container */}
       <div
         className="relative w-full h-[280px] sm:h-[340px] md:h-[380px] flex items-center justify-center overflow-hidden py-4"
@@ -184,8 +124,11 @@ export default function LoopingPackagesStack({
             <div
               key={pkg.id}
               onClick={() => {
-                onActiveIndexChange(index)
-                if (onSelectPackage) onSelectPackage(pkg.id)
+                if (isCenter) {
+                  if (onSelectPackage) onSelectPackage(pkg.id)
+                } else {
+                  onActiveIndexChange(index)
+                }
               }}
               className={`absolute top-0 w-[84%] sm:w-[68%] md:w-[54%] max-w-[460px] aspect-[16/10] sm:aspect-[16/10.5] rounded-3xl overflow-hidden cursor-pointer select-none transition-all duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-xl`}
               style={{
@@ -210,11 +153,6 @@ export default function LoopingPackagesStack({
               {/* Top Left Experience Badge */}
               <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/65 backdrop-blur-md text-[10px] sm:text-xs font-semibold text-white/95 border border-white/20 shadow-md pointer-events-none">
                 <span>{pkg.backdrop} Experience</span>
-              </div>
-
-              {/* Top Right Price Tag */}
-              <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-gradient-to-r from-[#E05A85] to-[#C83B68] text-xs font-extrabold text-white shadow-md pointer-events-none">
-                <span>{pkg.startingPrice}</span>
               </div>
 
               {/* Bottom Details on Card */}
