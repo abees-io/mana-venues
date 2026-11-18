@@ -4,6 +4,11 @@ import { persist } from 'zustand/middleware'
 export const DEFAULT_HERO_IMAGE = '/dest-wedding-1.jpg'
 
 export const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
+  destination_wedding: '/category-destination.jpg',
+  photography: '/category-photography.jpg',
+  catering: '/category-catering.jpg',
+  makeup_artist: '/category-makeup.jpg',
+  // Backward compatibility
   heritage: '/dest-wedding-1.jpg',
   lakeside: '/category-lakeside.jpg',
   beach: '/dest-wedding-2.jpg',
@@ -101,6 +106,17 @@ export const useHomeMediaStore = create<HomeMediaState>()(
         heroImage: state.heroImage,
         categoryImages: state.categoryImages,
       }),
+      merge: (persistedState, currentState) => {
+        const persisted = (persistedState as Partial<HomeMediaState>) || {}
+        return {
+          ...currentState,
+          ...persisted,
+          categoryImages: {
+            ...DEFAULT_CATEGORY_IMAGES,
+            ...(persisted.categoryImages || {}),
+          },
+        }
+      },
     }
   )
 )

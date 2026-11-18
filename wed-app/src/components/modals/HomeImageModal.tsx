@@ -19,6 +19,10 @@ interface HomeImageModalProps {
 }
 
 const PRESET_IMAGES = [
+  '/category-destination.jpg',
+  '/category-photography.jpg',
+  '/category-catering.jpg',
+  '/category-makeup.jpg',
   '/dest-wedding-1.jpg',
   '/dest-wedding-2.jpg',
   '/dest-wedding-3.jpg',

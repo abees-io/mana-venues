@@ -21,36 +21,47 @@ import { useHomeMediaStore } from '../store/homeMediaStore'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const CATEGORIES = [
+const CATEGORIES: Array<{
+  id: string
+  title: string
+  badge: string
+  image: string
+  query: string
+  subtypes?: { full: string; short: string }[]
+}> = [
   {
-    id: 'heritage',
-    title: 'Heritage & Tradition',
-    badge: 'Heritage & Tradition',
-    image: '/dest-wedding-1.jpg',
-    query: 'heritage',
+    id: 'destination_wedding',
+    title: 'Destination Wedding',
+    badge: 'Venues & Resorts',
+    image: '/category-destination.jpg',
+    query: 'destination wedding',
   },
   {
-    id: 'lakeside',
-    title: 'Lakeside & Backwaters',
-    badge: 'Lakeside & Backwaters',
-    image: '/category-lakeside.jpg',
-    query: 'backwater',
+    id: 'photography',
+    title: 'Photography Packages',
+    badge: 'Pro & Mobile',
+    image: '/category-photography.jpg',
+    query: 'photography',
+    subtypes: [
+      { full: 'Professional Photography', short: 'Pro Photography' },
+      { full: 'Mobile Photography', short: 'Mobile Photography' },
+    ],
   },
   {
-    id: 'beach',
-    title: 'Beach & Coastline',
-    badge: 'Beach & Coastline',
-    image: '/dest-wedding-2.jpg',
-    query: 'beach',
+    id: 'catering',
+    title: 'Catering',
+    badge: 'Feasts & Dining',
+    image: '/category-catering.jpg',
+    query: 'catering',
   },
   {
-    id: 'highland',
-    title: 'Highland & Hills',
-    badge: 'Highland & Hills',
-    image: '/dest-wedding-3.jpg',
-    query: 'resort',
+    id: 'makeup_artist',
+    title: 'Makeup Artist',
+    badge: 'Bridal & Groom',
+    image: '/category-makeup.jpg',
+    query: 'makeup artist',
   },
-] as const
+]
 
 // Haversine formula to calculate distance in km between two GPS coordinates
 function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -478,14 +489,27 @@ export default function HomePage() {
                   {cat.badge}
                 </div>
 
-                {/* Bottom Title in Crisp Gradient */}
-                <div className="absolute bottom-3 left-2.5 right-2.5 text-center pointer-events-none">
+                {/* Bottom Title & Subtypes in Crisp Gradient */}
+                <div className="absolute bottom-2.5 sm:bottom-3 left-2 right-2 text-center pointer-events-none flex flex-col items-center justify-end">
                   <h3
-                    className="text-sm sm:text-base md:text-lg font-bold bg-gradient-to-r from-white via-[#FCE7ED] to-white bg-clip-text text-transparent drop-shadow-md tracking-wide leading-tight"
+                    className="text-xs sm:text-base md:text-lg font-bold bg-gradient-to-r from-white via-[#FCE7ED] to-white bg-clip-text text-transparent drop-shadow-md tracking-wide leading-tight"
                     style={{ fontFamily: "'Cinzel', serif" }}
                   >
                     {cat.title}
                   </h3>
+                  {cat.subtypes && cat.subtypes.length > 0 && (
+                    <div className="mt-1 flex flex-wrap items-center justify-center gap-1">
+                      {cat.subtypes.map((sub) => (
+                        <span
+                          key={sub.full}
+                          className="px-1.5 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-[8px] sm:text-[9.5px] text-[#F0F9F8] font-medium border border-[#D8F0EC]/30 leading-tight drop-shadow-sm"
+                        >
+                          <span className="sm:hidden">{sub.short}</span>
+                          <span className="hidden sm:inline">{sub.full}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
