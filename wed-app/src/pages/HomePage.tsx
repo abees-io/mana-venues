@@ -56,10 +56,10 @@ const CATEGORIES: Array<{
   },
   {
     id: 'makeup_artist',
-    title: 'Makeup Artist',
+    title: 'Bridal and Make Up',
     badge: 'Bridal & Groom',
     image: '/category-makeup.jpg',
-    query: 'makeup artist',
+    query: 'bridal makeup',
   },
 ]
 
