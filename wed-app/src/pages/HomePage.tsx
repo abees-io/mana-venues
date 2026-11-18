@@ -39,12 +39,13 @@ const CATEGORIES: Array<{
   {
     id: 'photography',
     title: 'Photography Packages',
-    badge: 'Pro & Mobile',
+    badge: 'Wedding & Mobile',
     image: '/category-photography.jpg',
     query: 'photography',
     subtypes: [
-      { full: 'Professional Photography', short: 'Pro Photography' },
-      { full: 'Mobile Photography', short: 'Mobile Photography' },
+      { full: 'Wedding Photography', short: 'Wedding' },
+      { full: 'Mobile Photography', short: 'Mobile' },
+      { full: 'Normal Photography', short: 'Normal' },
     ],
   },
   {
@@ -359,6 +360,10 @@ export default function HomePage() {
       navigate('/packages#packages-section')
       return
     }
+    if (categoryId === 'photography') {
+      navigate('/photography')
+      return
+    }
     if (!isAdmin) {
       navigate('/packages')
       return
@@ -505,15 +510,26 @@ export default function HomePage() {
                     {cat.title}
                   </h3>
                   {cat.subtypes && cat.subtypes.length > 0 && (
-                    <div className="mt-1 flex flex-wrap items-center justify-center gap-1">
+                    <div className="mt-1 flex flex-wrap items-center justify-center gap-1 pointer-events-auto">
                       {cat.subtypes.map((sub) => (
-                        <span
+                        <button
                           key={sub.full}
-                          className="px-1.5 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-[8px] sm:text-[9.5px] text-[#F0F9F8] font-medium border border-[#D8F0EC]/30 leading-tight drop-shadow-sm"
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (sub.full.toLowerCase().includes('wedding')) {
+                              navigate('/photography?type=wedding')
+                            } else if (sub.full.toLowerCase().includes('mobile')) {
+                              navigate('/photography?type=mobile')
+                            } else {
+                              navigate('/photography?type=normal')
+                            }
+                          }}
+                          className="px-1.5 py-0.5 rounded-full bg-black/60 hover:bg-[#C83B68]/90 active:scale-95 backdrop-blur-xs text-[8px] sm:text-[9.5px] text-[#F0F9F8] font-medium border border-[#D8F0EC]/30 leading-tight drop-shadow-sm transition-all cursor-pointer"
                         >
                           <span className="sm:hidden">{sub.short}</span>
                           <span className="hidden sm:inline">{sub.full}</span>
-                        </span>
+                        </button>
                       ))}
                     </div>
                   )}

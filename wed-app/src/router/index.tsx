@@ -6,6 +6,7 @@ import BookingConfirmPage from '../pages/BookingConfirmPage'
 import ProfilePage from '../pages/ProfilePage'
 import AuthPage from '../pages/AuthPage'
 import PackagesPage from '../pages/PackagesPage'
+import PhotographyPage from '../pages/PhotographyPage'
 import VendorDashboard from '../pages/vendor/VendorDashboard'
 import VendorHallManager from '../pages/vendor/VendorHallManager'
 import AdminDashboard from '../pages/admin/AdminDashboard'
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
   {
     path: '/packages',
     element: <PackagesPage />,
+  },
+  {
+    path: '/photography',
+    element: <PhotographyPage />,
   },
   {
     path: '/city/:slug',

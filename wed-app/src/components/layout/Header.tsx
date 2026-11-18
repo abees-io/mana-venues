@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Undo2, Redo2 } from 'lucide-react'
+import CoolCameraIcon from '../common/CoolCameraIcon'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
 import { usePackagesStore } from '../../store/packagesStore'
@@ -126,9 +127,26 @@ export default function Header() {
           {/* Destination Packages Link */}
           <Link
             to="/packages"
-            className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-black bg-white/80 border border-[#D8F0EC] hover:bg-white active:bg-[#D8F0EC]/40 transition-colors shrink-0"
+            className={`hidden sm:inline-flex items-center px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0 ${
+              location.pathname === '/packages'
+                ? 'bg-[#C83B68] text-white shadow-xs font-bold'
+                : 'text-black bg-white/80 border border-[#D8F0EC] hover:bg-white active:bg-[#D8F0EC]/40'
+            }`}
           >
             <span>Packages</span>
+          </Link>
+
+          {/* Photography Packages Link */}
+          <Link
+            to="/photography"
+            className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0 ${
+              location.pathname === '/photography'
+                ? 'bg-[#C83B68] text-white shadow-xs font-bold'
+                : 'text-black bg-white/80 border border-[#D8F0EC] hover:bg-white active:bg-[#D8F0EC]/40'
+            }`}
+          >
+            <CoolCameraIcon className={`w-3.5 h-3.5 ${location.pathname === '/photography' ? 'text-white' : 'text-[#C83B68]'}`} />
+            <span>Photography</span>
           </Link>
 
           {/* Admin-only Global Undo / Redo Buttons */}

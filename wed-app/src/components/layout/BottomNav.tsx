@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Home, Search, User, Package } from 'lucide-react'
+import CoolCameraIcon from '../common/CoolCameraIcon'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
 
@@ -14,6 +15,7 @@ export default function BottomNav() {
 
   const isHomeActive = pathname === '/'
   const isPackagesActive = pathname === '/packages'
+  const isPhotoActive = pathname.startsWith('/photography')
   const isSearchActive = pathname.startsWith('/city')
   const isProfileActive = pathname === '/profile'
 
@@ -29,6 +31,12 @@ export default function BottomNav() {
       icon: Package,
       isActive: isPackagesActive,
       onClick: () => navigate('/packages'),
+    },
+    {
+      label: 'Photo',
+      icon: CoolCameraIcon,
+      isActive: isPhotoActive,
+      onClick: () => navigate('/photography'),
     },
     {
       label: 'Search',
