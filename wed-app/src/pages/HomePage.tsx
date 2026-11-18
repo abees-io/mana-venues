@@ -354,7 +354,11 @@ export default function HomePage() {
     return () => ctx.revert()
   }, [displayedAuditoriums.length, isLoading, selectedCity?.slug, isNearMeActive])
 
-  const handleCategorySelect = (query: string) => {
+  const handleCategorySelect = (categoryId: string, query: string) => {
+    if (categoryId === 'destination_wedding') {
+      navigate('/packages#packages-section')
+      return
+    }
     if (!isAdmin) {
       navigate('/packages')
       return
@@ -436,7 +440,7 @@ export default function HomePage() {
         {/* EXPLORE CATEGORIES SECTION */}
         <div
           onClick={() => {
-            if (!isAdmin) navigate('/packages')
+            if (!isAdmin) navigate('/packages#packages-section')
           }}
           className={`categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-10 ${!isAdmin ? 'cursor-pointer' : ''
             }`}
@@ -453,7 +457,10 @@ export default function HomePage() {
             {CATEGORIES.map((cat) => (
               <div
                 key={cat.id}
-                onClick={() => handleCategorySelect(cat.query)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleCategorySelect(cat.id, cat.query)
+                }}
                 className="category-card-animate group relative w-full aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer shadow-lg border-0 outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0 select-none will-change-[transform,opacity] transform-gpu active:opacity-95"
                 style={{ WebkitTapHighlightColor: 'transparent', outline: 'none' }}
               >

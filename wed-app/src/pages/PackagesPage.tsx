@@ -1,7 +1,9 @@
 import { useState, useId, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import gsap from 'gsap'
 import Layout from '../components/layout/Layout'
 import StackedDestinationImages from '../components/home/StackedDestinationImages'
+import LoopingPackagesStack from '../components/packages/LoopingPackagesStack'
 import ReelPlayerCard from '../components/packages/ReelPlayerCard'
 import PackageFormModal from '../components/modals/PackageFormModal'
 import ReelFormModal from '../components/modals/ReelFormModal'
@@ -169,6 +171,35 @@ export default function PackagesPage() {
   const { user, profile } = useAuth()
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
   const pageRef = useRef<HTMLDivElement>(null)
+  const location = useLocation()
+  const [activePackageIndex, setActivePackageIndex] = useState(0)
+  // (packages list is always shown)
+
+  // Smooth scroll when navigating with hash (e.g. from Explore Categories "Destination Wedding")
+  useEffect(() => {
+    const targetHash = location.hash || window.location.hash
+    if (
+      targetHash === '#packages-section' ||
+      targetHash === '#packages-grid' ||
+      targetHash === '#packages-list'
+    ) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById('packages-section')
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 180)
+      return () => clearTimeout(timer)
+    } else if (targetHash.startsWith('#package-')) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(targetHash.slice(1))
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 180)
+      return () => clearTimeout(timer)
+    }
+  }, [location.hash])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -204,7 +235,24 @@ export default function PackagesPage() {
         }
       )
 
-      // 3. Package cards staggered stack entrance
+      // 3. Explore packages square cards entrance cascade
+      gsap.fromTo(
+        '.package-square-card-animate',
+        { opacity: 0, y: 25, scale: 0.95 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.6,
+          delay: 0.25,
+          ease: 'power3.out',
+          stagger: 0.08,
+          clearProps: 'transform,opacity',
+          force3D: true,
+        }
+      )
+
+      // 4. Package cards staggered stack entrance
       gsap.fromTo(
         '.package-card-animate',
         { y: 30, opacity: 0, scale: 0.98 },
@@ -213,7 +261,7 @@ export default function PackagesPage() {
           opacity: 1,
           scale: 1,
           duration: 0.65,
-          delay: 0.3,
+          delay: 0.35,
           stagger: 0.1,
           ease: 'power3.out',
           force3D: true,
@@ -442,6 +490,34 @@ export default function PackagesPage() {
     }, 250)
   }
 
+  const handleSquarePackageClick = (pkgId: string) => {
+    const idx = packages.findIndex((p) => p.id === pkgId)
+    if (idx !== -1) {
+      setActivePackageIndex(idx)
+    }
+    const pkg = packages.find((p) => p.id === pkgId)
+    if (
+      pkg &&
+      selectedBackdrop !== 'All' &&
+      pkg.backdrop.toLowerCase() !== selectedBackdrop.toLowerCase()
+    ) {
+      setSelectedBackdrop('All')
+    }
+    if (searchFilter) {
+      setSearchFilter('')
+    }
+    setTimeout(() => {
+      const el = document.getElementById(`package-${pkgId}`)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        el.classList.remove('package-card-pop')
+        // Trigger clean reflow so pop animation plays
+        void el.offsetWidth
+        el.classList.add('package-card-pop')
+      }
+    }, 60)
+  }
+
   // Filter packages based on backdrop and search
   const filteredPackages = packages.filter((pkg) => {
     const matchesBackdrop =
@@ -452,6 +528,11 @@ export default function PackagesPage() {
       pkg.description.toLowerCase().includes(searchFilter.toLowerCase())
     return matchesBackdrop && matchesSearch
   })
+
+  // The package currently active in the 3D stack — drives the detail card below
+  const currentActivePackage = packages[activePackageIndex] || packages[0]
+  // Show only the active package in the detail section (synced with the looping stack)
+  const displayedPackages = currentActivePackage ? [currentActivePackage] : filteredPackages
 
   return (
     <Layout>
@@ -638,6 +719,36 @@ export default function PackagesPage() {
           </div>
         )}
 
+        {/* EXPLORE PACKAGES LOOPING STACK SECTION */}
+        <section
+          id="packages-section"
+          className="scroll-mt-24 mb-12 sm:mb-16 pt-1"
+          aria-label="Explore Destination Packages"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 sm:mb-6 gap-2">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/90 border border-[#D8F0EC] text-[11px] font-bold text-[#C83B68] mb-1.5 shadow-xs">
+                <span>Destination Wedding Packages</span>
+              </div>
+              <h2
+                className="text-2xl sm:text-3xl font-bold text-[#7E1F3E] tracking-wide text-left drop-shadow-xs"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                Explore Packages
+              </h2>
+            </div>
+          </div>
+
+          <LoopingPackagesStack
+            packages={packages}
+            activeIndex={activePackageIndex}
+            onActiveIndexChange={(idx) => {
+              setActivePackageIndex(idx)
+            }}
+            onSelectPackage={handleSquarePackageClick}
+          />
+        </section>
+
         {/* Loading State */}
         {isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8" aria-label="Loading packages">
@@ -700,13 +811,14 @@ export default function PackagesPage() {
           </div>
         )}
 
-        {/* Package Cards List — Horizontal card on desktop, with its own horizontally-ordered Reels section under it */}
-        {!isLoading && !hasError && filteredPackages.length > 0 && (
+        {/* Package Cards List — Synced with the looping stack above */}
+        {!isLoading && !hasError && displayedPackages.length > 0 && (
           <div className="flex flex-col gap-10">
-            {filteredPackages.map((pkg) => (
+            {displayedPackages.map((pkg) => (
               <article
                 key={pkg.id}
-                className="package-card-animate group rounded-2xl overflow-hidden bg-white backdrop-blur-md border border-[#D8F0EC] shadow-xl hover:border-[#BBE8E0] hover:shadow-2xl transition-all duration-300 flex flex-col will-change-[transform,opacity]"
+                id={`package-${pkg.id}`}
+                className="package-card-pop group rounded-2xl overflow-hidden bg-white backdrop-blur-md border border-[#D8F0EC] shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col will-change-[transform,opacity] scroll-mt-24"
               >
                 {/* Top Row: Photo on Left + Details on Right (or Swapped by Admin) */}
                 <div
