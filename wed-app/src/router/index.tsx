@@ -14,8 +14,13 @@ import VendorHallManager from '../pages/vendor/VendorHallManager'
 import AdminDashboard from '../pages/admin/AdminDashboard'
 import AdminVerificationQueue from '../pages/admin/AdminVerificationQueue'
 import { ProtectedRoute } from '../components/ProtectedRoute'
+import { ScrollToTop } from '../components/ScrollToTop'
 
 export const router = createBrowserRouter([
+  {
+    // Root layout wrapper — scrolls to top on every route change
+    element: <ScrollToTop />,
+    children: [
   {
     path: '/',
     element: <HomePage />,
@@ -100,4 +105,6 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+    ], // end children
+  },   // end ScrollToTop wrapper
 ])

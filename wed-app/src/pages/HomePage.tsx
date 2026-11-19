@@ -221,7 +221,7 @@ export default function HomePage() {
           }
         )
 
-        // 3. Explore Categories Title & Cards — ultra-smooth mobile entrance cascade
+        // 3. Explore Categories Title — scroll-triggered reveal
         gsap.fromTo(
           '.category-title-animate',
           { opacity: 0, y: 15 },
@@ -229,26 +229,35 @@ export default function HomePage() {
             opacity: 1,
             y: 0,
             duration: 0.5,
-            delay: 0.45,
             ease: 'power3.out',
             clearProps: 'transform,opacity',
             force3D: true,
+            scrollTrigger: {
+              trigger: '.categories-section',
+              start: 'top 85%',
+              toggleActions: 'play none none none',
+            },
           }
         )
 
+        // 4. Category Cards — scroll-triggered stagger entrance
         gsap.fromTo(
           '.category-card-animate',
-          { opacity: 0, y: 30, scale: 0.95 },
+          { opacity: 0, y: 40, scale: 0.93 },
           {
             opacity: 1,
             y: 0,
             scale: 1,
-            duration: 0.6,
-            delay: 0.55,
+            duration: 0.65,
             ease: 'power3.out',
-            stagger: 0.08,
+            stagger: 0.1,
             clearProps: 'transform,opacity',
             force3D: true,
+            scrollTrigger: {
+              trigger: '.categories-section',
+              start: 'top 80%',
+              toggleActions: 'play none none none',
+            },
           }
         )
       }, heroRef)
