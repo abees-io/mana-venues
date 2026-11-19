@@ -439,17 +439,20 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* EDITORIAL DESCRIPTION & SCROLL MOTION GRAPHIC */}
+        <HomeScrollMotionSection />
+
         {/* EXPLORE CATEGORIES SECTION */}
         <div
           onClick={() => {
             if (!isAdmin) navigate('/packages#packages-section')
           }}
-          className={`categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-10 ${!isAdmin ? 'cursor-pointer' : ''
+          className={`categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-12 ${!isAdmin ? 'cursor-pointer' : ''
             }`}
           style={{ perspective: '800px' }}
         >
           <h2
-            className="category-title-animate text-2xl sm:text-3xl font-bold text-[#7E1F3E] mb-4 sm:mb-5 tracking-wide text-left drop-shadow-xs inline-block"
+            className="category-title-animate text-2xl sm:text-3xl font-bold text-black mb-4 sm:mb-5 tracking-wide text-left drop-shadow-xs inline-block"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
             Explore Categories
@@ -553,9 +556,6 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-
-        {/* EDITORIAL DESCRIPTION & SCROLL MOTION GRAPHIC */}
-        <HomeScrollMotionSection />
       </section>
 
       {/* SECTION 2 & 3: FEED & GRID */}
@@ -634,6 +634,7 @@ export default function HomePage() {
               )}
             </div>
           </div>
+
 
           <div className="flex items-center gap-3 pt-1">
             <button
