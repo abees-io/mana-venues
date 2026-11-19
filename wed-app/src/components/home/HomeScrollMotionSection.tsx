@@ -33,17 +33,49 @@ export default function HomeScrollMotionSection() {
       }
 
       // 2. Bold kinetic line motion animation on scroll
+      // Ensure initial state is strictly hidden at app start
+      if (kineticLineRef.current) {
+        gsap.set(kineticLineRef.current, {
+          opacity: 0,
+          strokeDashoffset: 2100,
+          strokeDasharray: 2100,
+        })
+      }
+
       const motionTimeline = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
-          start: 'top 78%',
-          end: 'bottom 35%',
+          // Start drawing only after user scrolls down and hero moves up
+          start: 'top 45%',
+          end: 'bottom 20%',
           scrub: 1,
+          onUpdate: (self) => {
+            if (!kineticLineRef.current) return
+            // Strictly hide if at top of page or before scroll trigger threshold
+            if (window.scrollY < 20 || self.progress <= 0.005) {
+              kineticLineRef.current.style.opacity = '0'
+            } else {
+              kineticLineRef.current.style.opacity = '1'
+            }
+          },
+          onLeaveBack: () => {
+            if (kineticLineRef.current) {
+              kineticLineRef.current.style.opacity = '0'
+              gsap.set(kineticLineRef.current, { strokeDashoffset: 2100 })
+            }
+          },
         },
       })
 
       if (kineticLineRef.current) {
-        motionTimeline.to(kineticLineRef.current, { strokeDashoffset: 0, ease: 'none' }, 0)
+        motionTimeline.to(
+          kineticLineRef.current,
+          {
+            strokeDashoffset: 0,
+            ease: 'none',
+          },
+          0
+        )
       }
     }, containerRef)
 
@@ -104,6 +136,7 @@ export default function HomeScrollMotionSection() {
             strokeDasharray="2100"
             strokeDashoffset="2100"
             filter="url(#curveShadow)"
+            style={{ opacity: 0, transition: 'opacity 0.25s ease' }}
           />
         </svg>
       </div>

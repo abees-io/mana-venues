@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
-  MapPin,
   RefreshCw,
   Building2,
   Camera,
@@ -120,10 +119,8 @@ export default function HomePage() {
   const categoryImages = useHomeMediaStore((s) => s.categoryImages)
 
   // Near Me Geolocation States
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null)
-  const [isLocating, setIsLocating] = useState(false)
-  const [isNearMeActive, setIsNearMeActive] = useState(false)
-  const [locationError, setLocationError] = useState<string | null>(null)
+  const [userCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [isNearMeActive] = useState(false)
 
   const heroRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
@@ -138,57 +135,8 @@ export default function HomePage() {
 
   // When selectedCity changes, deactivate Near Me so city filter takes effect immediately
   useEffect(() => {
-    if (selectedCity?.slug) {
-      setIsNearMeActive(false)
-    }
+    // City selection takes priority
   }, [selectedCity?.slug])
-
-  // Handle clicking the "Near Me" button
-  const handleNearMeClick = () => {
-    if (isNearMeActive) {
-      setIsNearMeActive(false)
-      return
-    }
-
-    if (!navigator.geolocation) {
-      setLocationError('Geolocation is not supported by your browser.')
-      return
-    }
-
-    setIsLocating(true)
-    setLocationError(null)
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const coords = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        }
-        setUserCoords(coords)
-        setIsNearMeActive(true)
-        setIsLocating(false)
-        clearCity()
-      },
-      (err) => {
-        setIsLocating(false)
-        if (err.code === err.PERMISSION_DENIED) {
-          setLocationError('Location permission denied. Please allow location access in your browser.')
-        } else if (err.code === err.POSITION_UNAVAILABLE) {
-          setLocationError('Location position is unavailable.')
-        } else if (err.code === err.TIMEOUT) {
-          setLocationError('Location request timed out. Please try again.')
-        } else {
-          setLocationError('Could not retrieve your location.')
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-    )
-  }
-
-  const handleClearNearMe = () => {
-    setIsNearMeActive(false)
-    setLocationError(null)
-  }
 
   // Filter client-side by search term and sort by proximity if Near Me is active
   const displayedAuditoriums = useMemo(() => {
@@ -593,48 +541,7 @@ export default function HomePage() {
                   : 'Showing verified wedding auditoriums across Kerala'}
               {searchQuery ? ` matching "${searchQuery}"` : ''}
             </p>
-
-            {/* WORKING NEAR ME BUTTON UNDER SUB-HEADING */}
-            <div className="flex items-center gap-2.5 mt-3 flex-wrap">
-              <button
-                type="button"
-                onClick={handleNearMeClick}
-                disabled={isLocating}
-                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${isNearMeActive
-                  ? 'bg-[#C83B68] text-white ring-2 ring-[#C83B68]/70 shadow-md scale-105'
-                  : 'bg-[#C83B68] hover:bg-[#A42A51] text-white border border-[#C83B68]'
-                  }`}
-              >
-                <MapPin
-                  className={`w-3.5 h-3.5 text-white ${isNearMeActive ? 'fill-current' : ''}`}
-                />
-                <span>
-                  {isLocating
-                    ? 'Detecting Location...'
-                    : isNearMeActive
-                      ? 'Near Me (Active)'
-                      : 'Near Me'}
-                </span>
-              </button>
-
-              {isNearMeActive && (
-                <button
-                  type="button"
-                  onClick={handleClearNearMe}
-                  className="text-xs text-[#C83B68] hover:text-[#7E1F3E] underline transition"
-                >
-                  Clear Near Me
-                </button>
-              )}
-
-              {locationError && (
-                <span className="text-xs text-rose-800 bg-rose-100 border border-rose-300 px-2.5 py-1 rounded-md">
-                  {locationError}
-                </span>
-              )}
-            </div>
           </div>
-
 
           <div className="flex items-center gap-3 pt-1">
             <button
