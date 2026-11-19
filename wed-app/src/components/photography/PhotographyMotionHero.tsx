@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Heart,
   Smartphone,
@@ -6,6 +7,7 @@ import {
   ChevronRight,
   CheckCircle2,
   ArrowRight,
+  ArrowLeft,
 } from 'lucide-react'
 import CoolCameraIcon from '../common/CoolCameraIcon'
 import type { PhotographyCategory } from '../../store/photographyStore'
@@ -94,6 +96,7 @@ export default function PhotographyMotionHero({
   onSelectCategory,
   onExplorePackages,
 }: PhotographyMotionHeroProps) {
+  const navigate = useNavigate()
   const [activeIndex, setActiveIndex] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
   const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -136,6 +139,19 @@ export default function PhotographyMotionHero({
       </div>
 
       <div className="relative max-w-7xl mx-auto">
+        {/* Navigation Arrow on the top left corner just above the main title */}
+        <div className="flex items-center justify-start mb-2 sm:mb-3">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 hover:bg-white text-[#5A172D] border border-[#D8F0EC] shadow-xs hover:shadow-sm text-xs font-semibold transition-all hover:border-[#C83B68]/40 active:scale-95 cursor-pointer"
+            aria-label="Go back to previous page"
+          >
+            <ArrowLeft className="w-4 h-4 text-[#C83B68] group-hover:-translate-x-0.5 transition-transform" />
+            <span>Back</span>
+          </button>
+        </div>
+
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-8 sm:mb-10 space-y-2">
           <h1

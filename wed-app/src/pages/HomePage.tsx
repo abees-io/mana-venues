@@ -13,6 +13,7 @@ import AuditoriumCard from '../components/cards/AuditoriumCard'
 import { AuditoriumCardSkeletonList } from '../components/cards/AuditoriumCardSkeleton'
 import LocationModal from '../components/modals/LocationModal'
 import HomeImageModal, { type HomeImageTarget } from '../components/modals/HomeImageModal'
+import HomeScrollMotionSection from '../components/home/HomeScrollMotionSection'
 import { useAuth } from '../contexts/AuthContext'
 import { useAuditoriums } from '../hooks/useAuditoriums'
 import { useCityStore } from '../store/cityStore'
@@ -29,40 +30,50 @@ const CATEGORIES: Array<{
   query: string
   subtypes?: { full: string; short: string }[]
 }> = [
-  {
-    id: 'destination_wedding',
-    title: 'Destination Wedding',
-    badge: 'Venues & Resorts',
-    image: '/category-destination.jpg',
-    query: 'destination wedding',
-  },
-  {
-    id: 'photography',
-    title: 'Photography Packages',
-    badge: 'Wedding & Mobile',
-    image: '/category-photography.jpg',
-    query: 'photography',
-    subtypes: [
-      { full: 'Wedding Photography', short: 'Wedding' },
-      { full: 'Mobile Photography', short: 'Mobile' },
-      { full: 'Normal Photography', short: 'Normal' },
-    ],
-  },
-  {
-    id: 'catering',
-    title: 'Catering',
-    badge: 'Feasts & Dining',
-    image: '/category-catering.jpg',
-    query: 'catering',
-  },
-  {
-    id: 'makeup_artist',
-    title: 'Bridal and Make Up',
-    badge: 'Bridal & Groom',
-    image: '/category-makeup.jpg',
-    query: 'bridal makeup',
-  },
-]
+    {
+      id: 'destination_wedding',
+      title: 'Destination Wedding',
+      badge: 'Venues & Resorts',
+      image: '/category-destination.jpg',
+      query: 'destination wedding',
+    },
+    {
+      id: 'photography',
+      title: 'Photography Packages',
+      badge: 'Wedding & Mobile',
+      image: '/category-photography.jpg',
+      query: 'photography',
+      subtypes: [
+        { full: 'Wedding Photography', short: 'Wedding' },
+        { full: 'Mobile Photography', short: 'Mobile' },
+        { full: 'Normal Photography', short: 'Normal' },
+      ],
+    },
+    {
+      id: 'catering',
+      title: 'Catering',
+      badge: 'Feasts & Dining',
+      image: '/category-catering.jpg',
+      query: 'catering',
+      subtypes: [
+        { full: 'Traditional Sadya', short: 'Sadya' },
+        { full: 'Royal Buffet', short: 'Buffet' },
+        { full: 'Live Counters', short: 'Live' },
+      ],
+    },
+    {
+      id: 'makeup_artist',
+      title: 'Bridal and Make Up',
+      badge: 'Bridal & Groom',
+      image: '/category-makeup.jpg',
+      query: 'bridal makeup',
+      subtypes: [
+        { full: 'HD Bridal Makeup', short: 'HD Bridal' },
+        { full: 'Airbrush Glam', short: 'Airbrush' },
+        { full: 'Pre-Wedding & Sangeet', short: 'Party' },
+      ],
+    },
+  ]
 
 // Haversine formula to calculate distance in km between two GPS coordinates
 function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -292,28 +303,6 @@ export default function HomePage() {
             force3D: true,
           }
         )
-
-        // 5. Fade Scroll Scrub on Editorial Description (preserves inline text colors including gold highlights)
-        const words = gsap.utils.toArray<HTMLElement>('.editorial-word')
-        if (words.length) {
-          gsap.set(words, {
-            opacity: 0.18,
-            y: 0,
-            filter: 'none',
-          })
-          gsap.to(words, {
-            opacity: 1,
-            stagger: 0.08,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: '.editorial-quote-section',
-              start: 'top 82%',
-              end: 'bottom 45%',
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          })
-        }
       }, heroRef)
     }
 
@@ -362,6 +351,14 @@ export default function HomePage() {
     }
     if (categoryId === 'photography') {
       navigate('/photography')
+      return
+    }
+    if (categoryId === 'catering') {
+      navigate('/catering')
+      return
+    }
+    if (categoryId === 'makeup_artist') {
+      navigate('/bridal-makeup')
       return
     }
     if (!isAdmin) {
@@ -517,12 +514,30 @@ export default function HomePage() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation()
-                            if (sub.full.toLowerCase().includes('wedding')) {
-                              navigate('/photography?type=wedding')
-                            } else if (sub.full.toLowerCase().includes('mobile')) {
-                              navigate('/photography?type=mobile')
-                            } else {
-                              navigate('/photography?type=normal')
+                            if (cat.id === 'photography') {
+                              if (sub.full.toLowerCase().includes('wedding')) {
+                                navigate('/photography?type=wedding')
+                              } else if (sub.full.toLowerCase().includes('mobile')) {
+                                navigate('/photography?type=mobile')
+                              } else {
+                                navigate('/photography?type=normal')
+                              }
+                            } else if (cat.id === 'catering') {
+                              if (sub.full.toLowerCase().includes('sadya')) {
+                                navigate('/catering?type=sadya')
+                              } else if (sub.full.toLowerCase().includes('buffet')) {
+                                navigate('/catering?type=buffet')
+                              } else {
+                                navigate('/catering?type=live')
+                              }
+                            } else if (cat.id === 'makeup_artist') {
+                              if (sub.full.toLowerCase().includes('hd')) {
+                                navigate('/bridal-makeup?type=hd_bridal')
+                              } else if (sub.full.toLowerCase().includes('airbrush')) {
+                                navigate('/bridal-makeup?type=airbrush')
+                              } else {
+                                navigate('/bridal-makeup?type=party')
+                              }
                             }
                           }}
                           className="px-1.5 py-0.5 rounded-full bg-black/60 hover:bg-[#C83B68]/90 active:scale-95 backdrop-blur-xs text-[8px] sm:text-[9.5px] text-[#F0F9F8] font-medium border border-[#D8F0EC]/30 leading-tight drop-shadow-sm transition-all cursor-pointer"
@@ -539,65 +554,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* EDITORIAL CULTURAL DESCRIPTION */}
-        <div className="editorial-quote-section editorial-quote-card max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-8">
-          {/* Top Technical Meta Bar */}
-          <div className="flex items-center justify-between border-b border-[#A42A51]/20 pb-3 mb-6 sm:mb-8 text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-[#A42A51]/70">
-            <span>MANA VENUES • EDITORIAL</span>
-            <span className="hidden sm:inline">KERALA • 2026</span>
-            <span>CURATED DESTINATIONS</span>
-          </div>
-
-          {/* Description in Headline Typography */}
-          <div className="text-left">
-            <h2
-              className="text-4xl sm:text-6xl md:text-7xl lg:text-[82px] font-normal tracking-normal leading-[1.05] text-[#5A172D]"
-              style={{ fontFamily: "'Italiana', serif" }}
-            >
-              {/* Highlighted core sentence */}
-              <span className="inline text-[#C83B68]">
-                {`Your celebration deserves the warmth and safety of home.`
-                  .split(' ')
-                  .map((word, i) => (
-                    <span key={`h1-${i}`} className="editorial-word rush-word mr-[0.22em] text-[#C83B68] font-medium">
-                      {word}
-                    </span>
-                  ))}
-              </span>{' '}
-              {/* Deep wine text */}
-              <span className="text-[#5A172D]/90">
-                {`Explore verified venues and bespoke destination wedding packages across God's Own Country,`
-                  .split(' ')
-                  .map((word, i) => (
-                    <span key={`w1-${i}`} className="editorial-word inline-block mr-[0.22em]">
-                      {word}
-                    </span>
-                  ))}
-              </span>
-              <span className="block my-3 sm:my-5" />
-              {/* Highlighted cultural statement */}
-              <span className="inline text-[#C83B68]">
-                {`thoughtfully designed to honor Kerala's rich cultural tapestry`
-                  .split(' ')
-                  .map((word, i) => (
-                    <span key={`h2-${i}`} className="editorial-word rush-word mr-[0.22em] text-[#C83B68] font-medium">
-                      {word}
-                    </span>
-                  ))}
-              </span>{' '}
-              {/* Deep wine text */}
-              <span className="text-[#5A172D]/90">
-                {`while keeping you in expert, caring hands.`
-                  .split(' ')
-                  .map((word, i) => (
-                    <span key={`w2-${i}`} className="editorial-word inline-block mr-[0.22em]">
-                      {word}
-                    </span>
-                  ))}
-              </span>
-            </h2>
-          </div>
-        </div>
+        {/* EDITORIAL DESCRIPTION & SCROLL MOTION GRAPHIC */}
+        <HomeScrollMotionSection />
       </section>
 
       {/* SECTION 2 & 3: FEED & GRID */}
@@ -643,8 +601,8 @@ export default function HomePage() {
                 onClick={handleNearMeClick}
                 disabled={isLocating}
                 className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${isNearMeActive
-                    ? 'bg-[#C83B68] text-white ring-2 ring-[#C83B68]/70 shadow-md scale-105'
-                    : 'bg-[#C83B68] hover:bg-[#A42A51] text-white border border-[#C83B68]'
+                  ? 'bg-[#C83B68] text-white ring-2 ring-[#C83B68]/70 shadow-md scale-105'
+                  : 'bg-[#C83B68] hover:bg-[#A42A51] text-white border border-[#C83B68]'
                   }`}
               >
                 <MapPin

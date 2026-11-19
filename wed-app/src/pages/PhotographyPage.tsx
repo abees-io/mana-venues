@@ -265,7 +265,7 @@ export default function PhotographyPage() {
                             <Clock className="w-2.5 h-2.5 shrink-0" />
                             <span>{pkg.duration.split('(')[0].trim()}</span>
                           </span>
-                          <span className="text-[#D8F0EC]">•</span>
+                          <span className="text-[#D8F0EC]">â€¢</span>
                           <span className="flex items-center gap-1 truncate">
                             <Users className="w-2.5 h-2.5 shrink-0" />
                             <span>{pkg.teamSize.split('+')[0].trim()}</span>
@@ -322,7 +322,7 @@ export default function PhotographyPage() {
                           >
                             <span className="sm:hidden">{isExpanded ? 'Hide Inclusions' : 'Inclusions (5+)'}</span>
                             <span className="hidden sm:inline">{isExpanded ? 'Hide All Inclusions' : 'View Full Inclusions (5+)'}</span>
-                            <span className="text-[8px] sm:text-[10px]">{isExpanded ? '▲' : '▼'}</span>
+                            <span className="text-[8px] sm:text-[10px]">{isExpanded ? 'â–²' : 'â–¼'}</span>
                           </button>
 
                           {isExpanded && (
@@ -406,7 +406,7 @@ export default function PhotographyPage() {
                       Inquire: {inquiryPackage.title}
                     </h3>
                     <p className="text-xs text-[#7E1F3E]/70 font-medium">
-                      Starting from {inquiryPackage.price} • {inquiryPackage.duration}
+                      Starting from {inquiryPackage.price} â€¢ {inquiryPackage.duration}
                     </p>
                   </div>
 
@@ -505,3 +505,4 @@ export default function PhotographyPage() {
     </Layout>
   )
 }
+

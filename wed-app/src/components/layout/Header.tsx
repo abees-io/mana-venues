@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Undo2, Redo2 } from 'lucide-react'
+import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Undo2, Redo2, UtensilsCrossed } from 'lucide-react'
 import CoolCameraIcon from '../common/CoolCameraIcon'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
@@ -147,6 +147,31 @@ export default function Header() {
           >
             <CoolCameraIcon className={`w-3.5 h-3.5 ${location.pathname === '/photography' ? 'text-white' : 'text-[#C83B68]'}`} />
             <span>Photography</span>
+          </Link>
+
+          {/* Bridal & Makeup Link */}
+          <Link
+            to="/bridal-makeup"
+            className={`hidden md:inline-flex items-center px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0 ${
+              location.pathname === '/bridal-makeup'
+                ? 'bg-[#C83B68] text-white shadow-xs font-bold'
+                : 'text-black bg-white/80 border border-[#D8F0EC] hover:bg-white active:bg-[#D8F0EC]/40'
+            }`}
+          >
+            <span>Bridal & Makeup</span>
+          </Link>
+
+          {/* Catering Link */}
+          <Link
+            to="/catering"
+            className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0 ${
+              location.pathname === '/catering'
+                ? 'bg-[#C83B68] text-white shadow-xs font-bold'
+                : 'text-black bg-white/80 border border-[#D8F0EC] hover:bg-white active:bg-[#D8F0EC]/40'
+            }`}
+          >
+            <UtensilsCrossed className={`w-3.5 h-3.5 ${location.pathname === '/catering' ? 'text-white' : 'text-[#C83B68]'}`} />
+            <span>Catering</span>
           </Link>
 
           {/* Admin-only Global Undo / Redo Buttons */}
