@@ -38,6 +38,8 @@ export interface WeddingPackage {
   textOrder?: PackageTextGroup[]
   textOffsets?: Partial<Record<PackageTextGroup, { x: number; y: number }>>
   reverseDesktopLayout?: boolean
+  instagramUrl?: string
+  whatsappNumber?: string
 }
 
 export const DEFAULT_PACKAGES: WeddingPackage[] = [
@@ -63,6 +65,8 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
     ],
     partnerPlanner: 'Heritage Palms Events (Verified)',
     verified: true,
+    instagramUrl: 'https://instagram.com/manaweddings',
+    whatsappNumber: '919847012345',
     reels: [
       {
         id: 'reel-alleppey-1',
@@ -115,6 +119,8 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
     ],
     partnerPlanner: 'Coastline Luxe Weddings (Verified)',
     verified: true,
+    instagramUrl: 'https://instagram.com/manaweddings',
+    whatsappNumber: '919847012346',
     reels: [
       {
         id: 'reel-kovalam-1',
@@ -149,6 +155,8 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
     ],
     partnerPlanner: 'Highland Blooms Studio (Verified)',
     verified: true,
+    instagramUrl: 'https://instagram.com/manaweddings',
+    whatsappNumber: '919847012347',
     reels: [
       {
         id: 'reel-wayanad-1',
@@ -183,6 +191,8 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
     ],
     partnerPlanner: 'Royal Travancore Curators (Verified)',
     verified: true,
+    instagramUrl: 'https://instagram.com/manaweddings',
+    whatsappNumber: '919847012348',
     reels: [
       {
         id: 'reel-kochi-1',
@@ -446,7 +456,7 @@ export const usePackagesStore = create<PackagesStoreState>()(
     }),
     {
       name: 'manavenues_packages_data',
-      version: 3,
+      version: 4,
       partialize: (state) => ({
         packages: state.packages,
         savedDesktopAt: state.savedDesktopAt,
@@ -484,6 +494,8 @@ export const usePackagesStore = create<PackagesStoreState>()(
             return {
               ...pkg,
               reels,
+              instagramUrl: pkg.instagramUrl || fallback?.instagramUrl || 'https://instagram.com/manaweddings',
+              whatsappNumber: pkg.whatsappNumber || fallback?.whatsappNumber || '919847012345',
             }
           }),
         }

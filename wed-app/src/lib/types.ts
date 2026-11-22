@@ -18,6 +18,7 @@ export type Profile = {
   vendor_type?: VendorType | null
   business_name?: string | null
   access_permissions?: string[] | null
+  preferred_city?: string | null
   avatar_url: string | null
   created_at: string
 }

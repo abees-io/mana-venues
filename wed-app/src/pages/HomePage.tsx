@@ -5,6 +5,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   Camera,
   MapPin,
+  Package as PackageIcon,
+  Users,
+  ChevronRight,
+  Building2,
 } from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import LocationModal from '../components/modals/LocationModal'
@@ -15,6 +19,7 @@ import { useAuditoriums } from '../hooks/useAuditoriums'
 import { useCityStore } from '../store/cityStore'
 import { useFilterStore } from '../store/filterStore'
 import { useHomeMediaStore } from '../store/homeMediaStore'
+import { usePackagesStore } from '../store/packagesStore'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -24,7 +29,6 @@ const CATEGORIES: Array<{
   badge: string
   image: string
   query: string
-  subtypes?: { full: string; short: string }[]
 }> = [
     {
       id: 'destination_wedding',
@@ -35,15 +39,10 @@ const CATEGORIES: Array<{
     },
     {
       id: 'photography',
-      title: 'Photography Packages',
+      title: 'Photography',
       badge: 'Wedding & Mobile',
       image: '/category-photography.jpg',
       query: 'photography',
-      subtypes: [
-        { full: 'Wedding Photography', short: 'Wedding' },
-        { full: 'Mobile Photography', short: 'Mobile' },
-        { full: 'Normal Photography', short: 'Normal' },
-      ],
     },
     {
       id: 'catering',
@@ -51,23 +50,13 @@ const CATEGORIES: Array<{
       badge: 'Feasts & Dining',
       image: '/category-catering.jpg',
       query: 'catering',
-      subtypes: [
-        { full: 'Traditional Sadya', short: 'Sadya' },
-        { full: 'Royal Buffet', short: 'Buffet' },
-        { full: 'Live Counters', short: 'Live' },
-      ],
     },
     {
       id: 'makeup_artist',
-      title: 'Bridal and Make Up',
+      title: 'Bridal Makeup',
       badge: 'Bridal & Groom',
       image: '/category-makeup.jpg',
       query: 'bridal makeup',
-      subtypes: [
-        { full: 'HD Bridal Makeup', short: 'HD Bridal' },
-        { full: 'Airbrush Glam', short: 'Airbrush' },
-        { full: 'Pre-Wedding & Sangeet', short: 'Party' },
-      ],
     },
   ]
 
@@ -91,6 +80,16 @@ export default function HomePage() {
   const { user, profile } = useAuth()
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
   const { selectedCity } = useCityStore()
+
+  // User's preferred city: from authenticated profile or stored in localStorage
+  const preferredCity = useMemo(() => {
+    if (profile?.preferred_city) return profile.preferred_city
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('mana_preferred_city')
+      if (stored) return stored
+    }
+    return user ? 'kochi' : null
+  }, [profile?.preferred_city, user])
 
   const capacityMin = useFilterStore((state) => state.capacityMin)
   const capacityMax = useFilterStore((state) => state.capacityMax)
@@ -448,7 +447,7 @@ export default function HomePage() {
                   {cat.badge}
                 </div>
 
-                {/* Bottom Title & Subtypes in Crisp Gradient */}
+                {/* Bottom Title in Crisp Gradient */}
                 <div className="absolute bottom-2.5 sm:bottom-3 left-2 right-2 text-center pointer-events-none flex flex-col items-center justify-end">
                   <h3
                     className="text-xs sm:text-base md:text-lg font-bold bg-gradient-to-r from-white via-[#FCE7ED] to-white bg-clip-text text-transparent drop-shadow-md tracking-wide leading-tight"
@@ -456,48 +455,6 @@ export default function HomePage() {
                   >
                     {cat.title}
                   </h3>
-                  {cat.subtypes && cat.subtypes.length > 0 && (
-                    <div className="mt-1 flex flex-wrap items-center justify-center gap-1 pointer-events-auto">
-                      {cat.subtypes.map((sub) => (
-                        <button
-                          key={sub.full}
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            if (cat.id === 'photography') {
-                              if (sub.full.toLowerCase().includes('wedding')) {
-                                navigate('/photography?type=wedding')
-                              } else if (sub.full.toLowerCase().includes('mobile')) {
-                                navigate('/photography?type=mobile')
-                              } else {
-                                navigate('/photography?type=normal')
-                              }
-                            } else if (cat.id === 'catering') {
-                              if (sub.full.toLowerCase().includes('sadya')) {
-                                navigate('/catering?type=sadya')
-                              } else if (sub.full.toLowerCase().includes('buffet')) {
-                                navigate('/catering?type=buffet')
-                              } else {
-                                navigate('/catering?type=live')
-                              }
-                            } else if (cat.id === 'makeup_artist') {
-                              if (sub.full.toLowerCase().includes('hd')) {
-                                navigate('/bridal-makeup?type=hd_bridal')
-                              } else if (sub.full.toLowerCase().includes('airbrush')) {
-                                navigate('/bridal-makeup?type=airbrush')
-                              } else {
-                                navigate('/bridal-makeup?type=party')
-                              }
-                            }
-                          }}
-                          className="px-1.5 py-0.5 rounded-full bg-black/60 hover:bg-[#C83B68]/90 active:scale-95 backdrop-blur-xs text-[8px] sm:text-[9.5px] text-[#F0F9F8] font-medium border border-[#D8F0EC]/30 leading-tight drop-shadow-sm transition-all cursor-pointer"
-                        >
-                          <span className="sm:hidden">{sub.short}</span>
-                          <span className="hidden sm:inline">{sub.full}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
@@ -508,18 +465,23 @@ export default function HomePage() {
       {/* SECTION 2: FIND YOUR VENUES (1 Single Compact Feature Card with Dummy AI Image) */}
       <div ref={gridRef} className="max-w-5xl mx-auto px-3 sm:px-6 pt-6 sm:pt-8 pb-6">
         {/* Section Heading & City Quick Filter */}
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h2
-            className="text-2xl sm:text-3xl font-bold uppercase tracking-wide text-[#7E1F3E] text-left drop-shadow-xs inline-block"
-            style={{ fontFamily: "'Cinzel', serif" }}
-          >
-            Find your venues
-          </h2>
+        <div className="flex items-center justify-between mb-3 sm:mb-4 gap-3">
+          <div>
+            <h2
+              className="text-2xl sm:text-3xl font-bold uppercase tracking-wide text-[#7E1F3E] text-left drop-shadow-xs inline-block"
+              style={{ fontFamily: "'Cinzel', serif" }}
+            >
+              Find your venues
+            </h2>
+            <p className="text-xs sm:text-sm font-medium text-[#7E1F3E]/80 mt-0.5">
+              Free to use
+            </p>
+          </div>
 
           <button
             type="button"
             onClick={() => setIsLocationModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[#7E1F3E] bg-white hover:bg-gray-100 shadow-2xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[#7E1F3E] bg-white hover:bg-gray-100 shadow-2xs transition-colors shrink-0"
           >
             <MapPin className="w-3.5 h-3.5" />
             <span>{selectedCity && !isNearMeActive ? selectedCity.name : 'All Kerala'}</span>
@@ -585,6 +547,11 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* SECTION 3: CITY PACKAGES & LISTINGS (Dedicated for user's selected city, separated from Find Venues) */}
+      {preferredCity && (
+        <CityPackagesSection preferredCitySlug={preferredCity} />
+      )}
+
       {/* Location Modal */}
       <LocationModal
         isOpen={isLocationModalOpen}
@@ -597,5 +564,221 @@ export default function HomePage() {
         onClose={() => setEditingImageTarget(null)}
       />
     </Layout>
+  )
+}
+
+const KERALA_CITY_NAMES: Record<string, string> = {
+  kochi: 'Kochi',
+  thiruvananthapuram: 'Thiruvananthapuram',
+  thrissur: 'Thrissur',
+  kozhikode: 'Kozhikode',
+  kannur: 'Kannur',
+  kollam: 'Kollam',
+  palakkad: 'Palakkad',
+  alappuzha: 'Alappuzha',
+  malappuram: 'Malappuram',
+  kottayam: 'Kottayam',
+  wayanad: 'Wayanad',
+  idukki: 'Idukki',
+  pathanamthitta: 'Pathanamthitta',
+  kasaragod: 'Kasaragod',
+}
+
+function CityPackagesSection({ preferredCitySlug }: { preferredCitySlug: string }) {
+  const navigate = useNavigate()
+  const packages = usePackagesStore((s) => s.packages)
+  const cityName =
+    KERALA_CITY_NAMES[preferredCitySlug.toLowerCase()] ||
+    preferredCitySlug.charAt(0).toUpperCase() + preferredCitySlug.slice(1)
+
+  // Fetch auditoriums specifically for this preferred city (isolated hook call)
+  const { data: cityAuditoriums, isLoading: venuesLoading } = useAuditoriums(
+    preferredCitySlug.toLowerCase(),
+    {}
+  )
+
+  // Find packages matching the preferred city
+  const cityPackages = useMemo(() => {
+    const slug = preferredCitySlug.toLowerCase()
+    const matches = packages.filter((pkg) => {
+      const loc = pkg.location.toLowerCase()
+      const title = pkg.title.toLowerCase()
+      return loc.includes(slug) || title.includes(slug)
+    })
+    // If no direct matches for this specific city, display all packages with "Available for {cityName}"
+    return matches.length > 0 ? matches : packages
+  }, [packages, preferredCitySlug])
+
+  const [activeTab, setActiveTab] = useState<'packages' | 'venues'>('packages')
+
+  return (
+    <div className="max-w-5xl mx-auto px-3 sm:px-6 pt-4 pb-10">
+      {/* Header with City Badge */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 border-b border-[#D8F0EC] pb-4">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7E1F3E]/10 text-[#7E1F3E] text-xs font-bold mb-1.5 border border-[#7E1F3E]/20">
+            <MapPin className="w-3.5 h-3.5 text-[#C83B68]" />
+            <span>Selected City: {cityName}</span>
+          </div>
+          <h2
+            className="text-2xl sm:text-3xl font-bold uppercase tracking-wide text-[#7E1F3E] text-left drop-shadow-xs"
+            style={{ fontFamily: "'Cinzel', serif" }}
+          >
+            Packages & Venues in {cityName}
+          </h2>
+          <p className="text-xs sm:text-sm font-medium text-[#7E1F3E]/80 mt-0.5">
+            Wedding packages and verified auditoriums listed in {cityName}
+          </p>
+        </div>
+
+        {/* View Switcher Tabs */}
+        <div className="flex items-center gap-2 self-start sm:self-auto bg-[#F0F9F8] p-1 rounded-xl border border-[#D8F0EC]">
+          <button
+            type="button"
+            onClick={() => setActiveTab('packages')}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'packages'
+                ? 'bg-[#7E1F3E] text-white shadow-sm'
+                : 'text-[#5A172D]/70 hover:text-[#5A172D]'
+            }`}
+          >
+            <PackageIcon className="w-3.5 h-3.5" />
+            <span>Packages ({cityPackages.length})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('venues')}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'venues'
+                ? 'bg-[#7E1F3E] text-white shadow-sm'
+                : 'text-[#5A172D]/70 hover:text-[#5A172D]'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Venues ({cityAuditoriums?.length || 0})</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Content based on Active Tab */}
+      {activeTab === 'packages' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {cityPackages.map((pkg) => (
+            <div
+              key={pkg.id}
+              onClick={() => navigate('/packages#packages-section')}
+              className="group relative bg-white rounded-2xl overflow-hidden border border-[#D8F0EC] shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col"
+            >
+              {/* Image banner */}
+              <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">
+                <img
+                  src={pkg.image}
+                  alt={pkg.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />
+
+                {/* Badges */}
+                <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                  <span className="px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold">
+                    {pkg.backdrop}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#7E1F3E]/90 text-white text-[11px] font-semibold flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-[#F3A2BE]" />
+                    {cityName}
+                  </span>
+                </div>
+
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <div className="text-xs font-semibold text-rose-200">
+                    Starts at {pkg.startingPrice}
+                  </div>
+                  <h3
+                    className="text-base sm:text-lg font-bold leading-tight drop-shadow-md"
+                    style={{ fontFamily: "'Cinzel', serif" }}
+                  >
+                    {pkg.title}
+                  </h3>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                  {pkg.tagline}
+                </p>
+
+                <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
+                  <div className="flex items-center gap-1 text-[#7E1F3E] font-medium">
+                    <Users className="w-3.5 h-3.5" />
+                    <span>{pkg.guestCapacity}</span>
+                  </div>
+                  <span className="text-[#C83B68] font-bold inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                    <span>View Package</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div>
+          {venuesLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="aspect-[4/3] rounded-2xl bg-[#D8F0EC] animate-pulse" />
+              ))}
+            </div>
+          ) : !cityAuditoriums || cityAuditoriums.length === 0 ? (
+            <div className="text-center py-8 bg-[#F0F9F8] rounded-2xl border border-[#D8F0EC]">
+              <p className="text-sm font-semibold text-[#7E1F3E]">
+                No auditoriums currently listed for {cityName}.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate(`/city/${preferredCitySlug}`)}
+                className="mt-3 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#7E1F3E] hover:bg-[#A82B54]"
+              >
+                Browse All Kerala Venues
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+              {cityAuditoriums.slice(0, 6).map((venue) => (
+                <div
+                  key={venue.id}
+                  onClick={() => navigate(`/auditorium/${venue.slug || venue.id}`)}
+                  className="group relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer shadow-md border border-[#D8F0EC]/60 hover:shadow-lg active:scale-[0.98] transition-all will-change-transform bg-white"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <img
+                    src={venue.photos?.[0] || '/venue-ai-dummy.jpg'}
+                    alt={venue.title || venue.name}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-2.5 left-2.5 right-2.5 pointer-events-none text-white">
+                    <p
+                      className="text-xs sm:text-sm font-bold drop-shadow-md leading-tight line-clamp-1 tracking-wide"
+                      style={{ fontFamily: "'Cinzel', serif" }}
+                    >
+                      {venue.title || venue.name}
+                    </p>
+                    <div className="flex items-center justify-between text-[10px] sm:text-xs text-white/80 mt-1">
+                      <span>{venue.seating_capacity || venue.capacity || 200} guests</span>
+                      <span className="text-rose-200 font-semibold">
+                        ₹{(venue.base_price_per_day || venue.starting_price || 50000).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }

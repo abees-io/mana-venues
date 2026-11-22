@@ -9,6 +9,7 @@ import {
   EyeOff,
   User,
   Phone,
+  MapPin,
   CheckCircle2,
   AlertCircle,
   ArrowRight,
@@ -16,9 +17,26 @@ import {
 import { useLoginGate } from '../../contexts/LoginGateContext'
 import { useAuth } from '../../contexts/AuthContext'
 
+const KERALA_CITIES = [
+  { label: 'Kochi', value: 'kochi' },
+  { label: 'Thiruvananthapuram', value: 'thiruvananthapuram' },
+  { label: 'Thrissur', value: 'thrissur' },
+  { label: 'Kozhikode', value: 'kozhikode' },
+  { label: 'Kannur', value: 'kannur' },
+  { label: 'Kollam', value: 'kollam' },
+  { label: 'Palakkad', value: 'palakkad' },
+  { label: 'Alappuzha', value: 'alappuzha' },
+  { label: 'Malappuram', value: 'malappuram' },
+  { label: 'Kottayam', value: 'kottayam' },
+  { label: 'Wayanad', value: 'wayanad' },
+  { label: 'Idukki', value: 'idukki' },
+  { label: 'Pathanamthitta', value: 'pathanamthitta' },
+  { label: 'Kasaragod', value: 'kasaragod' },
+]
+
 export function LoginGateModal() {
   const { isOpen, closeLoginGate, onSuccessCallback } = useLoginGate()
-  const { signIn, signUp } = useAuth()
+  const { signIn, signUp, updateProfile } = useAuth()
 
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [showPassword, setShowPassword] = useState(false)
@@ -31,12 +49,19 @@ export function LoginGateModal() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
+  const [selectedCity, setSelectedCity] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('mana_preferred_city') || 'kochi'
+    }
+    return 'kochi'
+  })
 
   const resetForm = () => {
     setEmail('')
     setPassword('')
     setFullName('')
     setPhone('')
+    setSelectedCity(localStorage.getItem('mana_preferred_city') || 'kochi')
     setErrorMessage(null)
     setSuccessMessage(null)
     setSubmitting(false)
@@ -60,11 +85,21 @@ export function LoginGateModal() {
     setSubmitting(true)
 
     try {
+      if (!selectedCity) {
+        throw new Error('Please select your city to continue.')
+      }
+
       if (mode === 'login') {
         if (!email.trim() || !password) {
           throw new Error('Please enter both email and password.')
         }
         await signIn(email.trim(), password)
+        localStorage.setItem('mana_preferred_city', selectedCity)
+        try {
+          await updateProfile({ preferred_city: selectedCity })
+        } catch {
+          // ignore if user profile update is still syncing
+        }
         setSuccessMessage('Welcome back! Access granted.')
         setTimeout(() => {
           if (onSuccessCallback) {
@@ -79,7 +114,10 @@ export function LoginGateModal() {
         if (!password || password.length < 6) {
           throw new Error('Password must be at least 6 characters.')
         }
-        const { session } = await signUp(email.trim(), password, fullName.trim(), phone.trim())
+        localStorage.setItem('mana_preferred_city', selectedCity)
+        const { session } = await signUp(email.trim(), password, fullName.trim(), phone.trim(), {
+          preferred_city: selectedCity,
+        })
         if (session) {
           setSuccessMessage('Account created successfully! Welcome to MANA.')
           setTimeout(() => {
@@ -281,6 +319,60 @@ export function LoginGateModal() {
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
+                </div>
+              </div>
+
+              {/* City Picker — Required for both Login & Sign In */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-[#5A172D] flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-[#C83B68]" />
+                    <span>Select City</span>
+                    <span className="text-rose-600 text-xs">*</span>
+                  </label>
+                  <span className="text-[10px] text-gray-500 font-medium">
+                    (Required to view packages)
+                  </span>
+                </div>
+                <div className="relative">
+                  <MapPin className="w-4 h-4 text-[#C83B68] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <select
+                    value={selectedCity}
+                    onChange={(e) => setSelectedCity(e.target.value)}
+                    required
+                    className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-[#D8F0EC] focus:border-[#C83B68] focus:ring-2 focus:ring-[#C83B68]/20 text-xs sm:text-sm outline-none transition-all bg-white appearance-none cursor-pointer text-[#5A172D] font-medium"
+                  >
+                    <option value="" disabled>-- Select Your City --</option>
+                    {KERALA_CITIES.map((city) => (
+                      <option key={city.value} value={city.value}>
+                        {city.label}
+                      </option>
+                    ))}
+                  </select>
+                  {/* Custom dropdown arrow */}
+                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* City pill chips for fast 1-click selection */}
+                <div className="mt-2 flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+                  {KERALA_CITIES.slice(0, 7).map((city) => (
+                    <button
+                      key={city.value}
+                      type="button"
+                      onClick={() => setSelectedCity(city.value)}
+                      className={`shrink-0 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${
+                        selectedCity === city.value
+                          ? 'bg-[#7E1F3E] text-white border-[#7E1F3E] shadow-xs'
+                          : 'bg-white text-[#7E1F3E] border-[#D8F0EC] hover:border-[#C83B68]'
+                      }`}
+                    >
+                      {city.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 

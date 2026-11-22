@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { Eye, EyeOff, KeyRound, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { Eye, EyeOff, KeyRound, ArrowLeft, CheckCircle2, MapPin } from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
@@ -11,6 +11,7 @@ interface AuthFormData {
   password?: string
   fullName?: string
   phone?: string
+  city?: string
   newPassword?: string
 }
 
@@ -24,7 +25,7 @@ export default function AuthPage() {
   // Track whether we are in login, register, forgot-password, or set-new-password mode
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login'
   const [viewMode, setViewMode] = useState<AuthViewMode>(initialMode)
-  
+
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -77,9 +78,15 @@ export default function AuthPage() {
 
     try {
       if (viewMode === 'register') {
-        await signUp(data.email, data.password || '', data.fullName || '', data.phone || '')
+        const preferredCity = data.city || 'kochi'
+        localStorage.setItem('mana_preferred_city', preferredCity)
+        await signUp(data.email, data.password || '', data.fullName || '', data.phone || '', {
+          preferred_city: preferredCity,
+        })
         setSuccessMsg('Registration successful! Please check your email to verify your account or sign in.')
       } else if (viewMode === 'login') {
+        const preferredCity = data.city || 'kochi'
+        localStorage.setItem('mana_preferred_city', preferredCity)
         await signIn(data.email, data.password || '')
         navigate('/')
       }
@@ -152,7 +159,7 @@ export default function AuthPage() {
     <Layout>
       <div className="max-w-md mx-auto px-4 py-12 sm:py-16">
         <div className="bg-brand-dark/90 backdrop-blur-md rounded-2xl shadow-2xl border border-green-800/50 p-6 sm:p-8 text-white">
-          
+
           {/* Header Title & Subtitle */}
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-white">
@@ -286,6 +293,35 @@ export default function AuthPage() {
                 )}
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-green-100 mb-1 flex items-center gap-1">
+                  <MapPin className="w-4 h-4 text-brand-secondary" />
+                  <span>Select City (Required)</span>
+                </label>
+                <div className="relative flex items-center">
+                  <select
+                    className="w-full px-3 py-2 bg-green-950/60 border border-green-800/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary text-white appearance-none cursor-pointer"
+                    {...register('city', { required: 'City is required' })}
+                    defaultValue="kochi"
+                  >
+                    <option value="kochi" className="bg-green-950">Kochi</option>
+                    <option value="thiruvananthapuram" className="bg-green-950">Thiruvananthapuram</option>
+                    <option value="thrissur" className="bg-green-950">Thrissur</option>
+                    <option value="kozhikode" className="bg-green-950">Kozhikode</option>
+                    <option value="kannur" className="bg-green-950">Kannur</option>
+                    <option value="kollam" className="bg-green-950">Kollam</option>
+                    <option value="palakkad" className="bg-green-950">Palakkad</option>
+                    <option value="alappuzha" className="bg-green-950">Alappuzha</option>
+                    <option value="malappuram" className="bg-green-950">Malappuram</option>
+                    <option value="kottayam" className="bg-green-950">Kottayam</option>
+                    <option value="wayanad" className="bg-green-950">Wayanad</option>
+                    <option value="idukki" className="bg-green-950">Idukki</option>
+                    <option value="pathanamthitta" className="bg-green-950">Pathanamthitta</option>
+                    <option value="kasaragod" className="bg-green-950">Kasaragod</option>
+                  </select>
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -294,8 +330,8 @@ export default function AuthPage() {
                 {isSubmitting
                   ? 'Please wait...'
                   : viewMode === 'register'
-                  ? 'Create Account'
-                  : 'Sign In'}
+                    ? 'Create Account'
+                    : 'Sign In'}
               </button>
             </form>
           )}

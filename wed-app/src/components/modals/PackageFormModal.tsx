@@ -34,6 +34,8 @@ export default function PackageFormModal({
   const [partnerPlanner, setPartnerPlanner] = useState('MANA Verified Curators')
   const [description, setDescription] = useState('')
   const [inclusionsText, setInclusionsText] = useState('')
+  const [instagramUrl, setInstagramUrl] = useState('')
+  const [whatsappNumber, setWhatsappNumber] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [imageUrlInput, setImageUrlInput] = useState('')
   const [isUploading, setIsUploading] = useState(false)
@@ -51,6 +53,8 @@ export default function PackageFormModal({
       setPartnerPlanner(initialPackage.partnerPlanner)
       setDescription(initialPackage.description)
       setInclusionsText(initialPackage.inclusions.join('\n'))
+      setInstagramUrl(initialPackage.instagramUrl || '')
+      setWhatsappNumber(initialPackage.whatsappNumber || '')
       setImages(
         initialPackage.images?.length
           ? initialPackage.images
@@ -70,6 +74,8 @@ export default function PackageFormModal({
       setInclusionsText(
         'Venue & floral mandap setup\nTraditional Kerala Sadya & catering\nDedicated event coordination'
       )
+      setInstagramUrl('https://instagram.com/manaweddings')
+      setWhatsappNumber('919847012345')
       setImages(['/dest-wedding-1.jpg'])
     }
     setImageUrlInput('')
@@ -149,6 +155,8 @@ export default function PackageFormModal({
       inclusions: inclusions.length > 0 ? inclusions : ['Bespoke Kerala wedding coordination'],
       partnerPlanner: partnerPlanner.trim().slice(0, 100) || 'MANA Verified Curators',
       verified: true,
+      instagramUrl: instagramUrl.trim(),
+      whatsappNumber: whatsappNumber.trim(),
     }
 
     if (initialPackage) {
@@ -302,6 +310,34 @@ export default function PackageFormModal({
                 value={partnerPlanner}
                 onChange={(e) => setPartnerPlanner(e.target.value)}
                 placeholder="e.g. Heritage Palms Events (Verified)"
+                className="w-full px-3 py-2 text-sm bg-emerald-950/60 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-brand-secondary/50"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-emerald-200 mb-1">
+                Instagram Link (Exclusive)
+              </label>
+              <input
+                type="url"
+                value={instagramUrl}
+                onChange={(e) => setInstagramUrl(e.target.value)}
+                placeholder="https://instagram.com/reel/..."
+                className="w-full px-3 py-2 text-sm bg-emerald-950/60 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-brand-secondary/50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-emerald-200 mb-1">
+                WhatsApp Number (Exclusive)
+              </label>
+              <input
+                type="text"
+                value={whatsappNumber}
+                onChange={(e) => setWhatsappNumber(e.target.value)}
+                placeholder="e.g. 919847012345"
                 className="w-full px-3 py-2 text-sm bg-emerald-950/60 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-brand-secondary/50"
               />
             </div>

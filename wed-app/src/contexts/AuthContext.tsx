@@ -16,7 +16,12 @@ interface AuthContextType {
     extraData?: Record<string, unknown>
   ) => Promise<{ session: boolean }>
   signOut: () => Promise<void>
-  updateProfile: (updates: { full_name?: string; phone?: string; avatar_url?: string }) => Promise<void>
+  updateProfile: (updates: {
+    full_name?: string
+    phone?: string
+    avatar_url?: string
+    preferred_city?: string | null
+  }) => Promise<void>
   refreshProfile: () => Promise<void>
 }
 
@@ -38,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       vendor_type: (meta.vendor_type as Profile['vendor_type']) || null,
       business_name: (meta.business_name as string) || null,
       access_permissions: (meta.access_permissions as string[]) || null,
+      preferred_city: (meta.preferred_city as string) || null,
       avatar_url: (meta.avatar_url as string) || null,
       created_at: targetUser.created_at || new Date().toISOString(),
     }
@@ -96,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           vendor_type: data.vendor_type || (meta.vendor_type as Profile['vendor_type']) || null,
           business_name: data.business_name || (meta.business_name as string) || null,
           access_permissions: data.access_permissions || (meta.access_permissions as string[]) || null,
+          preferred_city: (data as Record<string, unknown>).preferred_city as string | null || (meta.preferred_city as string) || null,
         } as Profile)
       }
     } catch (err) {
@@ -118,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     full_name?: string
     phone?: string
     avatar_url?: string
+    preferred_city?: string | null
   }) => {
     if (!user) throw new Error('Not authenticated')
 
