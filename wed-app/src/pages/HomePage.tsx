@@ -292,7 +292,7 @@ export default function HomePage() {
 
   const handleCategorySelect = (categoryId: string, query: string) => {
     if (categoryId === 'destination_wedding') {
-      navigate('/packages#packages-section')
+      navigate('/packages')
       return
     }
     if (categoryId === 'photography') {
@@ -391,7 +391,7 @@ export default function HomePage() {
         {/* EXPLORE CATEGORIES SECTION */}
         <div
           onClick={() => {
-            if (!isAdmin) navigate('/packages#packages-section')
+            if (!isAdmin) navigate('/packages')
           }}
           className={`categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-12 ${!isAdmin ? 'cursor-pointer' : ''
             }`}
