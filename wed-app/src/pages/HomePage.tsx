@@ -259,7 +259,7 @@ export default function HomePage() {
     window.addEventListener('mana-splash-end', handleIntroEnd)
 
     // Fallback: in case user already bypassed splash or on direct mount
-    const timer = setTimeout(runReveal, 200)
+    const timer = setTimeout(runReveal, 2700)
 
     return () => {
       window.removeEventListener('mana-splash-reveal', handleIntroEnd)

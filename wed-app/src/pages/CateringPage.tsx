@@ -23,8 +23,10 @@ import {
   type CateringPackage,
 } from '../store/cateringStore'
 import { useAuth } from '../contexts/AuthContext'
+import { useLoginGate } from '../contexts/LoginGateContext'
 
 export default function CateringPage() {
+  const { requireAuth } = useLoginGate()
   const [searchParams, setSearchParams] = useSearchParams()
   const packagesListRef = useRef<HTMLDivElement>(null)
 
@@ -537,8 +539,10 @@ export default function CateringPage() {
                         <button
                           type="button"
                           onClick={() => {
-                            setInquiryPackage(pkg)
-                            setInquirySuccess(false)
+                            requireAuth(`to view catering details and inquire about "${pkg.title}"`, () => {
+                              setInquiryPackage(pkg)
+                              setInquirySuccess(false)
+                            })
                           }}
                           className="flex-1 inline-flex items-center justify-center gap-1 py-1.5 sm:py-2.5 px-2 sm:px-4 rounded-xl sm:rounded-full bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] hover:brightness-105 text-white font-extrabold text-[10px] sm:text-xs md:text-sm shadow-sm active:scale-95 transition-all cursor-pointer"
                         >

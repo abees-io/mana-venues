@@ -8,6 +8,7 @@ import ReelPlayerCard from '../components/packages/ReelPlayerCard'
 import PackageFormModal from '../components/modals/PackageFormModal'
 import ReelFormModal from '../components/modals/ReelFormModal'
 import { useAuth } from '../contexts/AuthContext'
+import { useLoginGate } from '../contexts/LoginGateContext'
 import {
   usePackagesStore,
   type WeddingPackage,
@@ -169,6 +170,7 @@ function PackageImageGallery({
 
 export default function PackagesPage() {
   const { user, profile } = useAuth()
+  const { requireAuth } = useLoginGate()
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
   const pageRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
@@ -448,8 +450,10 @@ export default function PackagesPage() {
   const notesId = useId()
 
   const handleInquireClick = (pkg: WeddingPackage) => {
-    setInquiryPackage(pkg)
-    setInquirySuccess(false)
+    requireAuth(`to view package pricing and submit an inquiry for "${pkg.title}"`, () => {
+      setInquiryPackage(pkg)
+      setInquirySuccess(false)
+    })
   }
 
   const handleCloseModal = () => {

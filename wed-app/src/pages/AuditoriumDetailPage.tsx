@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Phone, MessageCircle, Share2, Check, ArrowLeft, AlertCircle } from 'lucide-react'
+import { Phone, MessageCircle, Share2, Check, ArrowLeft, AlertCircle, Lock } from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import PhotoGallery from '../components/gallery/PhotoGallery'
 import SpecsGrid from '../components/detail/SpecsGrid'
@@ -9,6 +9,8 @@ import MapPlaceholder from '../components/detail/MapPlaceholder'
 import { useAuditoriumDetail } from '../hooks/useAuditoriumDetail'
 import { formatCurrency } from '../lib/utils'
 import type { Auditorium, City } from '../lib/types'
+import { useAuth } from '../contexts/AuthContext'
+import { useLoginGate } from '../contexts/LoginGateContext'
 
 interface JoinedAuditorium extends Auditorium {
   cities?: City | null
@@ -23,6 +25,8 @@ export default function AuditoriumDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const { data, isLoading, error } = useAuditoriumDetail(slug || '')
   const auditorium = data as unknown as JoinedAuditorium | undefined
+  const { user } = useAuth()
+  const { requireAuth } = useLoginGate()
 
   const [copied, setCopied] = useState(false)
 
@@ -231,34 +235,73 @@ export default function AuditoriumDetailPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {callPhone && (
-              <a
-                href={`tel:${callPhone}`}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#E05A85] via-[#F3A2BE] to-[#E05A85] hover:brightness-105 text-white font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
-              >
-                <Phone className="w-4 h-4 shrink-0" />
-                <span>Call {callPhone}</span>
-              </a>
-            )}
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              {callPhone && (
+                user ? (
+                  <a
+                    href={`tel:${callPhone}`}
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#E05A85] via-[#F3A2BE] to-[#E05A85] hover:brightness-105 text-white font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+                  >
+                    <Phone className="w-4 h-4 shrink-0" />
+                    <span>Call {callPhone}</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      requireAuth('to view host phone number and call directly', () => {
+                        window.location.href = `tel:${callPhone}`
+                      })
+                    }
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#E05A85] via-[#F3A2BE] to-[#E05A85] hover:brightness-105 text-white font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer"
+                  >
+                    <Lock className="w-4 h-4 shrink-0" />
+                    <span>Call Host (Login to view)</span>
+                  </button>
+                )
+              )}
 
-            {whatsappUrl && (
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
-              >
-                <MessageCircle className="w-5 h-5 shrink-0" />
-                <span>WhatsApp</span>
-              </a>
-            )}
+              {whatsappUrl && (
+                user ? (
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+                  >
+                    <MessageCircle className="w-5 h-5 shrink-0" />
+                    <span>WhatsApp</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      requireAuth('to message venue host directly on WhatsApp', () => {
+                        window.open(whatsappUrl, '_blank')
+                      })
+                    }
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98] cursor-pointer"
+                  >
+                    <Lock className="w-4 h-4 shrink-0" />
+                    <span>WhatsApp (Login to chat)</span>
+                  </button>
+                )
+              )}
 
-            {!callPhone && !whatsappUrl && (
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-[#D8F0EC] text-xs sm:text-sm text-black">
-                <Phone className="w-4 h-4 shrink-0 text-black/60" />
-                <span>Contact via management office</span>
-              </div>
+              {!callPhone && !whatsappUrl && (
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-[#D8F0EC] text-xs sm:text-sm text-black">
+                  <Phone className="w-4 h-4 shrink-0 text-black/60" />
+                  <span>Contact via management office</span>
+                </div>
+              )}
+            </div>
+
+            {!user && (callPhone || whatsappUrl) && (
+              <p className="flex items-center gap-1.5 text-xs text-black/70 font-medium">
+                <Lock className="w-3.5 h-3.5 text-[#C83B68] shrink-0" />
+                <span>Direct phone & WhatsApp are reserved for registered MANA members.</span>
+              </p>
             )}
           </div>
         </div>

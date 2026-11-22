@@ -23,9 +23,8 @@ import { formatCurrency } from '../../lib/utils'
 const getVendorCategoryTitle = (type?: string | null) => {
   switch (type) {
     case 'wedding_planner':
-      return 'Wedding Event Planner'
     case 'destination_wedding':
-      return 'Destination Weddings Specialist'
+      return 'Wedding Event Planner'
     case 'catering':
       return 'Catering & Feasts Partner'
     case 'photographer':
@@ -98,35 +97,6 @@ export default function VendorDashboard() {
             </button>
           )}
         </div>
-
-        {/* Vendor Active Modules & Webpage Access Strip */}
-        {profile?.access_permissions && profile.access_permissions.length > 0 && (
-          <div className="bg-[#FFF2F6] border border-[#7E1F3E]/20 rounded-2xl p-4 sm:p-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#7E1F3E] mb-2.5">
-              Active Vendor Portal Features & Webpage Access
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {profile.access_permissions.map((acc) => {
-                const map: Record<string, string> = {
-                  leads: '💬 Direct Client Leads',
-                  packages: '🏷️ Pricing & Packages Catalog',
-                  portfolio: '🖼️ Portfolio Gallery',
-                  calendar: '📅 Live Calendar & Slots',
-                  venues: '🏛️ Venue & Hall Listings',
-                  payouts: '💳 Payout & Invoicing',
-                }
-                return (
-                  <span
-                    key={acc}
-                    className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-white border border-[#7E1F3E]/25 text-[#5A172D] shadow-2xs"
-                  >
-                    {map[acc] || acc}
-                  </span>
-                )
-              })}
-            </div>
-          </div>
-        )}
 
         {/* If no auditoriums listed yet: onboarding card */}
         {!hasAuditoriums ? (

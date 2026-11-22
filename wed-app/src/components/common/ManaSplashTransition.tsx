@@ -2,65 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const ManaSplashTransition: React.FC = () => {
-  // Check if already viewed in this browser session or if not on root URL
-  const shouldSkipInitial = () => {
-    if (typeof window === 'undefined') return true;
-    try {
-      const isRoot = window.location.pathname === '/' || window.location.pathname === '';
-      const hasSeen = sessionStorage.getItem('mana_splash_seen');
-      // Only play once per session and only on root landing page
-      if (!isRoot || hasSeen) {
-        return true;
-      }
-      return false;
-    } catch {
-      return false;
-    }
-  };
-
-  const [isPlaying, setIsPlaying] = useState<boolean>(() => !shouldSkipInitial());
+  const [isPlaying, setIsPlaying] = useState(true);
   const [phase, setPhase] = useState<'intro' | 'shimmer' | 'reveal'>('intro');
 
   useEffect(() => {
-    if (!isPlaying) {
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('mana-splash-reveal'));
-        window.dispatchEvent(new CustomEvent('mana-splash-end'));
-      }
-      return;
-    }
-
-    try {
-      sessionStorage.setItem('mana_splash_seen', 'true');
-    } catch {
-      // Ignore storage errors
-    }
-
-    // Fast, responsive timings (under 1.3s total)
+    // Phase 1: Logo springs in gently (0 - 1000ms)
+    // Phase 2: Slow, graceful golden shimmer sweep across the "M" logo (1000ms - 2600ms)
     const shimmerTimer = setTimeout(() => {
       setPhase('shimmer');
-    }, 400);
+    }, 1000);
 
+    // Phase 3: Smooth cinematic portal zoom & dissolve into website (2600ms - 3500ms)
     const revealTimer = setTimeout(() => {
       setPhase('reveal');
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('mana-splash-reveal'));
       }
-    }, 900);
+    }, 2600);
 
     const completeTimer = setTimeout(() => {
       setIsPlaying(false);
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('mana-splash-end'));
       }
-    }, 1250);
+    }, 3550);
 
     return () => {
       clearTimeout(shimmerTimer);
       clearTimeout(revealTimer);
       clearTimeout(completeTimer);
     };
-  }, [isPlaying]);
+  }, []);
 
   const handleSkip = () => {
     setIsPlaying(false);
@@ -70,8 +42,6 @@ export const ManaSplashTransition: React.FC = () => {
     }
   };
 
-  if (!isPlaying) return null;
-
   return (
     <AnimatePresence>
       {isPlaying && (
@@ -80,51 +50,71 @@ export const ManaSplashTransition: React.FC = () => {
           initial={{ opacity: 1 }}
           animate={{
             opacity: phase === 'reveal' ? 0 : 1,
-            transition: { duration: 0.35, ease: 'easeOut' },
+            transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
           }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center select-none overflow-hidden cursor-pointer bg-gradient-to-br from-[#F3A2BE] via-[#E06A94] to-[#B83865] will-change-[opacity]"
+          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center select-none overflow-hidden cursor-pointer bg-gradient-to-br from-[#F3A2BE] via-[#E06A94] to-[#B83865]"
           onClick={handleSkip}
         >
-          {/* Subtle Glow */}
-          <div className="absolute w-[280px] h-[280px] sm:w-[420px] sm:h-[420px] rounded-full bg-gradient-to-tr from-[#F0F9F8]/20 via-[#F3A2BE]/30 to-white/20 pointer-events-none opacity-80" />
-
-          {/* Vignette */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(126,31,62,0.3)_90%)] pointer-events-none" />
-
-          {/* Center Logo Showcase */}
+          {/* Ambient Bubble Gum & Candy Floss Radial Glow */}
           <motion.div
-            initial={{ scale: 0.85, opacity: 0 }}
+            animate={{
+              scale: phase === 'reveal' ? 1.5 : [1, 1.2, 1],
+              opacity: phase === 'reveal' ? 0 : 0.75,
+            }}
+            transition={{
+              scale: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
+              opacity: { duration: 0.8 },
+            }}
+            className="absolute w-[340px] h-[340px] sm:w-[520px] sm:h-[520px] rounded-full bg-gradient-to-tr from-[#F0F9F8]/30 via-[#F3A2BE]/40 to-white/25 blur-[100px] sm:blur-[120px] pointer-events-none"
+          />
+
+          {/* Soft Radial Vignette for Mobile & Desktop Depth */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_25%,rgba(126,31,62,0.35)_90%)] pointer-events-none" />
+
+          {/* Center Logo Showcase with Cinematic Zoom Transition */}
+          <motion.div
+            initial={{ scale: 0.65, opacity: 0, filter: 'blur(10px)' }}
             animate={
               phase === 'intro'
                 ? {
                     scale: 1,
                     opacity: 1,
-                    transition: { duration: 0.35, ease: 'easeOut' },
+                    filter: 'blur(0px)',
+                    transition: {
+                      type: 'spring',
+                      stiffness: 140,
+                      damping: 20,
+                      mass: 0.9,
+                    },
                   }
                 : phase === 'shimmer'
                 ? {
-                    scale: 1.02,
+                    scale: 1.04,
                     opacity: 1,
-                    transition: { duration: 0.5, ease: 'easeInOut' },
+                    filter: 'blur(0px)',
+                    transition: { duration: 1.2, ease: 'easeInOut' },
                   }
                 : {
-                    scale: 1.15,
+                    // Portal zoom-through into the website
+                    scale: 1.4,
                     opacity: 0,
-                    transition: { duration: 0.35, ease: 'easeIn' },
+                    filter: 'blur(14px)',
+                    transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
                   }
             }
             className="relative z-10 flex flex-col items-center justify-center pointer-events-none"
           >
-            {/* MANA Logo Graphic */}
-            <div className="relative w-32 h-32 sm:w-44 sm:h-44 flex items-center justify-center">
+            {/* Pure Borderless MANA Logo Graphic with Pixel-Perfect Mask Shimmer */}
+            <div className="relative w-36 h-36 sm:w-48 sm:h-48 flex items-center justify-center">
+              {/* Base MANA Logo */}
               <img
                 src="/logo.svg"
                 alt="MANA Logo"
-                className="w-full h-full object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.6)]"
+                className="w-full h-full object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)]"
               />
 
-              {/* Shimmer Light Reflection Sweep */}
+              {/* Shimmer Light Reflection Sweep - STRICTLY MASKED TO THE LETTER "M" LOGO ONLY */}
               <div
                 className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden"
                 style={{
@@ -144,43 +134,46 @@ export const ManaSplashTransition: React.FC = () => {
                     phase === 'shimmer' || phase === 'reveal'
                       ? {
                           x: '150%',
-                          transition: { duration: 0.75, ease: 'easeInOut' },
+                          transition: { duration: 1.45, ease: 'easeInOut' },
                         }
                       : { x: '-130%' }
                   }
-                  className="w-full h-full bg-gradient-to-r from-transparent via-[#F0F9F8] to-transparent skew-x-[-25deg] opacity-90"
+                  className="w-full h-full bg-gradient-to-r from-transparent via-[#F0F9F8] to-transparent skew-x-[-25deg] opacity-95"
                 />
               </div>
             </div>
 
             {/* Typography: MANA */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={
                 phase === 'reveal'
-                  ? { opacity: 0, y: -6 }
+                  ? { opacity: 0, y: -10 }
                   : { opacity: 1, y: 0 }
               }
-              transition={{ delay: 0.1, duration: 0.35 }}
-              className="mt-4 sm:mt-6 text-center"
+              transition={{ delay: 0.15, duration: 0.5 }}
+              className="mt-6 text-center"
             >
               <h1
-                className="text-2xl sm:text-4xl font-extrabold tracking-[0.22em] uppercase text-[#F0F9F8] drop-shadow-md"
+                className="text-3xl sm:text-4xl font-extrabold tracking-[0.22em] uppercase text-[#F0F9F8] drop-shadow-md"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 MANA
               </h1>
-              <p
-                className="text-[10px] sm:text-xs uppercase tracking-[0.28em] text-[#F0F9F8]/90 font-medium mt-1 drop-shadow-xs"
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.95 }}
+                transition={{ delay: 0.35, duration: 0.5 }}
+                className="text-[11px] sm:text-xs uppercase tracking-[0.3em] text-[#F0F9F8] font-medium mt-1.5 drop-shadow-xs"
               >
-                Curated Kerala Weddings
-              </p>
+                Luxury Wedding Venues
+              </motion.p>
             </motion.div>
           </motion.div>
 
-          {/* Tap hint */}
-          <div className="absolute bottom-6 text-[10px] uppercase tracking-widest text-[#F0F9F8]/70 font-medium">
-            Tap to enter
+          {/* Discreet Hint */}
+          <div className="absolute bottom-8 text-[11px] uppercase tracking-widest text-[#F0F9F8]/80 font-medium">
+            Tap anywhere to enter
           </div>
         </motion.div>
       )}
