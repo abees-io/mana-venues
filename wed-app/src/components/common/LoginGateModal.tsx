@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -17,6 +17,14 @@ import {
 } from 'lucide-react'
 import { useLoginGate } from '../../contexts/LoginGateContext'
 import { useAuth } from '../../contexts/AuthContext'
+import {
+  checkRateLimit,
+  recordRateLimitAttempt,
+  resetRateLimit,
+  lockRateLimit,
+  isRateLimitError,
+  formatRateLimitMessage,
+} from '../../lib/rateLimit'
 
 const KERALA_CITIES = [
   { label: 'Kochi', value: 'kochi' },
@@ -79,10 +87,31 @@ export function LoginGateModal() {
     setSuccessMessage(null)
   }
 
+  const [rateLimitLockSeconds, setRateLimitLockSeconds] = useState(0)
+
+  // Countdown timer for rate limiting
+  useEffect(() => {
+    if (rateLimitLockSeconds <= 0) return
+    const timer = setInterval(() => {
+      setRateLimitLockSeconds((prev) => (prev > 1 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [rateLimitLockSeconds])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage(null)
     setSuccessMessage(null)
+
+    // Check rate limit: max 5 attempts per 60 seconds
+    const limitKey = `auth_user_${mode}`
+    const rateCheck = checkRateLimit(limitKey, 5, 60)
+    if (!rateCheck.allowed) {
+      setRateLimitLockSeconds(rateCheck.retryAfterSeconds)
+      setErrorMessage(formatRateLimitMessage(rateCheck.retryAfterSeconds, 'attempt'))
+      return
+    }
+
     setSubmitting(true)
 
     try {
@@ -95,6 +124,7 @@ export function LoginGateModal() {
           throw new Error('Please enter both email and password.')
         }
         await signIn(email.trim(), password)
+        resetRateLimit(limitKey)
         localStorage.setItem('mana_preferred_city', selectedCity)
         try {
           await updateProfile({ preferred_city: selectedCity })
@@ -119,6 +149,7 @@ export function LoginGateModal() {
         const { session } = await signUp(email.trim(), password, fullName.trim(), phone.trim(), {
           preferred_city: selectedCity,
         })
+        resetRateLimit(limitKey)
         if (session) {
           setSuccessMessage('Account created successfully! Welcome to MANA.')
           setTimeout(() => {
@@ -132,7 +163,14 @@ export function LoginGateModal() {
         }
       }
     } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : 'Authentication failed. Please try again.')
+      recordRateLimitAttempt(limitKey, 60)
+      if (isRateLimitError(err)) {
+        lockRateLimit(limitKey, 60)
+        setRateLimitLockSeconds(60)
+        setErrorMessage(formatRateLimitMessage(60, 'request'))
+      } else {
+        setErrorMessage(err instanceof Error ? err.message : 'Authentication failed. Please try again.')
+      }
     } finally {
       setSubmitting(false)
     }
@@ -380,10 +418,12 @@ export function LoginGateModal() {
               {/* Submit CTA Button */}
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || rateLimitLockSeconds > 0}
                 className="w-full mt-2 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-[#7E1F3E] via-[#A82B54] to-[#C83B68] hover:brightness-105 active:scale-[0.99] transition-all shadow-md disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
               >
-                {submitting ? (
+                {rateLimitLockSeconds > 0 ? (
+                  <span>Please wait {rateLimitLockSeconds}s to retry</span>
+                ) : submitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     <span>Please wait...</span>

@@ -140,16 +140,16 @@ export const ManaSplashTransition: React.FC = () => {
               </div>
             </div>
 
-            {/* Typography: MANA */}
+            {/* Typography: MANA — positioned closely under the logo */}
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={
                 phase === 'reveal'
-                  ? { opacity: 0, y: -10 }
+                  ? { opacity: 0, y: -6 }
                   : { opacity: 1, y: 0 }
               }
               transition={{ delay: 0.15, duration: 0.5 }}
-              className="mt-6 text-center"
+              className="mt-1 sm:mt-2 text-center"
             >
               <h1
                 className="text-3xl sm:text-4xl font-extrabold tracking-[0.22em] uppercase text-[#F0F9F8] drop-shadow-md"
@@ -161,7 +161,7 @@ export const ManaSplashTransition: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.95 }}
                 transition={{ delay: 0.35, duration: 0.5 }}
-                className="text-[11px] sm:text-xs uppercase tracking-[0.3em] text-[#F0F9F8] font-medium mt-1.5 drop-shadow-xs"
+                className="text-[11px] sm:text-xs uppercase tracking-[0.3em] text-[#F0F9F8] font-medium mt-1 drop-shadow-xs"
               >
                 Luxury Wedding Venues
               </motion.p>

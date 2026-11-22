@@ -193,7 +193,7 @@ export default function PhotographyMotionHero({
           {/* Left: 3-Card Depth Deck Animation */}
           <div className="lg:col-span-7 flex flex-col items-center justify-center">
             <div
-              className="relative w-full h-[320px] sm:h-[390px] md:h-[430px] flex items-center justify-center select-none"
+              className="relative w-full h-[320px] sm:h-[390px] md:h-[430px] flex items-center justify-center select-none overflow-hidden touch-pan-y"
               style={{ perspective: '1200px' }}
             >
               {PHOTOGRAPHY_TYPES.map((type, idx) => {
@@ -204,26 +204,26 @@ export default function PhotographyMotionHero({
                 if (diff < -total / 2) diff += total
 
                 const isCenter = diff === 0
-                const isLeft = diff === -1 || (diff === 2 && activeIndex === 0)
-                const isRight = diff === 1 || (diff === -2 && activeIndex === 2)
+                const isLeft = diff === -1
+                const isRight = diff === 1
 
                 let transformStyle = ''
                 let zIndex = 10
-                let opacity = 0.55
+                let opacity = 0.5
                 let pointerEvents: 'auto' | 'none' = 'auto'
 
                 if (isCenter) {
-                  transformStyle = 'translateX(0%) scale(1) translateZ(0) rotateY(0deg) rotate(0deg)'
+                  transformStyle = 'translateX(0%) scale(1) translateZ(0) rotateY(0deg)'
                   zIndex = 30
                   opacity = 1
                 } else if (isLeft) {
-                  transformStyle = 'translateX(-38%) scale(0.86) translateZ(-80px) rotate(-4deg)'
+                  transformStyle = 'translateX(-34%) scale(0.86) translateZ(-70px) rotateY(10deg)'
                   zIndex = 20
-                  opacity = 0.7
+                  opacity = 0.55
                 } else if (isRight) {
-                  transformStyle = 'translateX(38%) scale(0.86) translateZ(-80px) rotate(4deg)'
+                  transformStyle = 'translateX(34%) scale(0.86) translateZ(-70px) rotateY(-10deg)'
                   zIndex = 20
-                  opacity = 0.7
+                  opacity = 0.55
                 } else {
                   transformStyle = 'translateX(0%) scale(0.7) translateZ(-160px)'
                   zIndex = 10
@@ -235,14 +235,17 @@ export default function PhotographyMotionHero({
                   <div
                     key={type.id}
                     onClick={() => handleSelectType(idx)}
-                    className={`absolute top-0 w-[84%] sm:w-[76%] md:w-[68%] max-w-[440px] aspect-[16/11] rounded-3xl overflow-hidden cursor-pointer select-none transition-all duration-700 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-2xl hover:opacity-100 ${isCenter ? 'ring-2 ring-[#C83B68]/30 shadow-[0_24px_50px_rgba(200,59,104,0.18)]' : ''
-                      }`}
+                    className={`absolute top-0 w-[84%] sm:w-[76%] md:w-[68%] max-w-[440px] aspect-[16/11] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-2xl hover:opacity-100 ${
+                      isCenter ? 'ring-2 ring-[#C83B68]/30 shadow-[0_24px_50px_rgba(200,59,104,0.18)]' : ''
+                    }`}
                     style={{
                       transform: transformStyle,
                       zIndex,
                       opacity,
                       pointerEvents,
                       WebkitTapHighlightColor: 'transparent',
+                      WebkitBackfaceVisibility: 'hidden',
+                      backfaceVisibility: 'hidden',
                     }}
                   >
                     {/* Cover Photograph */}

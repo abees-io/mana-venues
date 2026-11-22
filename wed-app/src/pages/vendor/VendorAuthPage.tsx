@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import {
   Sparkles,
@@ -15,6 +15,14 @@ import {
 import Layout from '../../components/layout/Layout'
 import { useAuth } from '../../contexts/AuthContext'
 import type { VendorType } from '../../lib/types'
+import {
+  checkRateLimit,
+  recordRateLimitAttempt,
+  resetRateLimit,
+  lockRateLimit,
+  isRateLimitError,
+  formatRateLimitMessage,
+} from '../../lib/rateLimit'
 
 interface VendorCategoryOption {
   id: VendorType
@@ -79,6 +87,16 @@ export default function VendorAuthPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [rateLimitLockSeconds, setRateLimitLockSeconds] = useState(0)
+
+  // Countdown timer for rate limiting
+  useEffect(() => {
+    if (rateLimitLockSeconds <= 0) return
+    const timer = setInterval(() => {
+      setRateLimitLockSeconds((prev) => (prev > 1 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [rateLimitLockSeconds])
 
   // Redirect if already logged in as vendor
   if (user && profile?.role === 'vendor') {
@@ -88,15 +106,32 @@ export default function VendorAuthPage() {
   // Handle Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
     setErrorMsg(null)
     setSuccessMsg(null)
 
+    const limitKey = 'auth_vendor_login'
+    const rateCheck = checkRateLimit(limitKey, 5, 60)
+    if (!rateCheck.allowed) {
+      setRateLimitLockSeconds(rateCheck.retryAfterSeconds)
+      setErrorMsg(formatRateLimitMessage(rateCheck.retryAfterSeconds, 'attempt'))
+      return
+    }
+
+    setIsSubmitting(true)
+
     try {
       await signIn(loginEmail, loginPassword)
+      resetRateLimit(limitKey)
       navigate('/vendor')
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Login failed. Please check your credentials.')
+      recordRateLimitAttempt(limitKey, 60)
+      if (isRateLimitError(err)) {
+        lockRateLimit(limitKey, 60)
+        setRateLimitLockSeconds(60)
+        setErrorMsg(formatRateLimitMessage(60, 'attempt'))
+      } else {
+        setErrorMsg(err instanceof Error ? err.message : 'Login failed. Please check your credentials.')
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -105,20 +140,27 @@ export default function VendorAuthPage() {
   // Handle 2-Step Registration Submit
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
     setErrorMsg(null)
     setSuccessMsg(null)
 
+    const limitKey = 'auth_vendor_register'
+    const rateCheck = checkRateLimit(limitKey, 5, 60)
+    if (!rateCheck.allowed) {
+      setRateLimitLockSeconds(rateCheck.retryAfterSeconds)
+      setErrorMsg(formatRateLimitMessage(rateCheck.retryAfterSeconds, 'registration attempt'))
+      return
+    }
+
     if (!businessName.trim() || !fullName.trim()) {
       setErrorMsg('Please enter your business name and contact name.')
-      setIsSubmitting(false)
       return
     }
     if (!email.trim() || !password || password.length < 6) {
       setErrorMsg('Please provide a valid email and a password of at least 6 characters.')
-      setIsSubmitting(false)
       return
     }
+
+    setIsSubmitting(true)
 
     try {
       await signUp(email, password, fullName, phone, {
@@ -128,13 +170,21 @@ export default function VendorAuthPage() {
         operating_city: city,
         access_permissions: ['full_access'],
       })
+      resetRateLimit(limitKey)
 
       setSuccessMsg('Account created successfully! Redirecting to your dashboard...')
       setTimeout(() => {
         navigate('/vendor')
       }, 1200)
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Registration failed. Please try again.')
+      recordRateLimitAttempt(limitKey, 60)
+      if (isRateLimitError(err)) {
+        lockRateLimit(limitKey, 60)
+        setRateLimitLockSeconds(60)
+        setErrorMsg(formatRateLimitMessage(60, 'request'))
+      } else {
+        setErrorMsg(err instanceof Error ? err.message : 'Registration failed. Please try again.')
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -441,10 +491,10 @@ export default function VendorAuthPage() {
 
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || rateLimitLockSeconds > 0}
                     className="inline-flex items-center justify-center gap-1.5 px-6 py-2.5 rounded-xl bg-[#7E1F3E] hover:bg-[#5A172D] text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 disabled:opacity-50"
                   >
-                    <span>{isSubmitting ? 'Registering...' : 'Register as Vendor'}</span>
+                    <span>{rateLimitLockSeconds > 0 ? `Wait ${rateLimitLockSeconds}s` : isSubmitting ? 'Registering...' : 'Register as Vendor'}</span>
                     <CheckCircle2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -497,10 +547,10 @@ export default function VendorAuthPage() {
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || rateLimitLockSeconds > 0}
                   className="w-full py-2.5 rounded-xl bg-[#7E1F3E] hover:bg-[#5A172D] text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Signing in...' : 'Sign In to Vendor Portal'}
+                  {rateLimitLockSeconds > 0 ? `Please wait ${rateLimitLockSeconds}s to retry` : isSubmitting ? 'Signing in...' : 'Sign In to Vendor Portal'}
                 </button>
               </div>
 

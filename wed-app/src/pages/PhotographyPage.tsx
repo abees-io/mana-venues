@@ -15,6 +15,7 @@ import {
   Plus,
   Edit2,
   Trash2,
+  AlertCircle,
 } from 'lucide-react'
 import CoolCameraIcon from '../components/common/CoolCameraIcon'
 import Layout from '../components/layout/Layout'
@@ -26,6 +27,11 @@ import {
 } from '../store/photographyStore'
 import { useLoginGate } from '../contexts/LoginGateContext'
 import { useAuth } from '../contexts/AuthContext'
+import {
+  checkRateLimit,
+  recordRateLimitAttempt,
+  formatRateLimitMessage,
+} from '../lib/rateLimit'
 
 export default function PhotographyPage() {
   const { requireAuth } = useLoginGate()
@@ -47,6 +53,7 @@ export default function PhotographyPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [inquiryPackage, setInquiryPackage] = useState<PhotographyPackage | null>(null)
   const [inquirySuccess, setInquirySuccess] = useState(false)
+  const [inquiryError, setInquiryError] = useState<string | null>(null)
   const [expandedInclusions, setExpandedInclusions] = useState<Record<string, boolean>>({})
 
   // Add/Edit modal state
@@ -224,11 +231,20 @@ export default function PhotographyPage() {
 
   const handleInquireSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setInquiryError(null)
+
+    const rateCheck = checkRateLimit('inquiry_photography', 2, 60)
+    if (!rateCheck.allowed) {
+      setInquiryError(formatRateLimitMessage(rateCheck.retryAfterSeconds, 'inquiry'))
+      return
+    }
+
     if (!clientName.trim() || !clientPhone.trim()) {
       alert('Please provide your name and contact phone number.')
       return
     }
     setFormSubmitting(true)
+    recordRateLimitAttempt('inquiry_photography', 60)
     setTimeout(() => {
       setFormSubmitting(false)
       setInquirySuccess(true)
@@ -590,6 +606,13 @@ export default function PhotographyPage() {
                       Pricing: {inquiryPackage.price} • {inquiryPackage.duration}
                     </p>
                   </div>
+
+                  {inquiryError && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>{inquiryError}</span>
+                    </div>
+                  )}
 
                   <div className="space-y-3">
                     <div>

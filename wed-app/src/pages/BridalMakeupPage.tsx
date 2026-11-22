@@ -13,6 +13,7 @@ import {
   Edit2,
   Trash2,
   Edit3,
+  AlertCircle,
 } from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import BridalMakeupMotionHero from '../components/makeup/BridalMakeupMotionHero'
@@ -23,6 +24,11 @@ import {
 } from '../store/makeupStore'
 import { useAuth } from '../contexts/AuthContext'
 import { useLoginGate } from '../contexts/LoginGateContext'
+import {
+  checkRateLimit,
+  recordRateLimitAttempt,
+  formatRateLimitMessage,
+} from '../lib/rateLimit'
 
 export default function BridalMakeupPage() {
   const { requireAuth } = useLoginGate()
@@ -46,6 +52,7 @@ export default function BridalMakeupPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [inquiryPackage, setInquiryPackage] = useState<MakeupPackage | null>(null)
   const [inquirySuccess, setInquirySuccess] = useState(false)
+  const [inquiryError, setInquiryError] = useState<string | null>(null)
   const [expandedInclusions, setExpandedInclusions] = useState<Record<string, boolean>>({})
 
   // Admin Modals
@@ -242,11 +249,20 @@ export default function BridalMakeupPage() {
 
   const handleInquireSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setInquiryError(null)
+
+    const rateCheck = checkRateLimit('inquiry_makeup', 2, 60)
+    if (!rateCheck.allowed) {
+      setInquiryError(formatRateLimitMessage(rateCheck.retryAfterSeconds, 'inquiry'))
+      return
+    }
+
     if (!clientName.trim() || !clientPhone.trim()) {
       alert('Please provide your name and phone number.')
       return
     }
     setFormSubmitting(true)
+    recordRateLimitAttempt('inquiry_makeup', 60)
     setTimeout(() => {
       setFormSubmitting(false)
       setInquirySuccess(true)
@@ -612,6 +628,13 @@ export default function BridalMakeupPage() {
                       Pricing: <strong className="text-[#C83B68]">{inquiryPackage.price}</strong>
                     </p>
                   </div>
+
+                  {inquiryError && (
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                      <span>{inquiryError}</span>
+                    </div>
+                  )}
 
                   <div className="space-y-3">
                     <div>

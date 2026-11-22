@@ -10,6 +10,11 @@ import ReelFormModal from '../components/modals/ReelFormModal'
 import { useAuth } from '../contexts/AuthContext'
 import { useLoginGate } from '../contexts/LoginGateContext'
 import {
+  checkRateLimit,
+  recordRateLimitAttempt,
+  formatRateLimitMessage,
+} from '../lib/rateLimit'
+import {
   usePackagesStore,
   type WeddingPackage,
   type PackageReel,
@@ -451,6 +456,7 @@ export default function PackagesPage() {
   const [hasError, setHasError] = useState<boolean>(false)
   const [inquiryPackage, setInquiryPackage] = useState<WeddingPackage | null>(null)
   const [inquirySuccess, setInquirySuccess] = useState<boolean>(false)
+  const [inquiryError, setInquiryError] = useState<string | null>(null)
 
   // Admin Modals State
   const [isPkgModalOpen, setIsPkgModalOpen] = useState(false)
@@ -488,6 +494,7 @@ export default function PackagesPage() {
   const handleCloseModal = () => {
     setInquiryPackage(null)
     setInquirySuccess(false)
+    setInquiryError(null)
     setFormData({
       fullName: '',
       phone: '',
@@ -500,6 +507,15 @@ export default function PackagesPage() {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setInquiryError(null)
+
+    // Rate limiting: max 2 inquiries per 60 seconds
+    const rateCheck = checkRateLimit('inquiry_destination_wedding', 2, 60)
+    if (!rateCheck.allowed) {
+      setInquiryError(formatRateLimitMessage(rateCheck.retryAfterSeconds, 'inquiry'))
+      return
+    }
+
     // Sanitize input values
     const sanitizedName = formData.fullName.trim().slice(0, 80)
     const sanitizedPhone = formData.phone.trim().slice(0, 20)
@@ -508,6 +524,7 @@ export default function PackagesPage() {
     if (!sanitizedName || !sanitizedPhone || !sanitizedEmail) return
 
     setFormSubmitting(true)
+    recordRateLimitAttempt('inquiry_destination_wedding', 60)
     // Simulate inquiry submission with sanitized payload
     setTimeout(() => {
       setFormSubmitting(false)
@@ -1378,6 +1395,13 @@ export default function PackagesPage() {
                     Direct transparent connection with verified Kerala planners. Zero brokerage.
                   </p>
                 </div>
+
+                {inquiryError && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{inquiryError}</span>
+                  </div>
+                )}
 
                 <div className="space-y-3 pt-2">
                   <div>

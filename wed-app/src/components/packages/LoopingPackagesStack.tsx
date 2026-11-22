@@ -84,7 +84,7 @@ export default function LoopingPackagesStack({
     >
       {/* 3D Coverflow Stage Container */}
       <div
-        className="relative w-full h-[280px] sm:h-[340px] md:h-[380px] flex items-center justify-center overflow-hidden py-4"
+        className="relative w-full h-[280px] sm:h-[340px] md:h-[380px] flex items-center justify-center overflow-hidden py-4 touch-pan-y select-none"
         style={{ perspective: '1100px' }}
       >
         {packages.map((pkg, index) => {
@@ -97,7 +97,7 @@ export default function LoopingPackagesStack({
           const isLeft = diff === -1
           const isRight = diff === 1
 
-          // Compute 3D Stage styles
+          // Compute 3D Stage styles with smooth background-depth anchoring
           let transformStyle = ''
           let zIndex = 10
           let opacity = 0
@@ -109,18 +109,18 @@ export default function LoopingPackagesStack({
             opacity = 1
             pointerEvents = 'auto'
           } else if (isLeft) {
-            transformStyle = 'translateX(-58%) scale(0.84) translateZ(-80px) rotateY(16deg)'
+            transformStyle = 'translateX(-46%) scale(0.85) translateZ(-70px) rotateY(12deg)'
             zIndex = 20
-            opacity = 0.65
+            opacity = 0.55
             pointerEvents = 'auto'
           } else if (isRight) {
-            transformStyle = 'translateX(58%) scale(0.84) translateZ(-80px) rotateY(-16deg)'
+            transformStyle = 'translateX(46%) scale(0.85) translateZ(-70px) rotateY(-12deg)'
             zIndex = 20
-            opacity = 0.65
+            opacity = 0.55
             pointerEvents = 'auto'
           } else {
-            transformStyle = `translateX(${diff > 0 ? '90%' : '-90%'}) scale(0.7) translateZ(-160px) rotateY(${diff > 0 ? '-25deg' : '25deg'
-              })`
+            // Background anchor: neatly rests behind center at depth so cards never sweep across horizontally
+            transformStyle = 'translateX(0%) scale(0.68) translateZ(-160px) rotateY(0deg)'
             zIndex = 10
             opacity = 0
             pointerEvents = 'none'
@@ -136,13 +136,15 @@ export default function LoopingPackagesStack({
                   onActiveIndexChange(index)
                 }
               }}
-              className={`absolute top-0 w-[84%] sm:w-[68%] md:w-[54%] max-w-[460px] aspect-[16/10] sm:aspect-[16/10.5] rounded-3xl overflow-hidden cursor-pointer select-none transition-all duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-xl`}
+              className={`absolute top-0 w-[84%] sm:w-[68%] md:w-[54%] max-w-[460px] aspect-[16/10] sm:aspect-[16/10.5] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-xl`}
               style={{
                 transform: transformStyle,
                 zIndex,
                 opacity,
                 pointerEvents,
                 WebkitTapHighlightColor: 'transparent',
+                WebkitBackfaceVisibility: 'hidden',
+                backfaceVisibility: 'hidden',
               }}
             >
               {/* Cover Photo */}
