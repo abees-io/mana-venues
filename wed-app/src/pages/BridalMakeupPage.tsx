@@ -40,6 +40,8 @@ export default function BridalMakeupPage() {
 
   const { user, profile } = useAuth()
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
+  const isMakeupVendor = profile?.role === 'vendor' && profile?.vendor_type === 'bridal_makeup'
+  const canManageMakeup = Boolean(isAdmin || isMakeupVendor)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [inquiryPackage, setInquiryPackage] = useState<MakeupPackage | null>(null)
@@ -125,7 +127,7 @@ export default function BridalMakeupPage() {
     setPkgTitle('')
     setPkgCategory('hd_bridal')
     setPkgTagline('')
-    setPkgPrice('â‚¹25,000')
+    setPkgPrice('Price on Demand')
     setPkgDuration('4 Hours')
     setPkgTeamSize('Lead Artist + Stylist')
     setPkgBrandKit('Charlotte Tilbury â€¢ MAC Pro â€¢ Huda Beauty')
@@ -219,6 +221,8 @@ export default function BridalMakeupPage() {
           draping: pkgDraping.trim(),
           hairstyling: pkgHairstyling.trim(),
         },
+        vendorId: profile?.id,
+        vendorName: profile?.business_name || profile?.full_name || 'MANA Verified Artist',
       }
       addPackage(newPkg)
     }
@@ -295,8 +299,8 @@ export default function BridalMakeupPage() {
                 />
               </div>
 
-              {/* Admin: Add New Package Button */}
-              {isAdmin && (
+              {/* Admin / Makeup Vendor: Add New Package Button */}
+              {canManageMakeup && (
                 <button
                   type="button"
                   onClick={handleOpenAddModal}
@@ -370,13 +374,14 @@ export default function BridalMakeupPage() {
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6 lg:gap-8">
               {filteredPackages.map((pkg) => {
                 const isExpanded = Boolean(expandedInclusions[pkg.id])
+                const canEditPkg = Boolean(isAdmin || (isMakeupVendor && pkg.vendorId === profile?.id))
                 return (
                   <article
                     key={pkg.id}
                     className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-white border border-[#D8F0EC] shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col will-change-transform"
                   >
-                    {/* Admin Action Buttons on Card */}
-                    {isAdmin && (
+                    {/* Admin / Owner Vendor Action Buttons on Card */}
+                    {canEditPkg && (
                       <div className="absolute top-2 left-2 z-30 flex items-center gap-1">
                         <button
                           type="button"
@@ -415,10 +420,10 @@ export default function BridalMakeupPage() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
-                      {/* Category Badge Top Left (pushed right if admin buttons visible) */}
+                      {/* Category Badge Top Left (pushed right if edit buttons visible) */}
                       <div
                         className={`absolute top-2 ${
-                          isAdmin ? 'left-16 sm:left-20' : 'left-2'
+                          canEditPkg ? 'left-16 sm:left-20' : 'left-2'
                         } sm:top-3 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#D8F0EC] text-[8.5px] sm:text-[10px] font-bold text-[#7E1F3E] shadow-2xs`}
                       >
                         <span className="sm:hidden capitalize">{pkg.category.replace('_', ' ')}</span>
@@ -604,7 +609,7 @@ export default function BridalMakeupPage() {
                       Inquire: {inquiryPackage.title}
                     </h3>
                     <p className="text-xs text-black/70">
-                      Starting at <strong className="text-[#C83B68]">{inquiryPackage.price}</strong>
+                      Pricing: <strong className="text-[#C83B68]">{inquiryPackage.price}</strong>
                     </p>
                   </div>
 
@@ -815,7 +820,7 @@ export default function BridalMakeupPage() {
                       required
                       value={pkgPrice}
                       onChange={(e) => setPkgPrice(e.target.value)}
-                      placeholder="e.g. â‚¹28,000"
+                      placeholder="e.g. Price on Demand"
                       className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
                     />
                   </div>

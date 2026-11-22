@@ -23,6 +23,8 @@ export interface MakeupPackage {
     draping: string
     hairstyling: string
   }
+  vendorId?: string
+  vendorName?: string
 }
 
 export interface MakeupHeroText {
@@ -38,7 +40,7 @@ export const DEFAULT_MAKEUP_PACKAGES: MakeupPackage[] = [
     category: 'hd_bridal',
     categoryLabel: 'HD Bridal Makeup',
     tagline: 'Timeless traditional glow with 18-hour sweat-proof HD makeup and bridal saree draping',
-    price: '₹28,000',
+    price: 'Price on Demand',
     duration: '4-5 Hours (Pre-Muhurtham Call)',
     teamSize: 'Senior Lead Artist + Hair Stylist',
     image: '/makeup-bridal.jpg',
@@ -65,7 +67,7 @@ export const DEFAULT_MAKEUP_PACKAGES: MakeupPackage[] = [
     category: 'airbrush',
     categoryLabel: 'Airbrush Glam',
     tagline: 'Silicone-based micro-fine mist airbrush for a poreless, camera-ready red carpet finish',
-    price: '₹38,000',
+    price: 'Price on Demand',
     duration: '4 Hours (Evening Reception)',
     teamSize: 'Celebrity Master Artist + 2 Assistants',
     image: '/makeup-airbrush.jpg',
@@ -92,7 +94,7 @@ export const DEFAULT_MAKEUP_PACKAGES: MakeupPackage[] = [
     category: 'party',
     categoryLabel: 'Pre-Wedding & Sangeet',
     tagline: 'Vibrant, lightweight dewy glow with colorful graphic accents and playful party hair',
-    price: '₹18,000',
+    price: 'Price on Demand',
     duration: '2.5 Hours',
     teamSize: 'Lead Artist + Hair Specialist',
     image: '/makeup-party.jpg',
@@ -119,7 +121,7 @@ export const DEFAULT_MAKEUP_PACKAGES: MakeupPackage[] = [
     category: 'hd_bridal',
     categoryLabel: 'HD Bridal Makeup',
     tagline: 'Subtle, radiant traditional bridal beauty highlighting your natural features',
-    price: '₹22,000',
+    price: 'Price on Demand',
     duration: '3.5 Hours',
     teamSize: 'Lead Artist + Hair Stylist',
     image: '/category-makeup.jpg',
@@ -181,6 +183,17 @@ export const useMakeupStore = create<MakeupState>()(
     }),
     {
       name: 'mana_makeup_store_v1',
+      version: 2,
+      migrate: (persistedState: unknown) => {
+        const state = persistedState as { packages?: MakeupPackage[] } | undefined
+        if (!state || !Array.isArray(state.packages)) return { packages: DEFAULT_MAKEUP_PACKAGES }
+        return {
+          packages: state.packages.map((pkg) => ({
+            ...pkg,
+            price: pkg.price?.includes('₹') ? 'Price on Demand' : (pkg.price || 'Price on Demand'),
+          })),
+        }
+      },
     }
   )
 )

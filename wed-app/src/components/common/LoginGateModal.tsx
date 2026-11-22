@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowRight,
+  Store,
 } from 'lucide-react'
 import { useLoginGate } from '../../contexts/LoginGateContext'
 import { useAuth } from '../../contexts/AuthContext'
@@ -396,18 +397,17 @@ export function LoginGateModal() {
               </button>
             </form>
 
-            {/* Vendor link footer */}
+            {/* Vendor Register Button */}
             <div className="mt-5 pt-4 border-t border-[#D8F0EC] text-center">
-              <p className="text-xs text-gray-600">
-                Are you a venue owner or wedding vendor?{' '}
-                <Link
-                  to="/vendor/register"
-                  onClick={handleClose}
-                  className="font-bold text-[#7E1F3E] hover:text-[#C83B68] transition-colors"
-                >
-                  Vendor Portal →
-                </Link>
-              </p>
+              <p className="text-xs text-gray-500 mb-2">Are you a venue owner or wedding vendor?</p>
+              <Link
+                to="/vendor/register"
+                onClick={handleClose}
+                className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-[#7E1F3E]/30 bg-[#7E1F3E]/05 hover:bg-[#7E1F3E] hover:text-white text-[#7E1F3E] font-bold text-xs sm:text-sm transition-all"
+              >
+                <Store className="w-4 h-4" />
+                Vendor Register / Portal
+              </Link>
             </div>
           </div>
         </motion.div>

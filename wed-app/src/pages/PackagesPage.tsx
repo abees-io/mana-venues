@@ -176,10 +176,10 @@ function PackageImageGallery({
 
       {/* Pricing tag */}
       <div className="absolute bottom-3 right-3 px-3.5 py-1.5 rounded-lg bg-white/95 backdrop-blur-md border border-[#D8F0EC] shadow-md text-right">
-        <span className="block text-[10px] uppercase tracking-wider text-[#7E1F3E]/80 font-semibold">
-          Starting From
+        <span className="block text-[9px] uppercase tracking-wider text-[#7E1F3E]/80 font-bold">
+          Pricing
         </span>
-        <span className="text-base sm:text-lg font-extrabold text-[#C83B68]">
+        <span className="text-sm sm:text-base font-extrabold text-[#C83B68]">
           {pkg.startingPrice}
         </span>
       </div>
@@ -191,9 +191,14 @@ export default function PackagesPage() {
   const { user, profile } = useAuth()
   const { requireAuth } = useLoginGate()
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
+  const isPlannerVendor =
+    profile?.role === 'vendor' &&
+    (profile?.vendor_type === 'wedding_planner' || profile?.vendor_type === 'destination_wedding')
+  const canManagePackages = Boolean(isAdmin || isPlannerVendor)
   const pageRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const [activePackageIndex, setActivePackageIndex] = useState(0)
+  const prevPackagesLengthRef = useRef(0)
   // (packages list is always shown)
 
   // Smooth scroll when navigating with hash (e.g. from Explore Categories "Destination Wedding")
@@ -552,8 +557,123 @@ export default function PackagesPage() {
     return matchesBackdrop && matchesSearch
   })
 
+  // Clamp carousel index when filteredPackages length changes (e.g. after filter change)
+  useEffect(() => {
+    if (filteredPackages.length > 0) {
+      setActivePackageIndex((prev) => Math.min(prev, filteredPackages.length - 1))
+    }
+  }, [filteredPackages.length])
+
+  // Jump to newly added package (index 0 since addPackage prepends) and scroll to it
+  useEffect(() => {
+    if (packages.length > prevPackagesLengthRef.current && prevPackagesLengthRef.current > 0) {
+      setActivePackageIndex(0)
+      setTimeout(() => {
+        const el = packages[0] ? document.getElementById(`package-${packages[0].id}`) : null
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    }
+    prevPackagesLengthRef.current = packages.length
+  }, [packages])
+
   // Show all packages in the detail list section
   const displayedPackages = filteredPackages
+
+  const renderExclusiveLinks = (pkg: WeddingPackage, extraClass = '') => (
+    <div className={`flex flex-wrap items-center justify-between gap-2.5 bg-[#F0F9F8] p-2.5 sm:px-3 sm:py-2.5 rounded-xl border border-[#D8F0EC] ${extraClass}`}>
+      <div className="flex items-center gap-1.5">
+        {user ? (
+          <span className="text-xs font-bold text-[#7E1F3E] flex items-center gap-1">
+            <span>Exclusive Links:</span>
+          </span>
+        ) : (
+          <span className="text-[11px] font-semibold text-black/80 flex items-center gap-1">
+            <Lock className="w-3.5 h-3.5 text-[#C83B68]" />
+            <span>Exclusive Socials & Contact:</span>
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2">
+        {user ? (
+          <>
+            {/* Instagram (Logged In) */}
+            {pkg.instagramUrl && (
+              <a
+                href={pkg.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:brightness-110 shadow-xs transition-all active:scale-95"
+              >
+                <InstagramIcon className="w-3.5 h-3.5" />
+                <span>Instagram</span>
+              </a>
+            )}
+
+            {/* WhatsApp (Logged In) */}
+            {pkg.whatsappNumber && (
+              <a
+                href={`https://wa.me/${pkg.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                  `Hi! I found the "${pkg.title}" destination wedding package on MANA and would like to inquire.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-[#25D366] hover:bg-[#20ba59] shadow-xs transition-all active:scale-95"
+              >
+                <WhatsAppIcon className="w-3.5 h-3.5" />
+                <span>WhatsApp</span>
+              </a>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Instagram Gated (Click triggers Login Gate) */}
+            <button
+              type="button"
+              onClick={() =>
+                requireAuth(
+                  `to view exclusive Instagram reels & photos for "${pkg.title}"`,
+                  () => {
+                    if (pkg.instagramUrl) window.open(pkg.instagramUrl, '_blank')
+                  }
+                )
+              }
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold text-[#5A172D] bg-white hover:bg-pink-50 border border-[#D8F0EC] transition-all shadow-2xs cursor-pointer group"
+            >
+              <InstagramIcon className="w-3.5 h-3.5 text-[#E1306C]" />
+              <span>Instagram</span>
+              <Lock className="w-2.5 h-2.5 text-[#C83B68]" />
+            </button>
+
+            {/* WhatsApp Gated (Click triggers Login Gate) */}
+            <button
+              type="button"
+              onClick={() =>
+                requireAuth(
+                  `to chat directly on WhatsApp for "${pkg.title}"`,
+                  () => {
+                    if (pkg.whatsappNumber) {
+                      window.open(
+                        `https://wa.me/${pkg.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                          `Hi! I found the "${pkg.title}" destination wedding package on MANA and would like to inquire.`
+                        )}`,
+                        '_blank'
+                      )
+                    }
+                  }
+                )
+              }
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold text-[#5A172D] bg-white hover:bg-emerald-50 border border-[#D8F0EC] transition-all shadow-2xs cursor-pointer group"
+            >
+              <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366]" />
+              <span>WhatsApp</span>
+              <Lock className="w-2.5 h-2.5 text-[#C83B68]" />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
 
   return (
     <Layout>
@@ -641,40 +761,46 @@ export default function PackagesPage() {
 
       {/* Main Packages Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-        {/* Admin Controls Bar (Visible only to Admin users) */}
-        {isAdmin && (
+        {/* Admin / Wedding Planner Controls Bar */}
+        {canManagePackages && (
           <div className="mb-8 p-4 rounded-2xl bg-[#F0F9F8] border border-[#D8F0EC] flex flex-wrap items-center justify-between gap-3 shadow-xs">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-[#C83B68]">
-                Admin Package &amp; Reel Studio
+                {isAdmin ? 'Admin Package & Reel Studio' : 'Wedding Planner Package Studio'}
               </p>
               <p className="text-xs text-[#5A172D]/80">
-                Add packages, upload photos, arrange desktop text/videos, and save edits.
+                {isAdmin
+                  ? 'Add packages, upload photos, arrange desktop text/videos, and save edits.'
+                  : 'Add and manage your bespoke destination wedding packages.'}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                disabled={past.length === 0}
-                onClick={undo}
-                title="Undo last package edit"
-                aria-label="Undo"
-                className="inline-flex items-center gap-1 px-3 py-2 rounded-full bg-white hover:bg-[#F0F9F8] text-black font-bold text-xs border border-[#D8F0EC] shadow-sm disabled:opacity-35 disabled:cursor-not-allowed active:scale-95 transition-all"
-              >
-                <Undo2 className="w-3.5 h-3.5 text-[#C83B68]" />
-                <span>Undo</span>
-              </button>
-              <button
-                type="button"
-                disabled={future.length === 0}
-                onClick={redo}
-                title="Redo last package edit"
-                aria-label="Redo"
-                className="inline-flex items-center gap-1 px-3 py-2 rounded-full bg-white hover:bg-[#F0F9F8] text-black font-bold text-xs border border-[#D8F0EC] shadow-sm disabled:opacity-35 disabled:cursor-not-allowed active:scale-95 transition-all"
-              >
-                <Redo2 className="w-3.5 h-3.5 text-[#C83B68]" />
-                <span>Redo</span>
-              </button>
+              {isAdmin && (
+                <>
+                  <button
+                    type="button"
+                    disabled={past.length === 0}
+                    onClick={undo}
+                    title="Undo last package edit"
+                    aria-label="Undo"
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded-full bg-white hover:bg-[#F0F9F8] text-black font-bold text-xs border border-[#D8F0EC] shadow-sm disabled:opacity-35 disabled:cursor-not-allowed active:scale-95 transition-all"
+                  >
+                    <Undo2 className="w-3.5 h-3.5 text-[#C83B68]" />
+                    <span>Undo</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={future.length === 0}
+                    onClick={redo}
+                    title="Redo last package edit"
+                    aria-label="Redo"
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded-full bg-white hover:bg-[#F0F9F8] text-black font-bold text-xs border border-[#D8F0EC] shadow-sm disabled:opacity-35 disabled:cursor-not-allowed active:scale-95 transition-all"
+                  >
+                    <Redo2 className="w-3.5 h-3.5 text-[#C83B68]" />
+                    <span>Redo</span>
+                  </button>
+                </>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -686,55 +812,59 @@ export default function PackagesPage() {
                 <Plus className="w-4 h-4" />
                 <span>Add Package</span>
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setReelTargetPackageId(null)
-                  setEditingReel(null)
-                  setIsReelModalOpen(true)
-                }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#C83B68] hover:bg-[#A42A51] text-white font-bold text-xs border border-[#D8F0EC] shadow-md active:scale-95 transition-all"
-              >
-                <Film className="w-4 h-4 text-white" />
-                <span>Add Reel Video</span>
-              </button>
+              {isAdmin && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReelTargetPackageId(null)
+                      setEditingReel(null)
+                      setIsReelModalOpen(true)
+                    }}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#C83B68] hover:bg-[#A42A51] text-white font-bold text-xs border border-[#D8F0EC] shadow-md active:scale-95 transition-all"
+                  >
+                    <Film className="w-4 h-4 text-white" />
+                    <span>Add Reel Video</span>
+                  </button>
 
-              {/* Unified Save Button for Desktop & Mobile */}
-              <button
-                type="button"
-                onClick={handleSaveEdits}
-                title={
-                  savedDesktopAt || savedMobileAt
-                    ? `Last saved: ${new Date(savedDesktopAt || savedMobileAt || '').toLocaleTimeString()}`
-                    : 'Save Desktop & Mobile edits'
-                }
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white hover:bg-[#F0F9F8] text-[#C83B68] font-bold text-xs border border-[#D8F0EC] shadow-md active:scale-95 transition-all"
-              >
-                {saveFeedback ? (
-                  <Check className="w-3.5 h-3.5 text-[#C83B68]" />
-                ) : (
-                  <Save className="w-3.5 h-3.5" />
-                )}
-                <Monitor className="w-3.5 h-3.5" />
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>{saveFeedback ? 'Saved!' : 'Save Desktop & Mobile'}</span>
-              </button>
+                  {/* Unified Save Button for Desktop & Mobile */}
+                  <button
+                    type="button"
+                    onClick={handleSaveEdits}
+                    title={
+                      savedDesktopAt || savedMobileAt
+                        ? `Last saved: ${new Date(savedDesktopAt || savedMobileAt || '').toLocaleTimeString()}`
+                        : 'Save Desktop & Mobile edits'
+                    }
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white hover:bg-[#F0F9F8] text-[#C83B68] font-bold text-xs border border-[#D8F0EC] shadow-md active:scale-95 transition-all"
+                  >
+                    {saveFeedback ? (
+                      <Check className="w-3.5 h-3.5 text-[#C83B68]" />
+                    ) : (
+                      <Save className="w-3.5 h-3.5" />
+                    )}
+                    <Monitor className="w-3.5 h-3.5" />
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>{saveFeedback ? 'Saved!' : 'Save Desktop & Mobile'}</span>
+                  </button>
 
-              {/* Apply to All Button — Appears after saving */}
-              {(hasSavedSession || Boolean(savedDesktopAt) || Boolean(savedMobileAt)) && (
-                <button
-                  type="button"
-                  onClick={() => handleApplyToAll()}
-                  title="Apply your saved layout & reel settings to all packages"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#F3A2BE]/20 hover:bg-[#F3A2BE]/35 text-[#C83B68] font-extrabold text-xs border border-[#D8F0EC] shadow-md active:scale-95 transition-all"
-                >
-                  {appliedAllPkgId ? (
-                    <Check className="w-3.5 h-3.5 text-[#C83B68]" />
-                  ) : (
-                    <CopyCheck className="w-3.5 h-3.5" />
+                  {/* Apply to All Button — Appears after saving */}
+                  {(hasSavedSession || Boolean(savedDesktopAt) || Boolean(savedMobileAt)) && (
+                    <button
+                      type="button"
+                      onClick={() => handleApplyToAll()}
+                      title="Apply your saved layout & reel settings to all packages"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#F3A2BE]/20 hover:bg-[#F3A2BE]/35 text-[#C83B68] font-extrabold text-xs border border-[#D8F0EC] shadow-md active:scale-95 transition-all"
+                    >
+                      {appliedAllPkgId ? (
+                        <Check className="w-3.5 h-3.5 text-[#C83B68]" />
+                      ) : (
+                        <CopyCheck className="w-3.5 h-3.5" />
+                      )}
+                      <span>{appliedAllPkgId ? 'Applied to All!' : 'Apply to All'}</span>
+                    </button>
                   )}
-                  <span>{appliedAllPkgId ? 'Applied to All!' : 'Apply to All'}</span>
-                </button>
+                </>
               )}
             </div>
           </div>
@@ -761,10 +891,18 @@ export default function PackagesPage() {
           </div>
 
           <LoopingPackagesStack
-            packages={packages}
+            packages={filteredPackages}
             activeIndex={activePackageIndex}
             onActiveIndexChange={(idx) => {
               setActivePackageIndex(idx)
+              // Scroll the matching detail card into view when carousel advances
+              setTimeout(() => {
+                const pkg = filteredPackages[idx]
+                if (pkg) {
+                  const el = document.getElementById(`package-${pkg.id}`)
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+              }, 60)
             }}
             onSelectPackage={handleSquarePackageClick}
           />
@@ -851,7 +989,7 @@ export default function PackagesPage() {
                   <div className="w-full lg:w-[44%] shrink-0">
                     <PackageImageGallery
                       pkg={pkg}
-                      isAdmin={Boolean(isAdmin)}
+                      isAdmin={Boolean(isAdmin || (isPlannerVendor && pkg.vendorId === profile?.id))}
                       onEdit={() => {
                         setEditingPackage(pkg)
                         setIsPkgModalOpen(true)
@@ -1060,100 +1198,8 @@ export default function PackagesPage() {
                             isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-[#C83B68]/70 lg:p-1 lg:-m-1' : ''
                           } ${isBeingDragged ? 'opacity-45' : ''}`}
                         >
-                          {/* Exclusive Social Media & Direct Chat Links */}
-                          <div className="flex flex-wrap items-center justify-between gap-2.5 bg-[#F0F9F8] p-2.5 sm:px-3 sm:py-2.5 rounded-xl border border-[#D8F0EC]">
-                            <div className="flex items-center gap-1.5">
-                              {user ? (
-                                <span className="text-xs font-bold text-[#7E1F3E] flex items-center gap-1">
-                                  <span>Exclusive Links:</span>
-                                </span>
-                              ) : (
-                                <span className="text-[11px] font-semibold text-black/80 flex items-center gap-1">
-                                  <Lock className="w-3.5 h-3.5 text-[#C83B68]" />
-                                  <span>Exclusive Socials & Contact:</span>
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              {user ? (
-                                <>
-                                  {/* Instagram (Logged In) */}
-                                  {pkg.instagramUrl && (
-                                    <a
-                                      href={pkg.instagramUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:brightness-110 shadow-xs transition-all active:scale-95"
-                                    >
-                                      <InstagramIcon className="w-3.5 h-3.5" />
-                                      <span>Instagram</span>
-                                    </a>
-                                  )}
-
-                                  {/* WhatsApp (Logged In) */}
-                                  {pkg.whatsappNumber && (
-                                    <a
-                                      href={`https://wa.me/${pkg.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                                        `Hi! I found the "${pkg.title}" destination wedding package on MANA and would like to inquire.`
-                                      )}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-[#25D366] hover:bg-[#20ba59] shadow-xs transition-all active:scale-95"
-                                    >
-                                      <WhatsAppIcon className="w-3.5 h-3.5" />
-                                      <span>WhatsApp</span>
-                                    </a>
-                                  )}
-                                </>
-                              ) : (
-                                <>
-                                  {/* Instagram Gated (Click triggers Login Gate) */}
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      requireAuth(
-                                        `to view exclusive Instagram reels & photos for "${pkg.title}"`,
-                                        () => {
-                                          if (pkg.instagramUrl) window.open(pkg.instagramUrl, '_blank')
-                                        }
-                                      )
-                                    }
-                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold text-[#5A172D] bg-white hover:bg-pink-50 border border-[#D8F0EC] transition-all shadow-2xs cursor-pointer group"
-                                  >
-                                    <InstagramIcon className="w-3.5 h-3.5 text-[#E1306C]" />
-                                    <span>Instagram</span>
-                                    <Lock className="w-2.5 h-2.5 text-[#C83B68]" />
-                                  </button>
-
-                                  {/* WhatsApp Gated (Click triggers Login Gate) */}
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      requireAuth(
-                                        `to chat directly on WhatsApp for "${pkg.title}"`,
-                                        () => {
-                                          if (pkg.whatsappNumber) {
-                                            window.open(
-                                              `https://wa.me/${pkg.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                                                `Hi! I found the "${pkg.title}" destination wedding package on MANA and would like to inquire.`
-                                              )}`,
-                                              '_blank'
-                                            )
-                                          }
-                                        }
-                                      )
-                                    }
-                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold text-[#5A172D] bg-white hover:bg-emerald-50 border border-[#D8F0EC] transition-all shadow-2xs cursor-pointer group"
-                                  >
-                                    <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366]" />
-                                    <span>WhatsApp</span>
-                                    <Lock className="w-2.5 h-2.5 text-[#C83B68]" />
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </div>
+                          {/* Exclusive Social Media & Direct Chat Links (Desktop / Tablet view) */}
+                          {renderExclusiveLinks(pkg, 'hidden sm:flex')}
 
                           <div className="flex items-center justify-between gap-4 pt-1">
                             <div className="text-[11px] text-black">
@@ -1284,6 +1330,11 @@ export default function PackagesPage() {
                     )}
                   </div>
                 )}
+
+                {/* Exclusive Social Media & Direct Chat Links (Mobile only: moved down under the reels) */}
+                <div className="block sm:hidden p-4 pt-3 border-t border-[#D8F0EC] bg-[#FFF2F6]/60">
+                  {renderExclusiveLinks(pkg, 'flex')}
+                </div>
               </article>
             ))}
           </div>

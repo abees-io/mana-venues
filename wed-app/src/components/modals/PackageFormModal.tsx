@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { X, Upload, Plus, Trash2, Loader2, Image as ImageIcon, Star } from 'lucide-react'
 import { uploadOrConvertMultiplePhotos } from '../../lib/imageUtils'
 import { usePackagesStore, type WeddingPackage } from '../../store/packagesStore'
+import { useAuth } from '../../contexts/AuthContext'
 
 interface PackageFormModalProps {
   isOpen: boolean
@@ -21,6 +22,7 @@ export default function PackageFormModal({
   onClose,
   initialPackage,
 }: PackageFormModalProps) {
+  const { profile } = useAuth()
   const addPackage = usePackagesStore((s) => s.addPackage)
   const updatePackage = usePackagesStore((s) => s.updatePackage)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -67,9 +69,9 @@ export default function PackageFormModal({
       setTagline('')
       setBackdrop('Backwaters')
       setLocation('')
-      setStartingPrice('₹8,50,000')
+      setStartingPrice('Price on Demand')
       setGuestCapacity('150 - 400 Guests')
-      setPartnerPlanner('MANA Verified Curators')
+      setPartnerPlanner(profile?.business_name || profile?.full_name || 'MANA Verified Curators')
       setDescription('')
       setInclusionsText(
         'Venue & floral mandap setup\nTraditional Kerala Sadya & catering\nDedicated event coordination'
@@ -80,7 +82,7 @@ export default function PackageFormModal({
     }
     setImageUrlInput('')
     setErrorMsg(null)
-  }, [isOpen, initialPackage])
+  }, [isOpen, initialPackage, profile])
 
   if (!isOpen) return null
 
@@ -157,6 +159,7 @@ export default function PackageFormModal({
       verified: true,
       instagramUrl: instagramUrl.trim(),
       whatsappNumber: whatsappNumber.trim(),
+      vendorId: initialPackage?.vendorId || (profile?.role === 'vendor' ? profile.id : undefined),
     }
 
     if (initialPackage) {
@@ -182,7 +185,7 @@ export default function PackageFormModal({
         <div className="flex items-center justify-between pb-3 border-b border-emerald-800/60 mb-5">
           <div>
             <span className="text-[11px] uppercase tracking-wider text-brand-secondary font-bold">
-              Admin Package Manager
+              {profile?.role === 'vendor' ? 'Wedding Planner Package Studio' : 'Admin Package Manager'}
             </span>
             <h2 id="package-form-title" className="text-xl font-bold text-white">
               {initialPackage ? 'Edit Wedding Package' : 'Add New Wedding Package'}
@@ -265,7 +268,7 @@ export default function PackageFormModal({
                 maxLength={40}
                 value={startingPrice}
                 onChange={(e) => setStartingPrice(e.target.value)}
-                placeholder="e.g. ₹10,50,000"
+                placeholder="e.g. Price on Demand"
                 className="w-full px-3 py-2 text-sm bg-emerald-950/60 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-brand-secondary/50"
               />
             </div>

@@ -36,7 +36,7 @@ const PHOTOGRAPHY_TYPES: PhotographyTypeMeta[] = [
     image: '/photo-wedding.jpg',
     badge: 'Ceremony & Grandeur',
     badgeColor: 'from-[#C83B68] via-[#E05A85] to-[#C83B68]',
-    startingPrice: 'From ₹85,000',
+    startingPrice: 'Price on Demand',
     description:
       'Immersive multi-day coverage honoring timeless heritage: the sacred Muhurtham ceremonies, Haldi laughter, Sangeet choreography, and grand evening receptions.',
     gearSpec: 'Sony FX3 Cinema • 4K Drone • 10-bit S-Log3 • Prime Glass',
@@ -55,7 +55,7 @@ const PHOTOGRAPHY_TYPES: PhotographyTypeMeta[] = [
     image: '/photo-mobile.jpg',
     badge: 'Trending Social-First',
     badgeColor: 'from-[#E05A85] via-[#F3A2BE] to-[#C83B68]',
-    startingPrice: 'From ₹28,000',
+    startingPrice: 'Price on Demand',
     description:
       'Fast-paced, creative vertical 4K video reels and unfiltered candid phone memories delivered straight to your WhatsApp and Instagram on the same night.',
     gearSpec: 'iPhone 16 Pro Max • DJI Osmo Gimbal • Wireless Lav Mics',
@@ -74,7 +74,7 @@ const PHOTOGRAPHY_TYPES: PhotographyTypeMeta[] = [
     image: '/photo-normal.jpg',
     badge: 'Classic & Reliable',
     badgeColor: 'from-[#0F766E] via-[#14B8A6] to-[#0D9488]',
-    startingPrice: 'From ₹24,000',
+    startingPrice: 'Price on Demand',
     description:
       'Clean, timeless stage and family portraiture capturing every greeting, ceremony blessing, and family generation with balanced lighting and hardcover albums.',
     gearSpec: 'Full-Frame Cameras • Balanced Studio Strobes • Portrait Optics',

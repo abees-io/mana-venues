@@ -23,6 +23,8 @@ export interface CateringPackage {
     desserts: string
     serviceCrew: string
   }
+  vendorId?: string
+  vendorName?: string
 }
 
 export interface CateringHeroText {
@@ -38,7 +40,7 @@ export const DEFAULT_CATERING_PACKAGES: CateringPackage[] = [
     category: 'sadya',
     categoryLabel: 'Traditional Royal Sadya',
     tagline: 'Authentic heritage feast served on fresh green plantain leaves with 4 varieties of payasam',
-    price: '₹420 / Plate',
+    price: 'Price on Demand',
     duration: 'Lunch Hours (11:30 AM - 3:30 PM)',
     guestCount: 'Min. 300 - 3,000+ Guests',
     image: '/catering-sadya.jpg',
@@ -65,7 +67,7 @@ export const DEFAULT_CATERING_PACKAGES: CateringPackage[] = [
     category: 'buffet',
     categoryLabel: 'Grand Multi-Cuisine Buffet',
     tagline: 'Opulent spread featuring Royal Dum Biryani, Tandoori platters, Continental mains & salads',
-    price: '₹750 / Plate',
+    price: 'Price on Demand',
     duration: 'Full Event Coverage (Dinner/Reception)',
     guestCount: 'Min. 200 - 2,500+ Guests',
     image: '/catering-buffet.jpg',
@@ -92,7 +94,7 @@ export const DEFAULT_CATERING_PACKAGES: CateringPackage[] = [
     category: 'live',
     categoryLabel: 'Live Counters & Fiesta',
     tagline: 'High-energy live cooking stations: Delhi Chaat, Woodfired Pizzas, Dosa Bars & Mocktails',
-    price: '₹580 / Plate',
+    price: 'Price on Demand',
     duration: 'High Tea & Evening Reception (4-6 Hours)',
     guestCount: 'Min. 150 - 1,500 Guests',
     image: '/catering-live.jpg',
@@ -119,7 +121,7 @@ export const DEFAULT_CATERING_PACKAGES: CateringPackage[] = [
     category: 'buffet',
     categoryLabel: 'Grand Multi-Cuisine Buffet',
     tagline: 'Refined menu designed for Haldi, Mehendi, engagement rituals and intimate family affairs',
-    price: '₹380 / Plate',
+    price: 'Price on Demand',
     duration: 'Afternoon / Evening (3 Hours)',
     guestCount: 'Min. 50 - 250 Guests',
     image: '/category-catering.jpg',
@@ -182,6 +184,17 @@ export const useCateringStore = create<CateringState>()(
     }),
     {
       name: 'mana_catering_store_v1',
+      version: 2,
+      migrate: (persistedState: unknown) => {
+        const state = persistedState as { packages?: CateringPackage[] } | undefined
+        if (!state || !Array.isArray(state.packages)) return { packages: DEFAULT_CATERING_PACKAGES }
+        return {
+          packages: state.packages.map((pkg) => ({
+            ...pkg,
+            price: pkg.price?.includes('₹') ? 'Price on Demand' : (pkg.price || 'Price on Demand'),
+          })),
+        }
+      },
     }
   )
 )

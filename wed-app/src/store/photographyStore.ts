@@ -23,6 +23,8 @@ export interface PhotographyPackage {
     films: string
     deliveryTime: string
   }
+  vendorId?: string
+  vendorName?: string
 }
 
 export const DEFAULT_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [
@@ -33,7 +35,7 @@ export const DEFAULT_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [
     category: 'wedding',
     categoryLabel: 'Wedding Photography',
     tagline: 'Multi-day luxury celebration, sacred Muhurtham ceremonies & 4K cinematic films',
-    price: '₹1,45,000',
+    price: 'Price on Demand',
     duration: '3 Days (Haldi, Muhurtham & Reception)',
     teamSize: '4-Crew Master Team + Drone Pilot',
     image: '/photo-wedding.jpg',
@@ -61,7 +63,7 @@ export const DEFAULT_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [
     category: 'wedding',
     categoryLabel: 'Wedding Photography',
     tagline: 'Timeless traditional ceremony coverage, emotional family portraits & rituals',
-    price: '₹85,000',
+    price: 'Price on Demand',
     duration: '2 Days (Ceremony & Reception)',
     teamSize: '3 Photographers + Cinematographer',
     image: '/photo-wedding.jpg',
@@ -90,7 +92,7 @@ export const DEFAULT_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [
     category: 'mobile',
     categoryLabel: 'Mobile Photography',
     tagline: 'Instant 4K vertical reels, unfiltered BTS moments & same-day story deliveries',
-    price: '₹28,000',
+    price: 'Price on Demand',
     duration: 'Full Day (10 Hours)',
     teamSize: '1 Dedicated Creator',
     image: '/photo-mobile.jpg',
@@ -117,7 +119,7 @@ export const DEFAULT_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [
     category: 'mobile',
     categoryLabel: 'Mobile Photography',
     tagline: 'High-energy TikTok & Instagram ready reels, transitions & instant guest memories',
-    price: '₹36,000',
+    price: 'Price on Demand',
     duration: '2 Days Coverage',
     teamSize: '2 Mobile Content Creators',
     image: '/photo-mobile.jpg',
@@ -146,7 +148,7 @@ export const DEFAULT_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [
     category: 'normal',
     categoryLabel: 'Normal Photography',
     tagline: 'Standard event coverage, crisp family stage greetings & keepsake photo albums',
-    price: '₹35,000',
+    price: 'Price on Demand',
     duration: 'Full Day Event Coverage',
     teamSize: '2 Photographers',
     image: '/photo-normal.jpg',
@@ -173,7 +175,7 @@ export const DEFAULT_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [
     category: 'normal',
     categoryLabel: 'Normal Photography',
     tagline: 'Clean, timeless portraits for family keepsakes, invitations & wedding stages',
-    price: '₹24,000',
+    price: 'Price on Demand',
     duration: 'Half Day (5 Hours)',
     teamSize: '1 Lead Photographer + Assistant',
     image: '/photo-normal.jpg',
@@ -224,6 +226,17 @@ export const usePhotographyStore = create<PhotographyState>()(
     }),
     {
       name: 'mana_photography_store_v3',
+      version: 4,
+      migrate: (persistedState: unknown) => {
+        const state = persistedState as { packages?: PhotographyPackage[] } | undefined
+        if (!state || !Array.isArray(state.packages)) return { packages: DEFAULT_PHOTOGRAPHY_PACKAGES }
+        return {
+          packages: state.packages.map((pkg) => ({
+            ...pkg,
+            price: pkg.price?.includes('₹') ? 'Price on Demand' : (pkg.price || 'Price on Demand'),
+          })),
+        }
+      },
     }
   )
 )

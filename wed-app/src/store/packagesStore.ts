@@ -40,6 +40,7 @@ export interface WeddingPackage {
   reverseDesktopLayout?: boolean
   instagramUrl?: string
   whatsappNumber?: string
+  vendorId?: string
 }
 
 export const DEFAULT_PACKAGES: WeddingPackage[] = [
@@ -49,7 +50,7 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
     tagline: 'Houseboat reception, emerald waterways & swaying palms',
     backdrop: 'Backwaters',
     location: 'Vembanad Lake, Alleppey & Kumarakom',
-    startingPrice: '₹8,50,000',
+    startingPrice: 'Price on Demand',
     guestCapacity: '150 - 350 Guests',
     image: '/dest-wedding-2.jpg',
     images: ['/dest-wedding-2.jpg', '/dest-wedding-1.jpg'],
@@ -103,7 +104,7 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
     tagline: 'Golden sands, Arabian sea horizon & cliffside panoramas',
     backdrop: 'Coast',
     location: 'Kovalam & Marari Coastline',
-    startingPrice: '₹12,00,000',
+    startingPrice: 'Price on Demand',
     guestCapacity: '200 - 600 Guests',
     image: '/dest-wedding-3.jpg',
     images: ['/dest-wedding-3.jpg', '/dest-wedding-2.jpg'],
@@ -139,7 +140,7 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
     tagline: 'High-altitude tea gardens, cool mountain breeze & stone chalets',
     backdrop: 'Hills',
     location: 'Vythiri, Wayanad & Munnar Heights',
-    startingPrice: '₹9,80,000',
+    startingPrice: 'Price on Demand',
     guestCapacity: '100 - 300 Guests',
     image: '/dest-wedding-1.jpg',
     images: ['/dest-wedding-1.jpg', '/dest-wedding-3.jpg'],
@@ -175,7 +176,7 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
     tagline: 'Colonial opulence, antique carved wood & temple courtyards',
     backdrop: 'Heritage',
     location: 'Fort Kochi & Mattancherry Heritage Quarter',
-    startingPrice: '₹14,50,000',
+    startingPrice: 'Price on Demand',
     guestCapacity: '300 - 1,200 Guests',
     image: '/dest-wedding-1.jpg',
     images: ['/dest-wedding-1.jpg', '/dest-wedding-2.jpg'],
@@ -456,7 +457,7 @@ export const usePackagesStore = create<PackagesStoreState>()(
     }),
     {
       name: 'manavenues_packages_data',
-      version: 4,
+      version: 5,
       partialize: (state) => ({
         packages: state.packages,
         savedDesktopAt: state.savedDesktopAt,
@@ -491,8 +492,15 @@ export const usePackagesStore = create<PackagesStoreState>()(
               if (third) reels = [...reels, third]
             }
 
+            // Upgrade any dummy prices to Price on Demand
+            const startingPrice =
+              pkg.startingPrice && !pkg.startingPrice.toLowerCase().includes('demand') && (pkg.startingPrice.includes('₹') || fallback)
+                ? 'Price on Demand'
+                : (pkg.startingPrice || 'Price on Demand')
+
             return {
               ...pkg,
+              startingPrice,
               reels,
               instagramUrl: pkg.instagramUrl || fallback?.instagramUrl || 'https://instagram.com/manaweddings',
               whatsappNumber: pkg.whatsappNumber || fallback?.whatsappNumber || '919847012345',

@@ -41,6 +41,8 @@ export default function CateringPage() {
 
   const { user, profile } = useAuth()
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
+  const isCateringVendor = profile?.role === 'vendor' && profile?.vendor_type === 'catering'
+  const canManageCatering = Boolean(isAdmin || isCateringVendor)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [inquiryPackage, setInquiryPackage] = useState<CateringPackage | null>(null)
@@ -127,7 +129,7 @@ export default function CateringPage() {
     setPkgTitle('')
     setPkgCategory('sadya')
     setPkgTagline('')
-    setPkgPrice('â‚¹450 / Plate')
+    setPkgPrice('Price on Demand')
     setPkgDuration('Lunch (11:30 AM - 3:30 PM)')
     setPkgGuestCount('Min. 250 Guests')
     setPkgKitchenSpec('100% Traditional Brass Urulis â€¢ Pure Ghee')
@@ -221,6 +223,8 @@ export default function CateringPage() {
           desserts: pkgDesserts.trim(),
           serviceCrew: pkgServiceCrew.trim(),
         },
+        vendorId: profile?.id,
+        vendorName: profile?.business_name || profile?.full_name || 'MANA Verified Catering',
       }
       addPackage(newPkg)
     }
@@ -297,8 +301,8 @@ export default function CateringPage() {
                 />
               </div>
 
-              {/* Admin: Add New Package Button */}
-              {isAdmin && (
+              {/* Admin / Catering Vendor: Add New Feast Button */}
+              {canManageCatering && (
                 <button
                   type="button"
                   onClick={handleOpenAddModal}
@@ -372,13 +376,14 @@ export default function CateringPage() {
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6 lg:gap-8">
               {filteredPackages.map((pkg) => {
                 const isExpanded = Boolean(expandedInclusions[pkg.id])
+                const canEditPkg = Boolean(isAdmin || (isCateringVendor && pkg.vendorId === profile?.id))
                 return (
                   <article
                     key={pkg.id}
                     className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-white border border-[#D8F0EC] shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col will-change-transform"
                   >
-                    {/* Admin Action Buttons on Card */}
-                    {isAdmin && (
+                    {/* Admin / Owner Vendor Action Buttons on Card */}
+                    {canEditPkg && (
                       <div className="absolute top-2 left-2 z-30 flex items-center gap-1">
                         <button
                           type="button"
@@ -417,10 +422,10 @@ export default function CateringPage() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
-                      {/* Category Badge Top Left (pushed right if admin buttons visible) */}
+                      {/* Category Badge Top Left (pushed right if edit buttons visible) */}
                       <div
                         className={`absolute top-2 ${
-                          isAdmin ? 'left-16 sm:left-20' : 'left-2'
+                          canEditPkg ? 'left-16 sm:left-20' : 'left-2'
                         } sm:top-3 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#D8F0EC] text-[8.5px] sm:text-[10px] font-bold text-[#7E1F3E] shadow-2xs`}
                       >
                         <span className="sm:hidden capitalize">{pkg.category}</span>
@@ -825,13 +830,13 @@ export default function CateringPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-black/80 mb-1">Price per Plate *</label>
+                    <label className="block text-xs font-bold text-black/80 mb-1">Price per Plate / Package Cost *</label>
                     <input
                       type="text"
                       required
                       value={pkgPrice}
                       onChange={(e) => setPkgPrice(e.target.value)}
-                      placeholder="e.g. â‚¹420 / Plate"
+                      placeholder="e.g. Price on Demand"
                       className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
                     />
                   </div>

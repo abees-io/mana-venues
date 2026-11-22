@@ -691,7 +691,7 @@ function CityPackagesSection({ preferredCitySlug }: { preferredCitySlug: string 
 
                 <div className="absolute bottom-3 left-3 right-3 text-white">
                   <div className="text-xs font-semibold text-rose-200">
-                    Starts at {pkg.startingPrice}
+                    {pkg.startingPrice?.toLowerCase().includes('demand') ? pkg.startingPrice : `Starts at ${pkg.startingPrice}`}
                   </div>
                   <h3
                     className="text-base sm:text-lg font-bold leading-tight drop-shadow-md"

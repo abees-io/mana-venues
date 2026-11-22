@@ -12,6 +12,9 @@ import {
   Send,
   X,
   SlidersHorizontal,
+  Plus,
+  Edit2,
+  Trash2,
 } from 'lucide-react'
 import CoolCameraIcon from '../components/common/CoolCameraIcon'
 import Layout from '../components/layout/Layout'
@@ -22,20 +25,150 @@ import {
   type PhotographyPackage,
 } from '../store/photographyStore'
 import { useLoginGate } from '../contexts/LoginGateContext'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function PhotographyPage() {
   const { requireAuth } = useLoginGate()
+  const { user, profile } = useAuth()
+  const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
+  const isPhotoVendor = profile?.role === 'vendor' && profile?.vendor_type === 'photographer'
+  const canManagePhotography = Boolean(isAdmin || isPhotoVendor)
+
   const [searchParams, setSearchParams] = useSearchParams()
   const packagesListRef = useRef<HTMLDivElement>(null)
 
   const packages = usePhotographyStore((s) => s.packages)
   const selectedCategory = usePhotographyStore((s) => s.selectedCategory)
   const setSelectedCategory = usePhotographyStore((s) => s.setSelectedCategory)
+  const addPackage = usePhotographyStore((s) => s.addPackage)
+  const updatePackage = usePhotographyStore((s) => s.updatePackage)
+  const deletePackage = usePhotographyStore((s) => s.deletePackage)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [inquiryPackage, setInquiryPackage] = useState<PhotographyPackage | null>(null)
   const [inquirySuccess, setInquirySuccess] = useState(false)
   const [expandedInclusions, setExpandedInclusions] = useState<Record<string, boolean>>({})
+
+  // Add/Edit modal state
+  const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false)
+  const [editingPkg, setEditingPkg] = useState<PhotographyPackage | null>(null)
+
+  // Photography package form state
+  const [pkgTitle, setPkgTitle] = useState('')
+  const [pkgCategory, setPkgCategory] = useState<PhotographyCategory>('wedding')
+  const [pkgTagline, setPkgTagline] = useState('')
+  const [pkgPrice, setPkgPrice] = useState('')
+  const [pkgDuration, setPkgDuration] = useState('')
+  const [pkgTeamSize, setPkgTeamSize] = useState('')
+  const [pkgGear, setPkgGear] = useState('')
+  const [pkgBadge, setPkgBadge] = useState('')
+  const [pkgImage, setPkgImage] = useState('/photo-wedding.jpg')
+  const [pkgInclusionsText, setPkgInclusionsText] = useState('')
+  const [pkgReels, setPkgReels] = useState('')
+  const [pkgPhotos, setPkgPhotos] = useState('')
+  const [pkgFilms, setPkgFilms] = useState('')
+  const [pkgDelivery, setPkgDelivery] = useState('')
+
+  const handleOpenAddModal = () => {
+    setPkgTitle('')
+    setPkgCategory('wedding')
+    setPkgTagline('')
+    setPkgPrice('Price on Demand')
+    setPkgDuration('')
+    setPkgTeamSize('')
+    setPkgGear('')
+    setPkgBadge('')
+    setPkgImage('/photo-wedding.jpg')
+    setPkgInclusionsText('')
+    setPkgReels('')
+    setPkgPhotos('')
+    setPkgFilms('')
+    setPkgDelivery('')
+    setEditingPkg(null)
+    setIsAddEditModalOpen(true)
+  }
+
+  const handleOpenEditModal = (pkg: PhotographyPackage) => {
+    setPkgTitle(pkg.title)
+    setPkgCategory(pkg.category)
+    setPkgTagline(pkg.tagline)
+    setPkgPrice(pkg.price)
+    setPkgDuration(pkg.duration)
+    setPkgTeamSize(pkg.teamSize)
+    setPkgGear(pkg.gear)
+    setPkgBadge(pkg.badge)
+    setPkgImage(pkg.image)
+    setPkgInclusionsText(pkg.inclusions.join('\n'))
+    setPkgReels(pkg.deliverables.reels)
+    setPkgPhotos(pkg.deliverables.photos)
+    setPkgFilms(pkg.deliverables.films)
+    setPkgDelivery(pkg.deliverables.deliveryTime)
+    setEditingPkg(pkg)
+    setIsAddEditModalOpen(true)
+  }
+
+  const categoryLabels: Record<PhotographyCategory, string> = {
+    wedding: 'Wedding Photography',
+    mobile: 'Mobile Photography',
+    normal: 'Normal Photography',
+  }
+
+  const handleSavePhotographyPackage = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!pkgTitle.trim() || !pkgPrice.trim()) {
+      alert('Please fill in at least a title and price.')
+      return
+    }
+    const inclusionsArray = pkgInclusionsText.split('\n').map((s) => s.trim()).filter(Boolean)
+
+    if (editingPkg) {
+      updatePackage(editingPkg.id, {
+        title: pkgTitle.trim(),
+        category: pkgCategory,
+        categoryLabel: categoryLabels[pkgCategory],
+        tagline: pkgTagline.trim(),
+        price: pkgPrice.trim(),
+        duration: pkgDuration.trim(),
+        teamSize: pkgTeamSize.trim(),
+        gear: pkgGear.trim(),
+        badge: pkgBadge.trim(),
+        image: pkgImage.trim() || '/photo-wedding.jpg',
+        inclusions: inclusionsArray,
+        deliverables: {
+          reels: pkgReels.trim(),
+          photos: pkgPhotos.trim(),
+          films: pkgFilms.trim(),
+          deliveryTime: pkgDelivery.trim(),
+        },
+      })
+    } else {
+      const newPkg: PhotographyPackage = {
+        id: `photo-${Date.now()}`,
+        title: pkgTitle.trim(),
+        category: pkgCategory,
+        categoryLabel: categoryLabels[pkgCategory],
+        tagline: pkgTagline.trim(),
+        price: pkgPrice.trim(),
+        duration: pkgDuration.trim(),
+        teamSize: pkgTeamSize.trim(),
+        gear: pkgGear.trim(),
+        badge: pkgBadge.trim() || 'Custom Package',
+        image: pkgImage.trim() || '/photo-wedding.jpg',
+        highlights: ['HD Footage', 'Professional Crew', 'Quick Delivery'],
+        inclusions: inclusionsArray,
+        deliverables: {
+          reels: pkgReels.trim(),
+          photos: pkgPhotos.trim(),
+          films: pkgFilms.trim(),
+          deliveryTime: pkgDelivery.trim(),
+        },
+        vendorId: profile?.id,
+        vendorName: profile?.business_name || profile?.full_name || 'MANA Verified Photographer',
+      }
+      addPackage(newPkg)
+    }
+    setIsAddEditModalOpen(false)
+  }
 
   // Form state
   const [clientName, setClientName] = useState('')
@@ -134,15 +267,28 @@ export default function PhotographyPage() {
               </p>
             </div>
 
-            {/* Search Input */}
-            <div className="w-full md:w-72">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search packages, gear, reels..."
-                className="w-full px-4 py-2 text-xs sm:text-sm bg-white border border-[#D8F0EC] rounded-full text-black placeholder-black/50 focus:outline-none focus:ring-2 focus:ring-[#C83B68]/30 shadow-2xs"
-              />
+            {/* Search Input & Vendor Add Button */}
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <div className="w-full md:w-72">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search packages, gear, reels..."
+                  className="w-full px-4 py-2 text-xs sm:text-sm bg-white border border-[#D8F0EC] rounded-full text-black placeholder-black/50 focus:outline-none focus:ring-2 focus:ring-[#C83B68]/30 shadow-2xs"
+                />
+              </div>
+              {canManagePhotography && (
+                <button
+                  type="button"
+                  onClick={handleOpenAddModal}
+                  className="inline-flex items-center gap-1 px-3.5 py-2 rounded-full bg-[#C83B68] hover:bg-[#A82B54] text-white font-bold text-xs shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Add Package</span>
+                  <span className="sm:hidden">Add</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -206,11 +352,42 @@ export default function PhotographyPage() {
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6 lg:gap-8">
               {filteredPackages.map((pkg) => {
                 const isExpanded = Boolean(expandedInclusions[pkg.id])
+                const canEditPkg = Boolean(isAdmin || (isPhotoVendor && pkg.vendorId === profile?.id))
                 return (
                   <article
                     key={pkg.id}
-                    className="group rounded-2xl sm:rounded-3xl overflow-hidden bg-white border border-[#D8F0EC] shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col will-change-transform"
+                    className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-white border border-[#D8F0EC] shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col will-change-transform"
                   >
+                    {/* Admin / Photographer Vendor Action Buttons on Card */}
+                    {canEditPkg && (
+                      <div className="absolute top-2 left-2 z-30 flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleOpenEditModal(pkg)
+                          }}
+                          title="Edit Package"
+                          className="p-1.5 rounded-full bg-white/90 hover:bg-white text-[#C83B68] shadow-md border border-[#D8F0EC] transition-transform active:scale-90"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (confirm(`Delete "${pkg.title}"?`)) {
+                              deletePackage(pkg.id)
+                            }
+                          }}
+                          title="Delete Package"
+                          className="p-1.5 rounded-full bg-white/90 hover:bg-white text-red-600 shadow-md border border-[#D8F0EC] transition-transform active:scale-90"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+
                     {/* Package Cover Image */}
                     <div className="relative aspect-[16/11] sm:aspect-[16/10] overflow-hidden bg-black/10">
                       <img
@@ -221,8 +398,8 @@ export default function PhotographyPage() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
-                      {/* Category Badge Top Left */}
-                      <div className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#D8F0EC] text-[8.5px] sm:text-[10px] font-bold text-[#7E1F3E] shadow-2xs">
+                      {/* Category Badge Top Left (pushed right if edit buttons visible) */}
+                      <div className={`absolute top-2 ${canEditPkg ? 'left-16 sm:left-20' : 'left-2'} sm:top-3 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#D8F0EC] text-[8.5px] sm:text-[10px] font-bold text-[#7E1F3E] shadow-2xs`}>
                         <span className="sm:hidden capitalize">{pkg.category}</span>
                         <span className="hidden sm:inline">{pkg.categoryLabel}</span>
                       </div>
@@ -410,7 +587,7 @@ export default function PhotographyPage() {
                       Inquire: {inquiryPackage.title}
                     </h3>
                     <p className="text-xs text-[#7E1F3E]/70 font-medium">
-                      Starting from {inquiryPackage.price} â€¢ {inquiryPackage.duration}
+                      Pricing: {inquiryPackage.price} • {inquiryPackage.duration}
                     </p>
                   </div>
 
@@ -506,7 +683,208 @@ export default function PhotographyPage() {
           </div>
         )}
       </div>
+
+      {/* Vendor / Admin: Add / Edit Photography Package Modal */}
+      {isAddEditModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="relative w-full max-w-lg rounded-3xl bg-white border border-[#D8F0EC] shadow-2xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setIsAddEditModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-100"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <h3 className="text-lg font-bold text-[#5A172D] mb-4 flex items-center gap-2">
+              <CoolCameraIcon className="w-5 h-5 text-[#C83B68]" />
+              <span>{editingPkg ? 'Edit Photography Package' : 'Add Photography Package'}</span>
+            </h3>
+
+            <form onSubmit={handleSavePhotographyPackage} className="space-y-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-black/80 mb-1">Package Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={pkgTitle}
+                    onChange={(e) => setPkgTitle(e.target.value)}
+                    placeholder="e.g. Grand Royal Wedding"
+                    className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-black/80 mb-1">Category *</label>
+                  <select
+                    value={pkgCategory}
+                    onChange={(e) => setPkgCategory(e.target.value as PhotographyCategory)}
+                    className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                  >
+                    <option value="wedding">Wedding Photography</option>
+                    <option value="mobile">Mobile Photography</option>
+                    <option value="normal">Normal Photography</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-black/80 mb-1">Tagline</label>
+                <input
+                  type="text"
+                  value={pkgTagline}
+                  onChange={(e) => setPkgTagline(e.target.value)}
+                  placeholder="Short highlight caption"
+                  className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-black/80 mb-1">Price *</label>
+                  <input
+                    type="text"
+                    required
+                    value={pkgPrice}
+                    onChange={(e) => setPkgPrice(e.target.value)}
+                    placeholder="e.g. Price on Demand"
+                    className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-black/80 mb-1">Duration</label>
+                  <input
+                    type="text"
+                    value={pkgDuration}
+                    onChange={(e) => setPkgDuration(e.target.value)}
+                    placeholder="e.g. 3 Days"
+                    className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-black/80 mb-1">Team Size</label>
+                  <input
+                    type="text"
+                    value={pkgTeamSize}
+                    onChange={(e) => setPkgTeamSize(e.target.value)}
+                    placeholder="e.g. 4-Crew"
+                    className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-black/80 mb-1">Camera Gear</label>
+                <input
+                  type="text"
+                  value={pkgGear}
+                  onChange={(e) => setPkgGear(e.target.value)}
+                  placeholder="e.g. Sony FX3 • DJI Drone • 70-200mm GM"
+                  className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-black/80 mb-1">Badge Text</label>
+                <input
+                  type="text"
+                  value={pkgBadge}
+                  onChange={(e) => setPkgBadge(e.target.value)}
+                  placeholder="e.g. Most Popular"
+                  className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-black/80 mb-1">Image URL</label>
+                <input
+                  type="text"
+                  value={pkgImage}
+                  onChange={(e) => setPkgImage(e.target.value)}
+                  placeholder="/photo-wedding.jpg"
+                  className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-black/80 mb-1">Reels Deliverable</label>
+                  <input
+                    type="text"
+                    value={pkgReels}
+                    onChange={(e) => setPkgReels(e.target.value)}
+                    placeholder="e.g. 3 Viral Reels"
+                    className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-black/80 mb-1">Photos Deliverable</label>
+                  <input
+                    type="text"
+                    value={pkgPhotos}
+                    onChange={(e) => setPkgPhotos(e.target.value)}
+                    placeholder="e.g. 600+ Retouched"
+                    className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-black/80 mb-1">Film Deliverable</label>
+                  <input
+                    type="text"
+                    value={pkgFilms}
+                    onChange={(e) => setPkgFilms(e.target.value)}
+                    placeholder="e.g. 25-min 4K Film"
+                    className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-black/80 mb-1">Delivery Time</label>
+                  <input
+                    type="text"
+                    value={pkgDelivery}
+                    onChange={(e) => setPkgDelivery(e.target.value)}
+                    placeholder="e.g. 21 Days"
+                    className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-black/80 mb-1">Inclusions (one per line)</label>
+                <textarea
+                  rows={4}
+                  value={pkgInclusionsText}
+                  onChange={(e) => setPkgInclusionsText(e.target.value)}
+                  placeholder="Coverage of Haldi, Muhurtham & Reception&#10;4K drone aerial shots&#10;Luxury leather album"
+                  className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl resize-y"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsAddEditModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-[#7E1F3E] hover:text-[#5A172D]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#E05A85] via-[#F3A2BE] to-[#E05A85] text-white font-extrabold text-xs shadow-md hover:brightness-105 active:scale-95 transition-all"
+                >
+                  {editingPkg ? 'Save Changes' : 'Add Package'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </Layout>
   )
 }
+
 

@@ -22,17 +22,23 @@ export default function LoopingPackagesStack({
 
   const total = packages.length
 
+  // Keep a ref to activeIndex so the autoplay interval never stales
+  const activeIndexRef = useRef(activeIndex)
+  useEffect(() => {
+    activeIndexRef.current = activeIndex
+  }, [activeIndex])
+
   const handleNext = useCallback(() => {
     if (total <= 1) return
-    onActiveIndexChange((activeIndex + 1) % total)
-  }, [activeIndex, total, onActiveIndexChange])
+    onActiveIndexChange((activeIndexRef.current + 1) % total)
+  }, [total, onActiveIndexChange])
 
   const handlePrev = useCallback(() => {
     if (total <= 1) return
-    onActiveIndexChange((activeIndex - 1 + total) % total)
-  }, [activeIndex, total, onActiveIndexChange])
+    onActiveIndexChange((activeIndexRef.current - 1 + total) % total)
+  }, [total, onActiveIndexChange])
 
-  // Automatic looping: smoothly advances every 4.2 seconds
+  // Automatic looping: advances every 10 seconds with a stable interval (no restart on each step)
   useEffect(() => {
     if (!isAutoPlaying || isHovered || total <= 1) {
       if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current)
@@ -40,13 +46,13 @@ export default function LoopingPackagesStack({
     }
 
     autoPlayTimerRef.current = setInterval(() => {
-      handleNext()
+      onActiveIndexChange((activeIndexRef.current + 1) % total)
     }, 10000)
 
     return () => {
       if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current)
     }
-  }, [isAutoPlaying, isHovered, handleNext, total])
+  }, [isAutoPlaying, isHovered, total, onActiveIndexChange])
 
   // Touch swipe support on mobile
   const handleTouchStart = (e: React.TouchEvent) => {

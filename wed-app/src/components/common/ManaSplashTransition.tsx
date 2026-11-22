@@ -59,28 +59,27 @@ export const ManaSplashTransition: React.FC = () => {
           {/* Ambient Bubble Gum & Candy Floss Radial Glow */}
           <motion.div
             animate={{
-              scale: phase === 'reveal' ? 1.5 : [1, 1.2, 1],
-              opacity: phase === 'reveal' ? 0 : 0.75,
+              scale: phase === 'reveal' ? 1.4 : [1, 1.15, 1],
+              opacity: phase === 'reveal' ? 0 : 0.65,
             }}
             transition={{
               scale: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
               opacity: { duration: 0.8 },
             }}
-            className="absolute w-[340px] h-[340px] sm:w-[520px] sm:h-[520px] rounded-full bg-gradient-to-tr from-[#F0F9F8]/30 via-[#F3A2BE]/40 to-white/25 blur-[100px] sm:blur-[120px] pointer-events-none"
+            className="absolute w-[320px] h-[320px] sm:w-[500px] sm:h-[500px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.35)_0%,rgba(243,162,190,0.25)_40%,transparent_70%)] pointer-events-none"
           />
 
           {/* Soft Radial Vignette for Mobile & Desktop Depth */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_25%,rgba(126,31,62,0.35)_90%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_25%,rgba(126,31,62,0.3)_90%)] pointer-events-none" />
 
           {/* Center Logo Showcase with Cinematic Zoom Transition */}
           <motion.div
-            initial={{ scale: 0.65, opacity: 0, filter: 'blur(10px)' }}
+            initial={{ scale: 0.75, opacity: 0 }}
             animate={
               phase === 'intro'
                 ? {
                     scale: 1,
                     opacity: 1,
-                    filter: 'blur(0px)',
                     transition: {
                       type: 'spring',
                       stiffness: 140,
@@ -92,14 +91,12 @@ export const ManaSplashTransition: React.FC = () => {
                 ? {
                     scale: 1.04,
                     opacity: 1,
-                    filter: 'blur(0px)',
                     transition: { duration: 1.2, ease: 'easeInOut' },
                   }
                 : {
                     // Portal zoom-through into the website
-                    scale: 1.4,
+                    scale: 1.35,
                     opacity: 0,
-                    filter: 'blur(14px)',
                     transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
                   }
             }
@@ -109,17 +106,17 @@ export const ManaSplashTransition: React.FC = () => {
             <div className="relative w-36 h-36 sm:w-48 sm:h-48 flex items-center justify-center">
               {/* Base MANA Logo */}
               <img
-                src="/logo.svg"
+                src="/logo.png"
                 alt="MANA Logo"
-                className="w-full h-full object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)]"
+                className="w-full h-full object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.25)]"
               />
 
               {/* Shimmer Light Reflection Sweep - STRICTLY MASKED TO THE LETTER "M" LOGO ONLY */}
               <div
                 className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden"
                 style={{
-                  WebkitMaskImage: 'url(/logo.svg)',
-                  maskImage: 'url(/logo.svg)',
+                  WebkitMaskImage: 'url(/logo.png)',
+                  maskImage: 'url(/logo.png)',
                   WebkitMaskSize: 'contain',
                   maskSize: 'contain',
                   WebkitMaskRepeat: 'no-repeat',
