@@ -217,8 +217,13 @@ export default function PackagesPage() {
       }, 180)
       return () => clearTimeout(timer)
     } else if (targetHash.startsWith('#package-')) {
+      const pkgId = targetHash.replace('#package-', '')
+      const idx = packages.findIndex((p) => p.id === pkgId)
+      if (idx !== -1) {
+        setActivePackageIndex(idx)
+      }
       const timer = setTimeout(() => {
-        const el = document.getElementById(targetHash.slice(1))
+        const el = document.getElementById('packages-section')
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' })
         }
@@ -519,7 +524,7 @@ export default function PackagesPage() {
   }
 
   const handleSquarePackageClick = (pkgId: string) => {
-    const idx = packages.findIndex((p) => p.id === pkgId)
+    const idx = filteredPackages.findIndex((p) => p.id === pkgId)
     if (idx !== -1) {
       setActivePackageIndex(idx)
     }
@@ -534,16 +539,6 @@ export default function PackagesPage() {
     if (searchFilter) {
       setSearchFilter('')
     }
-    setTimeout(() => {
-      const el = document.getElementById(`package-${pkgId}`)
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        el.classList.remove('package-card-pop')
-        // Trigger clean reflow so pop animation plays
-        void el.offsetWidth
-        el.classList.add('package-card-pop')
-      }
-    }, 60)
   }
 
   // Filter packages based on backdrop and search
@@ -564,20 +559,18 @@ export default function PackagesPage() {
     }
   }, [filteredPackages.length])
 
-  // Jump to newly added package (index 0 since addPackage prepends) and scroll to it
+  // Jump to newly added package (index 0 since addPackage prepends)
   useEffect(() => {
     if (packages.length > prevPackagesLengthRef.current && prevPackagesLengthRef.current > 0) {
       setActivePackageIndex(0)
-      setTimeout(() => {
-        const el = packages[0] ? document.getElementById(`package-${packages[0].id}`) : null
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 100)
     }
     prevPackagesLengthRef.current = packages.length
   }, [packages])
 
-  // Show all packages in the detail list section
-  const displayedPackages = filteredPackages
+  // The package currently active in the 3D stack — directly drives the detail card right underneath
+  const currentActivePackage = filteredPackages[activePackageIndex] || filteredPackages[0]
+  // Show only the related active package right under the animation (no scrolling down)
+  const displayedPackages = currentActivePackage ? [currentActivePackage] : []
 
   const renderExclusiveLinks = (pkg: WeddingPackage, extraClass = '') => (
     <div className={`flex flex-wrap items-center justify-between gap-2.5 bg-[#F0F9F8] p-2.5 sm:px-3 sm:py-2.5 rounded-xl border border-[#D8F0EC] ${extraClass}`}>
@@ -895,14 +888,6 @@ export default function PackagesPage() {
             activeIndex={activePackageIndex}
             onActiveIndexChange={(idx) => {
               setActivePackageIndex(idx)
-              // Scroll the matching detail card into view when carousel advances
-              setTimeout(() => {
-                const pkg = filteredPackages[idx]
-                if (pkg) {
-                  const el = document.getElementById(`package-${pkg.id}`)
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }
-              }, 60)
             }}
             onSelectPackage={handleSquarePackageClick}
           />
