@@ -161,14 +161,6 @@ export default function VisionSection({ className = '' }: VisionSectionProps) {
               {word}
             </motion.span>
           ))}
-          {/* Subtle Blinking Loading Cursor */}
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 1, 0] }}
-            transition={{ repeat: Infinity, duration: 0.85, ease: 'easeInOut' }}
-            className="inline-block w-1.5 h-4 bg-[#f98093] rounded-full shrink-0 self-center"
-            aria-hidden="true"
-          />
         </motion.p>
 
         {/* Author Sign-off */}
