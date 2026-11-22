@@ -14,6 +14,7 @@ import Layout from '../components/layout/Layout'
 import LocationModal from '../components/modals/LocationModal'
 import HomeImageModal, { type HomeImageTarget } from '../components/modals/HomeImageModal'
 import HomeScrollMotionSection from '../components/home/HomeScrollMotionSection'
+import VisionSection from '../components/home/VisionSection'
 import { useAuth } from '../contexts/AuthContext'
 import { useAuditoriums } from '../hooks/useAuditoriums'
 import { useCityStore } from '../store/cityStore'
@@ -483,7 +484,7 @@ export default function HomePage() {
             onClick={() => setIsLocationModalOpen(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[#7E1F3E] bg-white hover:bg-gray-100 shadow-2xs transition-colors shrink-0"
           >
-            <MapPin className="w-3.5 h-3.5" />
+            <MapPin className="w-3.5 h-3.5 text-[#f98093]" />
             <span>{selectedCity && !isNearMeActive ? selectedCity.name : 'All Kerala'}</span>
           </button>
         </div>
@@ -538,7 +539,7 @@ export default function HomePage() {
                 const citySlug = selectedCity?.slug || 'kochi'
                 navigate(`/city/${citySlug}`)
               }}
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#C83B68] hover:bg-[#A42A51] active:scale-95 transition-all shadow-md"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#f98093] hover:bg-[#e86e81] active:scale-95 transition-all shadow-md"
             >
               <span>Explore Venues</span>
               <span>→</span>
@@ -546,6 +547,9 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* SECTION: OUR MISSION */}
+      <VisionSection />
 
       {/* SECTION 3: CITY PACKAGES & LISTINGS (Dedicated for user's selected city, separated from Find Venues) */}
       {preferredCity && (
@@ -617,7 +621,7 @@ function CityPackagesSection({ preferredCitySlug }: { preferredCitySlug: string 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 border-b border-[#D8F0EC] pb-4">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7E1F3E]/10 text-[#7E1F3E] text-xs font-bold mb-1.5 border border-[#7E1F3E]/20">
-            <MapPin className="w-3.5 h-3.5 text-[#C83B68]" />
+            <MapPin className="w-3.5 h-3.5 text-[#f98093]" />
             <span>Selected City: {cityName}</span>
           </div>
           <h2
@@ -636,11 +640,10 @@ function CityPackagesSection({ preferredCitySlug }: { preferredCitySlug: string 
           <button
             type="button"
             onClick={() => setActiveTab('packages')}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'packages'
-                ? 'bg-[#7E1F3E] text-white shadow-sm'
-                : 'text-[#5A172D]/70 hover:text-[#5A172D]'
-            }`}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${activeTab === 'packages'
+              ? 'bg-[#f98093] text-white shadow-sm'
+              : 'text-[#5A172D]/70 hover:text-[#5A172D]'
+              }`}
           >
             <PackageIcon className="w-3.5 h-3.5" />
             <span>Packages ({cityPackages.length})</span>
@@ -648,11 +651,10 @@ function CityPackagesSection({ preferredCitySlug }: { preferredCitySlug: string 
           <button
             type="button"
             onClick={() => setActiveTab('venues')}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'venues'
-                ? 'bg-[#7E1F3E] text-white shadow-sm'
-                : 'text-[#5A172D]/70 hover:text-[#5A172D]'
-            }`}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${activeTab === 'venues'
+              ? 'bg-[#f98093] text-white shadow-sm'
+              : 'text-[#5A172D]/70 hover:text-[#5A172D]'
+              }`}
           >
             <Building2 className="w-3.5 h-3.5" />
             <span>Venues ({cityAuditoriums?.length || 0})</span>
@@ -684,13 +686,13 @@ function CityPackagesSection({ preferredCitySlug }: { preferredCitySlug: string 
                     {pkg.backdrop}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full bg-[#7E1F3E]/90 text-white text-[11px] font-semibold flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-[#F3A2BE]" />
+                    <MapPin className="w-3 h-3 text-[#f98093]" />
                     {cityName}
                   </span>
                 </div>
 
                 <div className="absolute bottom-3 left-3 right-3 text-white">
-                  <div className="text-xs font-semibold text-rose-200">
+                  <div className="text-xs font-semibold text-[#f98093]">
                     {pkg.startingPrice?.toLowerCase().includes('demand') ? pkg.startingPrice : `Starts at ${pkg.startingPrice}`}
                   </div>
                   <h3
@@ -713,7 +715,7 @@ function CityPackagesSection({ preferredCitySlug }: { preferredCitySlug: string 
                     <Users className="w-3.5 h-3.5" />
                     <span>{pkg.guestCapacity}</span>
                   </div>
-                  <span className="text-[#C83B68] font-bold inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                  <span className="text-[#f98093] font-bold inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                     <span>View Package</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </span>
@@ -738,7 +740,7 @@ function CityPackagesSection({ preferredCitySlug }: { preferredCitySlug: string 
               <button
                 type="button"
                 onClick={() => navigate(`/city/${preferredCitySlug}`)}
-                className="mt-3 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#7E1F3E] hover:bg-[#A82B54]"
+                className="mt-3 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#f98093] hover:bg-[#e06b7e]"
               >
                 Browse All Kerala Venues
               </button>
@@ -768,7 +770,7 @@ function CityPackagesSection({ preferredCitySlug }: { preferredCitySlug: string 
                     </p>
                     <div className="flex items-center justify-between text-[10px] sm:text-xs text-white/80 mt-1">
                       <span>{venue.seating_capacity || venue.capacity || 200} guests</span>
-                      <span className="text-rose-200 font-semibold">
+                      <span className="text-[#f98093] font-semibold">
                         ₹{(venue.base_price_per_day || venue.starting_price || 50000).toLocaleString('en-IN')}
                       </span>
                     </div>

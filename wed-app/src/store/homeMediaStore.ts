@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export const DEFAULT_HERO_IMAGE = '/dest-wedding-1.jpg'
+export const DEFAULT_VISION_IMAGE = '/photo-prewedding.jpg'
 
 export const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   destination_wedding: '/category-destination.jpg',
@@ -17,17 +18,21 @@ export const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
 
 interface HomeMediaSnapshot {
   heroImage: string
+  visionImage: string
   categoryImages: Record<string, string>
 }
 
 interface HomeMediaState {
   heroImage: string
+  visionImage: string
   categoryImages: Record<string, string>
   past: HomeMediaSnapshot[]
   future: HomeMediaSnapshot[]
   setHeroImage: (url: string) => void
+  setVisionImage: (url: string) => void
   setCategoryImage: (categoryId: string, url: string) => void
   resetHeroImage: () => void
+  resetVisionImage: () => void
   resetCategoryImage: (categoryId: string) => void
   undo: () => void
   redo: () => void
@@ -38,6 +43,7 @@ const MAX_HISTORY = 25
 function takeSnapshot(state: HomeMediaState): HomeMediaSnapshot {
   return {
     heroImage: state.heroImage,
+    visionImage: state.visionImage,
     categoryImages: { ...state.categoryImages },
   }
 }
@@ -46,6 +52,7 @@ export const useHomeMediaStore = create<HomeMediaState>()(
   persist(
     (set) => ({
       heroImage: DEFAULT_HERO_IMAGE,
+      visionImage: DEFAULT_VISION_IMAGE,
       categoryImages: DEFAULT_CATEGORY_IMAGES,
       past: [],
       future: [],
@@ -54,6 +61,18 @@ export const useHomeMediaStore = create<HomeMediaState>()(
           past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
           future: [],
           heroImage: url || DEFAULT_HERO_IMAGE,
+        })),
+      setVisionImage: (url) =>
+        set((state) => ({
+          past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
+          future: [],
+          visionImage: url || DEFAULT_VISION_IMAGE,
+        })),
+      resetVisionImage: () =>
+        set((state) => ({
+          past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
+          future: [],
+          visionImage: DEFAULT_VISION_IMAGE,
         })),
       setCategoryImage: (categoryId, url) =>
         set((state) => ({

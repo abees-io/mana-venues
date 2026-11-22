@@ -98,7 +98,7 @@ export default function HomeScrollMotionSection() {
               we connect
             </h2>
             <h2
-              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[#C83B68] leading-[1.02]"
+              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[#f98093] leading-[1.02]"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               we elevate
@@ -117,10 +117,10 @@ export default function HomeScrollMotionSection() {
         >
           <defs>
             <linearGradient id="tealPinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#00A8A8" />
-              <stop offset="45%" stopColor="#2BB3C0" />
-              <stop offset="75%" stopColor="#A8558A" />
-              <stop offset="100%" stopColor="#DE3B6B" />
+              <stop offset="0%" stopColor="#f98093" />
+              <stop offset="45%" stopColor="#f98093" />
+              <stop offset="75%" stopColor="#699407" />
+              <stop offset="100%" stopColor="#699407" />
             </linearGradient>
             <filter id="curveShadow" x="-10%" y="-10%" width="200%" height="200%">
               <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#0f172a" floodOpacity="0.14" />

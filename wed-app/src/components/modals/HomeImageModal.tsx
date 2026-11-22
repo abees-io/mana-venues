@@ -8,7 +8,7 @@ import {
 } from '../../store/homeMediaStore'
 
 export interface HomeImageTarget {
-  type: 'hero' | 'category'
+  type: 'hero' | 'category' | 'vision'
   id: string
   label: string
 }
@@ -32,10 +32,13 @@ const PRESET_IMAGES = [
 
 export default function HomeImageModal({ target, onClose }: HomeImageModalProps) {
   const heroImage = useHomeMediaStore((s) => s.heroImage)
+  const visionImage = useHomeMediaStore((s) => s.visionImage)
   const categoryImages = useHomeMediaStore((s) => s.categoryImages)
   const setHeroImage = useHomeMediaStore((s) => s.setHeroImage)
+  const setVisionImage = useHomeMediaStore((s) => s.setVisionImage)
   const setCategoryImage = useHomeMediaStore((s) => s.setCategoryImage)
   const resetHeroImage = useHomeMediaStore((s) => s.resetHeroImage)
+  const resetVisionImage = useHomeMediaStore((s) => s.resetVisionImage)
   const resetCategoryImage = useHomeMediaStore((s) => s.resetCategoryImage)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -48,10 +51,12 @@ export default function HomeImageModal({ target, onClose }: HomeImageModalProps)
     const current =
       target.type === 'hero'
         ? heroImage
+        : target.type === 'vision'
+        ? visionImage
         : categoryImages[target.id] || DEFAULT_CATEGORY_IMAGES[target.id] || DEFAULT_HERO_IMAGE
     setUrlInput(current)
     setErrorMsg(null)
-  }, [target, heroImage, categoryImages])
+  }, [target, heroImage, visionImage, categoryImages])
 
   if (!target) return null
 
@@ -80,6 +85,8 @@ export default function HomeImageModal({ target, onClose }: HomeImageModalProps)
     }
     if (target.type === 'hero') {
       setHeroImage(trimmed)
+    } else if (target.type === 'vision') {
+      setVisionImage(trimmed)
     } else {
       setCategoryImage(target.id, trimmed)
     }
@@ -89,6 +96,8 @@ export default function HomeImageModal({ target, onClose }: HomeImageModalProps)
   const handleReset = () => {
     if (target.type === 'hero') {
       resetHeroImage()
+    } else if (target.type === 'vision') {
+      resetVisionImage()
     } else {
       resetCategoryImage(target.id)
     }
