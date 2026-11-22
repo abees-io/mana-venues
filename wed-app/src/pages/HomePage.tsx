@@ -398,7 +398,7 @@ export default function HomePage() {
           style={{ perspective: '800px' }}
         >
           <h2
-            className="category-title-animate text-2xl sm:text-3xl font-bold uppercase tracking-wide text-[#7E1F3E] mb-4 sm:mb-5 text-left drop-shadow-xs inline-block"
+            className="category-title-animate text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-wide text-[#7E1F3E] mb-3 sm:mb-4 text-left drop-shadow-xs inline-block"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
             Explore Categories
@@ -468,7 +468,7 @@ export default function HomePage() {
         <div className="flex items-center justify-between mb-3 sm:mb-4 gap-3">
           <div>
             <h2
-              className="text-2xl sm:text-3xl font-bold uppercase tracking-wide text-[#7E1F3E] text-left drop-shadow-xs inline-block"
+              className="text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-wide text-[#7E1F3E] text-left drop-shadow-xs inline-block"
               style={{ fontFamily: "'Cinzel', serif" }}
             >
               Find your venues
