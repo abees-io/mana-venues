@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Undo2, Redo2, UtensilsCrossed } from 'lucide-react'
+import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Undo2, Redo2, UtensilsCrossed, Store } from 'lucide-react'
 import CoolCameraIcon from '../common/CoolCameraIcon'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
@@ -291,6 +291,20 @@ export default function Header() {
                     </>
                   )}
 
+                  {!isVendor && !isAdmin && (
+                    <>
+                      <Link
+                        to="/vendor/register"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-[#7E1F3E] font-medium hover:bg-[#F0F9F8] transition-colors"
+                      >
+                        <Store className="w-4 h-4 text-[#7E1F3E]" />
+                        <span>Vendor Register / Portal</span>
+                      </Link>
+                      <div className="border-t border-[#D8F0EC] my-1" />
+                    </>
+                  )}
+
                   <Link
                     to="/profile"
                     onClick={() => setIsUserMenuOpen(false)}
@@ -313,6 +327,15 @@ export default function Header() {
             </div>
           ) : (
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <Link
+                to="/vendor/register"
+                title="Vendor Register & Portal"
+                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-[#7E1F3E]/10 text-[#7E1F3E] border border-[#7E1F3E]/30 hover:bg-[#7E1F3E] hover:text-white transition-all shadow-2xs shrink-0"
+              >
+                <Store className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">Vendor Register</span>
+                <span className="sm:hidden">Vendor</span>
+              </Link>
               <Link
                 to="/auth/login"
                 className="px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-medium text-black bg-white/80 border border-[#D8F0EC] rounded-lg hover:bg-white active:bg-[#D8F0EC]/40 transition-colors shrink-0"

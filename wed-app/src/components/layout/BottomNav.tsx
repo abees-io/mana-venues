@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Home, Search, User, Package } from 'lucide-react'
+import { Home, Search, User, Package, Store } from 'lucide-react'
 import CoolCameraIcon from '../common/CoolCameraIcon'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
@@ -7,17 +7,18 @@ import { useCityStore } from '../../store/cityStore'
 export default function BottomNav() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const selectedCity = useCityStore((state) => state.selectedCity)
 
   const citySlug = selectedCity?.slug ?? 'kochi'
   const pathname = location.pathname
+  const isVendor = profile?.role === 'vendor'
 
   const isHomeActive = pathname === '/'
   const isPackagesActive = pathname === '/packages'
   const isPhotoActive = pathname.startsWith('/photography')
   const isSearchActive = pathname.startsWith('/city')
-  const isProfileActive = pathname === '/profile'
+  const isProfileActive = pathname === '/profile' || pathname.startsWith('/vendor')
 
   const tabs = [
     {
@@ -45,10 +46,10 @@ export default function BottomNav() {
       onClick: () => navigate(`/city/${citySlug}`),
     },
     {
-      label: 'Profile',
-      icon: User,
+      label: isVendor ? 'Vendor' : 'Profile',
+      icon: isVendor ? Store : User,
       isActive: isProfileActive,
-      onClick: () => navigate(user ? '/profile' : '/auth/login'),
+      onClick: () => navigate(user ? (isVendor ? '/vendor' : '/profile') : '/auth/login'),
     },
   ]
 

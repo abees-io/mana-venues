@@ -1,4 +1,11 @@
 export type Role = 'customer' | 'vendor' | 'admin'
+export type VendorType =
+  | 'wedding_planner'
+  | 'destination_wedding'
+  | 'catering'
+  | 'photographer'
+  | 'bridal_makeup'
+
 export type PricingSlotStatus = 'available' | 'booked' | 'blocked'
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled'
 
@@ -8,6 +15,9 @@ export type Profile = {
   email: string
   phone: string | null
   role: Role
+  vendor_type?: VendorType | null
+  business_name?: string | null
+  access_permissions?: string[] | null
   avatar_url: string | null
   created_at: string
 }

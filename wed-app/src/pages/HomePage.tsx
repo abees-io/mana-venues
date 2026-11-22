@@ -3,13 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
-  RefreshCw,
-  Building2,
   Camera,
+  MapPin,
 } from 'lucide-react'
 import Layout from '../components/layout/Layout'
-import AuditoriumCard from '../components/cards/AuditoriumCard'
-import { AuditoriumCardSkeletonList } from '../components/cards/AuditoriumCardSkeleton'
 import LocationModal from '../components/modals/LocationModal'
 import HomeImageModal, { type HomeImageTarget } from '../components/modals/HomeImageModal'
 import HomeScrollMotionSection from '../components/home/HomeScrollMotionSection'
@@ -93,7 +90,7 @@ export default function HomePage() {
   const navigate = useNavigate()
   const { user, profile } = useAuth()
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
-  const { selectedCity, clearCity } = useCityStore()
+  const { selectedCity } = useCityStore()
 
   const capacityMin = useFilterStore((state) => state.capacityMin)
   const capacityMax = useFilterStore((state) => state.capacityMax)
@@ -129,14 +126,7 @@ export default function HomePage() {
   const {
     data: auditoriums,
     isLoading,
-    isError,
-    refetch,
   } = useAuditoriums(isNearMeActive ? null : selectedCity?.slug, filterParams)
-
-  // When selectedCity changes, deactivate Near Me so city filter takes effect immediately
-  useEffect(() => {
-    // City selection takes priority
-  }, [selectedCity?.slug])
 
   // Filter client-side by search term and sort by proximity if Near Me is active
   const displayedAuditoriums = useMemo(() => {
@@ -269,7 +259,7 @@ export default function HomePage() {
     window.addEventListener('mana-splash-end', handleIntroEnd)
 
     // Fallback: in case user already bypassed splash or on direct mount
-    const timer = setTimeout(runReveal, 2700)
+    const timer = setTimeout(runReveal, 200)
 
     return () => {
       window.removeEventListener('mana-splash-reveal', handleIntroEnd)
@@ -409,7 +399,7 @@ export default function HomePage() {
           style={{ perspective: '800px' }}
         >
           <h2
-            className="category-title-animate text-2xl sm:text-3xl font-bold text-black mb-4 sm:mb-5 tracking-wide text-left drop-shadow-xs inline-block"
+            className="category-title-animate text-2xl sm:text-3xl font-bold uppercase tracking-wide text-[#7E1F3E] mb-4 sm:mb-5 text-left drop-shadow-xs inline-block"
             style={{ fontFamily: "'Cinzel', serif" }}
           >
             Explore Categories
@@ -515,136 +505,85 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 2 & 3: FEED & GRID */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Feed Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-[#A42A51]/20 mb-8">
-          <div>
-            <p
-              className="text-2xl sm:text-3xl font-bold uppercase tracking-wide text-[#7E1F3E] mb-1 inline-block"
-              style={{ fontFamily: "'Cinzel', serif" }}
-            >
-              Find your venues
-            </p>
-            <div className="flex items-center gap-2.5">
-              <h2 className="text-base sm:text-lg font-bold text-[#5A172D] tracking-tight">
-                {isNearMeActive
-                  ? 'Venues Near You'
-                  : selectedCity
-                    ? `Venues in ${selectedCity.name}`
-                    : 'Venues in Kerala'}
-              </h2>
-              {!isLoading && (
-                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-[#A42A51]/15 text-[#7E1F3E] border border-[#A42A51]/30">
-                  {displayedAuditoriums.length}
-                </span>
-              )}
-            </div>
+      {/* SECTION 2: FIND YOUR VENUES (1 Single Compact Feature Card with Dummy AI Image) */}
+      <div ref={gridRef} className="max-w-5xl mx-auto px-3 sm:px-6 pt-6 sm:pt-8 pb-6">
+        {/* Section Heading & City Quick Filter */}
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h2
+            className="text-2xl sm:text-3xl font-bold uppercase tracking-wide text-[#7E1F3E] text-left drop-shadow-xs inline-block"
+            style={{ fontFamily: "'Cinzel', serif" }}
+          >
+            Find your venues
+          </h2>
 
-            {/* Sub-heading */}
-            <p className="text-xs sm:text-sm text-[#7E1F3E]/80 mt-1">
-              {isNearMeActive
-                ? 'Showing curated auditoriums closest to your current location (sorted by proximity)'
-                : selectedCity
-                  ? `Showing curated auditoriums in ${selectedCity.name}`
-                  : 'Showing verified wedding auditoriums across Kerala'}
-              {searchQuery ? ` matching "${searchQuery}"` : ''}
-            </p>
+          <button
+            type="button"
+            onClick={() => setIsLocationModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[#7E1F3E] bg-white hover:bg-gray-100 shadow-2xs transition-colors"
+          >
+            <MapPin className="w-3.5 h-3.5" />
+            <span>{selectedCity && !isNearMeActive ? selectedCity.name : 'All Kerala'}</span>
+          </button>
+        </div>
+
+        {/* 1 Single Compact Feature Card */}
+        <div
+          onClick={() => {
+            const citySlug = selectedCity?.slug || 'kochi'
+            navigate(`/city/${citySlug}`)
+          }}
+          className="group relative w-full aspect-[2.4/1] sm:aspect-[3.4/1] min-h-[140px] sm:min-h-[160px] rounded-2xl overflow-hidden cursor-pointer shadow-md select-none will-change-[transform,opacity] transform-gpu hover:shadow-xl transition-all active:scale-[0.99]"
+          style={{ WebkitTapHighlightColor: 'transparent', outline: 'none' }}
+        >
+          {/* Dummy AI Venue Image */}
+          <img
+            src="/venue-ai-dummy.jpg"
+            alt="Find Your Venues"
+            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+            loading="eager"
+          />
+
+          {/* Vignette Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/20 pointer-events-none" />
+
+          {/* Top Pill Badge */}
+          <div className="absolute top-2.5 left-2.5 sm:top-3.5 sm:left-3.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] sm:text-xs font-semibold text-white/95 border border-white/10 pointer-events-none flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Curated Venues & Auditoriums</span>
           </div>
 
-          <div className="flex items-center gap-3 pt-1">
+          {/* Content on the Card */}
+          <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-5 pointer-events-none">
+            <div className="max-w-md sm:max-w-lg">
+              <h3
+                className="text-sm sm:text-xl font-bold uppercase tracking-wide text-white drop-shadow-md leading-tight"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                Curated Auditoriums & Grand Halls
+              </h3>
+              <p className="text-[11px] sm:text-xs text-white/90 font-medium mt-1 leading-snug drop-shadow-xs line-clamp-1 sm:line-clamp-none">
+                Air-conditioned banquet halls, mandapams & luxury wedding lawns across Kerala
+              </p>
+            </div>
+          </div>
+
+          {/* Right Action Button */}
+          <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 pointer-events-auto">
             <button
               type="button"
-              onClick={() => setIsLocationModalOpen(true)}
-              className="inline-flex items-center px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#5A172D] bg-white border border-[#A42A51]/30 hover:bg-[#A42A51]/10 transition-all shadow-xs"
+              onClick={(e) => {
+                e.stopPropagation()
+                const citySlug = selectedCity?.slug || 'kochi'
+                navigate(`/city/${citySlug}`)
+              }}
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#C83B68] hover:bg-[#A42A51] active:scale-95 transition-all shadow-md"
             >
-              <span>{selectedCity && !isNearMeActive ? 'Change City' : 'Select City'}</span>
+              <span>Explore Venues</span>
+              <span>→</span>
             </button>
           </div>
         </div>
-
-        {/* FEED GRID / STATES */}
-        <div ref={gridRef}>
-          {/* Loading Skeleton */}
-          {isLoading && !auditoriums && <AuditoriumCardSkeletonList count={6} />}
-
-          {/* Error State */}
-          {isError && (
-            <div className="text-center py-16 bg-brand-dark/90 backdrop-blur-md rounded-2xl border border-red-900/40 shadow-xl max-w-lg mx-auto p-8 space-y-4">
-              <div className="w-12 h-12 rounded-full bg-red-950 text-red-400 mx-auto flex items-center justify-center">
-                <RefreshCw className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-bold text-red-200">
-                Failed to load auditoriums
-              </h3>
-              <p className="text-sm text-red-300/70">
-                We encountered an issue fetching venues. Please check your connection and try again.
-              </p>
-              <button
-                type="button"
-                onClick={() => refetch()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#C83B68] hover:bg-[#A42A51] text-white font-bold text-sm transition-all shadow-sm"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span>Retry</span>
-              </button>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!isLoading && !isError && displayedAuditoriums.length === 0 && (
-            <div className="text-center py-16 bg-[#FFF2F6] backdrop-blur-md rounded-2xl border border-[#D8F0EC] shadow-xl max-w-lg mx-auto p-8 space-y-4">
-              <div className="w-14 h-14 rounded-full bg-[#F0F9F8] text-[#C83B68] border border-[#D8F0EC] mx-auto flex items-center justify-center">
-                <Building2 className="w-7 h-7" />
-              </div>
-              <h3 className="text-lg font-bold text-[#5A172D]">
-                No venues found {selectedCity ? `in ${selectedCity.name}` : ''}
-              </h3>
-              <p className="text-sm text-[#7E1F3E]/80 max-w-sm mx-auto">
-                {searchQuery
-                  ? `No venues match the query "${searchQuery}". Try a different keyword or clear the search.`
-                  : 'We could not find any active venues matching your criteria in this city.'}
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#5A172D] bg-[#F0F9F8] hover:bg-white border border-[#D8F0EC] transition-colors"
-                  >
-                    Clear Search
-                  </button>
-                )}
-                {selectedCity && (
-                  <button
-                    type="button"
-                    onClick={() => clearCity()}
-                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#C83B68] hover:bg-[#A42A51] transition-colors shadow-sm"
-                  >
-                    View All Cities
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setIsLocationModalOpen(true)}
-                  className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#7E1F3E] bg-[#F0F9F8] hover:bg-white transition-colors border border-[#D8F0EC]"
-                >
-                  Switch City
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Cards Grid */}
-          {!isLoading && !isError && displayedAuditoriums.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayedAuditoriums.map((auditorium) => (
-                <AuditoriumCard key={auditorium.id || auditorium.slug} auditorium={auditorium} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      </div>
 
       {/* Location Modal */}
       <LocationModal

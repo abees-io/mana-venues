@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { Eye, EyeOff, KeyRound, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import Layout from '../components/layout/Layout'
@@ -386,6 +386,16 @@ export default function AuthPage() {
               </button>
             </div>
           )}
+
+          {/* Vendor Portal Direct Link */}
+          <div className="mt-5 pt-4 border-t border-green-800/40 text-center">
+            <p className="text-xs text-green-200/80">
+              Are you a wedding vendor or venue partner?{' '}
+              <Link to="/vendor/register" className="text-brand-secondary font-bold hover:underline">
+                Vendor Portal & Registration →
+              </Link>
+            </p>
+          </div>
 
         </div>
       </div>

@@ -20,6 +20,23 @@ import { useVendorBookings } from '../../hooks/useVendorBookings'
 import { useAuth } from '../../contexts/AuthContext'
 import { formatCurrency } from '../../lib/utils'
 
+const getVendorCategoryTitle = (type?: string | null) => {
+  switch (type) {
+    case 'wedding_planner':
+      return 'Wedding Event Planner'
+    case 'destination_wedding':
+      return 'Destination Weddings Specialist'
+    case 'catering':
+      return 'Catering & Feasts Partner'
+    case 'photographer':
+      return 'Wedding Photography & Cinema'
+    case 'bridal_makeup':
+      return 'Bridal & Makeup Artist'
+    default:
+      return 'Verified Wedding Vendor'
+  }
+}
+
 export default function VendorDashboard() {
   const { profile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
@@ -56,12 +73,20 @@ export default function VendorDashboard() {
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Welcome Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-200/80 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-200/80 pb-6">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark">
-              Welcome back, {profile?.full_name || 'Vendor'} 👋
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">Here is what is happening with your halls today, {todayStr}</p>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark">
+                Welcome back, {profile?.business_name || profile?.full_name || 'Vendor'} 👋
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#7E1F3E]/10 text-[#7E1F3E] border border-[#7E1F3E]/20">
+                {getVendorCategoryTitle(profile?.vendor_type)}
+              </span>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              {profile?.business_name && profile?.full_name ? `${profile.full_name} • ` : ''}
+              Here is what is happening with your wedding business today, {todayStr}
+            </p>
           </div>
           {hasAuditoriums && firstAuditoriumId && (
             <button
@@ -73,6 +98,35 @@ export default function VendorDashboard() {
             </button>
           )}
         </div>
+
+        {/* Vendor Active Modules & Webpage Access Strip */}
+        {profile?.access_permissions && profile.access_permissions.length > 0 && (
+          <div className="bg-[#FFF2F6] border border-[#7E1F3E]/20 rounded-2xl p-4 sm:p-5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#7E1F3E] mb-2.5">
+              Active Vendor Portal Features & Webpage Access
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {profile.access_permissions.map((acc) => {
+                const map: Record<string, string> = {
+                  leads: '💬 Direct Client Leads',
+                  packages: '🏷️ Pricing & Packages Catalog',
+                  portfolio: '🖼️ Portfolio Gallery',
+                  calendar: '📅 Live Calendar & Slots',
+                  venues: '🏛️ Venue & Hall Listings',
+                  payouts: '💳 Payout & Invoicing',
+                }
+                return (
+                  <span
+                    key={acc}
+                    className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-white border border-[#7E1F3E]/25 text-[#5A172D] shadow-2xs"
+                  >
+                    {map[acc] || acc}
+                  </span>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* If no auditoriums listed yet: onboarding card */}
         {!hasAuditoriums ? (

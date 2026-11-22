@@ -8,7 +8,13 @@ interface AuthContextType {
   profile: Profile | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, fullName: string, phone: string) => Promise<{ session: boolean }>
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+    phone: string,
+    extraData?: Record<string, unknown>
+  ) => Promise<{ session: boolean }>
   signOut: () => Promise<void>
   updateProfile: (updates: { full_name?: string; phone?: string; avatar_url?: string }) => Promise<void>
   refreshProfile: () => Promise<void>
@@ -29,6 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       full_name: (meta.full_name as string) || (meta.name as string) || '',
       phone: (meta.phone as string) || null,
       role: ((meta.role as string) || 'customer') as 'customer' | 'vendor' | 'admin',
+      vendor_type: (meta.vendor_type as Profile['vendor_type']) || null,
+      business_name: (meta.business_name as string) || null,
+      access_permissions: (meta.access_permissions as string[]) || null,
       avatar_url: (meta.avatar_url as string) || null,
       created_at: targetUser.created_at || new Date().toISOString(),
     }
@@ -48,14 +57,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const fallback = buildFallbackProfile(targetUser)
           // Try self-heal in public.profiles table
           try {
+            const dbPayload = {
+              id: fallback.id,
+              email: fallback.email,
+              full_name: fallback.full_name,
+              phone: fallback.phone,
+              role: fallback.role,
+              avatar_url: fallback.avatar_url,
+            }
             const { data: createdProfile } = await supabase
               .from('profiles')
-              .upsert(fallback)
+              .upsert(dbPayload)
               .select()
               .single()
 
             if (createdProfile) {
-              setProfile(createdProfile as Profile)
+              setProfile({
+                ...fallback,
+                ...createdProfile,
+              } as Profile)
               return
             }
           } catch {
@@ -73,6 +93,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ...data,
           full_name: data.full_name || (meta.full_name as string) || '',
           phone: data.phone || (meta.phone as string) || null,
+          vendor_type: data.vendor_type || (meta.vendor_type as Profile['vendor_type']) || null,
+          business_name: data.business_name || (meta.business_name as string) || null,
+          access_permissions: data.access_permissions || (meta.access_permissions as string[]) || null,
         } as Profile)
       }
     } catch (err) {
@@ -182,7 +205,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     password: string,
     fullName: string,
-    phone: string
+    phone: string,
+    extraData?: Record<string, unknown>
   ): Promise<{ session: boolean }> => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -191,6 +215,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: {
           full_name: fullName,
           phone,
+          ...(extraData || {}),
         },
       },
     })
