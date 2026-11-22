@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import Header from './Header'
 import BottomNav from './BottomNav'
 import CookieBanner from '../common/CookieBanner'
-import AuthPromptModal from '../modals/AuthPromptModal'
 
 interface LayoutProps {
   children: ReactNode
@@ -15,7 +14,6 @@ export default function Layout({ children }: LayoutProps) {
       <main className="flex-1 pb-16 md:pb-0">{children}</main>
       <BottomNav />
       <CookieBanner />
-      <AuthPromptModal />
     </div>
   )
 }
