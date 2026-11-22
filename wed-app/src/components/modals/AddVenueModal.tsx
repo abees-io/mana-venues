@@ -10,12 +10,14 @@ import {
   Loader2,
   Phone,
   MessageCircle,
+  Crop as CropIcon,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useCities } from '../../hooks/useCities'
 import { useAuth } from '../../contexts/AuthContext'
 import { useQueryClient } from '@tanstack/react-query'
 import { uploadOrConvertPhoto } from '../../lib/imageUtils'
+import ImageCropModal from './ImageCropModal'
 
 const AMENITY_OPTIONS = [
   'AC',
@@ -57,6 +59,7 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
   const [isPhotoUploading, setIsPhotoUploading] = useState(false)
   const [photoUploadProgress, setPhotoUploadProgress] = useState<string | null>(null)
   const [photoError, setPhotoError] = useState<string | null>(null)
+  const [croppingPhotoIndex, setCroppingPhotoIndex] = useState<number | null>(null)
   const [showUrlFallback, setShowUrlFallback] = useState(false)
   const [fallbackUrlInput, setFallbackUrlInput] = useState('')
 
@@ -246,7 +249,8 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <>
+      <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-7 shadow-2xl border border-gray-100 relative my-auto animate-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto text-brand-dark">
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-gray-100 mb-4 sticky top-0 bg-white z-20">
@@ -437,6 +441,17 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
 
                       {/* Action Overlay */}
                       <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-1">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setCroppingPhotoIndex(index)
+                          }}
+                          className="p-1.5 rounded-lg bg-white/90 hover:bg-white text-gray-800 text-[10px] font-medium shadow-sm transition"
+                          title="Crop & adjust photo"
+                        >
+                          <CropIcon className="w-3.5 h-3.5 text-[#f98093]" />
+                        </button>
                         {index !== 0 && (
                           <button
                             type="button"
@@ -694,6 +709,25 @@ export default function AddVenueModal({ isOpen, onClose, onSuccess }: AddVenueMo
         </form>
       </div>
     </div>
+
+    {/* Photo Cropper Modal */}
+    {croppingPhotoIndex !== null && venuePhotos[croppingPhotoIndex] && (
+      <ImageCropModal
+        isOpen={true}
+        imageUrl={venuePhotos[croppingPhotoIndex]}
+        onCrop={(croppedDataUrl) => {
+          setVenuePhotos((prev) => {
+            const next = [...prev]
+            next[croppingPhotoIndex] = croppedDataUrl
+            return next
+          })
+          setCroppingPhotoIndex(null)
+        }}
+        onClose={() => setCroppingPhotoIndex(null)}
+        title="Crop & Adjust Venue Photo"
+      />
+    )}
+  </>
   )
 }
 

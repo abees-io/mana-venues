@@ -114,6 +114,7 @@ export default function HomePage() {
   const [editingImageTarget, setEditingImageTarget] = useState<HomeImageTarget | null>(null)
   const heroImage = useHomeMediaStore((s) => s.heroImage)
   const categoryImages = useHomeMediaStore((s) => s.categoryImages)
+  const venueFeatureImage = useHomeMediaStore((s) => s.venueFeatureImage || '/venue-ai-dummy.jpg')
 
   // Near Me Geolocation States
   const [userCoords] = useState<{ lat: number; lng: number } | null>(null)
@@ -500,11 +501,30 @@ export default function HomePage() {
         >
           {/* Dummy AI Venue Image */}
           <img
-            src="/venue-ai-dummy.jpg"
+            src={venueFeatureImage}
             alt="Find Your Venues"
             className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
             loading="eager"
           />
+
+          {/* Admin Change Image Button */}
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setEditingImageTarget({
+                  type: 'venueFeature',
+                  id: 'venueFeature',
+                  label: 'Find Your Venues Banner',
+                })
+              }}
+              className="absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 z-30 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/75 hover:bg-black text-white text-xs font-bold backdrop-blur-md border border-white/20 shadow-lg pointer-events-auto cursor-pointer"
+            >
+              <Camera className="w-3.5 h-3.5 text-[#f98093]" />
+              <span>Change Image</span>
+            </button>
+          )}
 
           {/* Vignette Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/20 pointer-events-none" />

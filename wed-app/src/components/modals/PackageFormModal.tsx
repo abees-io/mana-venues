@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, Upload, Plus, Trash2, Loader2, Image as ImageIcon, Star } from 'lucide-react'
+import { X, Upload, Plus, Trash2, Loader2, Image as ImageIcon, Star, Crop as CropIcon } from 'lucide-react'
 import { uploadOrConvertMultiplePhotos } from '../../lib/imageUtils'
 import { usePackagesStore, type WeddingPackage } from '../../store/packagesStore'
 import { useAuth } from '../../contexts/AuthContext'
+import ImageCropModal from './ImageCropModal'
 
 interface PackageFormModalProps {
   isOpen: boolean
@@ -42,6 +43,7 @@ export default function PackageFormModal({
   const [imageUrlInput, setImageUrlInput] = useState('')
   const [isUploading, setIsUploading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [croppingImageIndex, setCroppingImageIndex] = useState<number | null>(null)
 
   useEffect(() => {
     if (!isOpen) return
@@ -171,8 +173,9 @@ export default function PackageFormModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+    <>
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="package-form-title"
@@ -451,14 +454,24 @@ export default function PackageFormModal({
                         <Star className="w-3 h-3" />
                       </button>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(idx)}
-                      aria-label="Remove image"
-                      className="absolute top-1 right-1 p-1 rounded bg-black/70 text-red-400 hover:bg-red-900/90 transition-colors"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                    <div className="absolute bottom-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={() => setCroppingImageIndex(idx)}
+                        title="Crop & adjust image"
+                        className="p-1 rounded bg-black/75 text-white hover:text-[#f98093] transition-colors"
+                      >
+                        <CropIcon className="w-3 h-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(idx)}
+                        aria-label="Remove image"
+                        className="p-1 rounded bg-black/75 text-red-400 hover:bg-red-900/90 transition-colors"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -484,5 +497,24 @@ export default function PackageFormModal({
         </form>
       </div>
     </div>
+
+    {/* Image Crop Modal */}
+    {croppingImageIndex !== null && images[croppingImageIndex] && (
+      <ImageCropModal
+        isOpen={true}
+        imageUrl={images[croppingImageIndex]}
+        onCrop={(croppedDataUrl) => {
+          setImages((prev) => {
+            const next = [...prev]
+            next[croppingImageIndex] = croppedDataUrl
+            return next
+          })
+          setCroppingImageIndex(null)
+        }}
+        onClose={() => setCroppingImageIndex(null)}
+        title="Crop & Adjust Package Photo"
+      />
+    )}
+  </>
   )
 }
