@@ -57,6 +57,7 @@ export default function HomeImageModal({ target, onClose }: HomeImageModalProps)
   const [isUploading, setIsUploading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isCropOpen, setIsCropOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     if (!target) return
@@ -95,8 +96,6 @@ export default function HomeImageModal({ target, onClose }: HomeImageModalProps)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
-
-  const [isSaving, setIsSaving] = useState(false)
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
