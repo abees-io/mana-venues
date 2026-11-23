@@ -128,7 +128,8 @@ export default function VisionSection({ className = '' }: VisionSectionProps) {
               whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
-              className="block font-bold text-2xl sm:text-3xl md:text-4xl text-black leading-none tracking-tight"
+              className="block font-bold text-2xl sm:text-3xl md:text-4xl text-black leading-none tracking-wide"
+              style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}
             >
               Our
             </motion.span>
@@ -137,7 +138,8 @@ export default function VisionSection({ className = '' }: VisionSectionProps) {
               whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
-              className="block font-bold text-2xl sm:text-3xl md:text-4xl text-black leading-tight mt-1 tracking-tight"
+              className="block font-bold text-2xl sm:text-3xl md:text-4xl text-black leading-tight mt-1 tracking-wide"
+              style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}
             >
               Mission
             </motion.span>
@@ -150,7 +152,8 @@ export default function VisionSection({ className = '' }: VisionSectionProps) {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
-          className="text-sm sm:text-base md:text-lg text-black leading-relaxed font-normal max-w-3xl flex flex-wrap gap-x-1.5 gap-y-1 items-baseline"
+          className="text-base sm:text-lg md:text-xl text-black leading-relaxed font-normal max-w-3xl flex flex-wrap gap-x-1.5 gap-y-1 items-baseline"
+          style={{ fontFamily: "'Playfair Display', 'Cormorant Garamond', 'Lora', serif" }}
         >
           {missionWords.map((word, index) => (
             <motion.span
@@ -169,7 +172,8 @@ export default function VisionSection({ className = '' }: VisionSectionProps) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ delay: 1.4, duration: 0.6, ease: 'easeOut' }}
-          className="text-xs sm:text-sm font-semibold tracking-wider text-black/70 mt-3 sm:mt-4"
+          className="text-xs sm:text-sm font-medium tracking-widest uppercase text-black/75 mt-4 sm:mt-5"
+          style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}
         >
           — the author
         </motion.p>
