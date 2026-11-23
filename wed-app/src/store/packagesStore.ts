@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { supabase } from '../lib/supabase'
 
 export type ReelAspectRatio = '9:16' | '16:9'
 export type ReelSize = 'sm' | 'md' | 'lg' | 'full'
@@ -214,6 +215,7 @@ interface PackagesStoreState {
   future: WeddingPackage[][]
   savedDesktopAt: string | null
   savedMobileAt: string | null
+  fetchGlobalPackages: () => Promise<void>
   saveDesktopEdits: () => void
   saveMobileEdits: () => void
   undo: () => void
@@ -232,6 +234,19 @@ interface PackagesStoreState {
 const pushHistory = (past: WeddingPackage[][], current: WeddingPackage[]) =>
   [...past.slice(-24), current]
 
+// Background push to Supabase so added/edited packages go live globally across devices
+async function pushPackagesToCloud(packages: WeddingPackage[]) {
+  try {
+    const payload = JSON.stringify(packages)
+    await supabase
+      .from('auditoriums')
+      .update({ description: payload } as any)
+      .eq('slug', 'mana_system_packages_config')
+  } catch (err) {
+    console.warn('Failed to sync packages to Supabase:', err)
+  }
+}
+
 export const usePackagesStore = create<PackagesStoreState>()(
   persist(
     (set) => ({
@@ -240,14 +255,45 @@ export const usePackagesStore = create<PackagesStoreState>()(
       future: [],
       savedDesktopAt: null,
       savedMobileAt: null,
+      fetchGlobalPackages: async () => {
+        try {
+          const { data, error } = await supabase
+            .from('auditoriums')
+            .select('description')
+            .eq('slug', 'mana_system_packages_config')
+            .single()
+
+          if (!error && data?.description) {
+            const parsed = JSON.parse(data.description)
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              set((state) => {
+                // Merge custom cloud packages with local state, keeping all newly created vendor packages
+                const cloudIds = new Set(parsed.map((p: WeddingPackage) => p.id))
+                const localOnly = state.packages.filter((p) => !cloudIds.has(p.id))
+                return {
+                  packages: [...parsed, ...localOnly],
+                }
+              })
+            }
+          }
+        } catch {
+          // Keep local packages
+        }
+      },
       saveDesktopEdits: () =>
-        set(() => ({
-          savedDesktopAt: new Date().toISOString(),
-        })),
+        set((state) => {
+          pushPackagesToCloud(state.packages)
+          return {
+            savedDesktopAt: new Date().toISOString(),
+          }
+        }),
       saveMobileEdits: () =>
-        set(() => ({
-          savedMobileAt: new Date().toISOString(),
-        })),
+        set((state) => {
+          pushPackagesToCloud(state.packages)
+          return {
+            savedMobileAt: new Date().toISOString(),
+          }
+        }),
       undo: () =>
         set((state) => {
           if (state.past.length === 0) return state
@@ -289,26 +335,26 @@ export const usePackagesStore = create<PackagesStoreState>()(
             aspectRatio: '9:16',
             size: 'md',
           }
+          const nextPackages = [
+            {
+              ...pkg,
+              id: newId,
+              image: images[0],
+              images,
+              reels: pkg.reels?.length ? pkg.reels : [defaultReel],
+            },
+            ...state.packages,
+          ]
+          pushPackagesToCloud(nextPackages)
           return {
             past: pushHistory(state.past, state.packages),
             future: [],
-            packages: [
-              {
-                ...pkg,
-                id: newId,
-                image: images[0],
-                images,
-                reels: pkg.reels?.length ? pkg.reels : [defaultReel],
-              },
-              ...state.packages,
-            ],
+            packages: nextPackages,
           }
         }),
       updatePackage: (id, updates) =>
-        set((state) => ({
-          past: pushHistory(state.past, state.packages),
-          future: [],
-          packages: state.packages.map((p) => {
+        set((state) => {
+          const nextPackages = state.packages.map((p) => {
             if (p.id !== id) return p
             const nextImages = updates.images?.length
               ? updates.images
@@ -321,14 +367,24 @@ export const usePackagesStore = create<PackagesStoreState>()(
               images: nextImages,
               image: nextImages[0] || updates.image || p.image,
             }
-          }),
-        })),
+          })
+          pushPackagesToCloud(nextPackages)
+          return {
+            past: pushHistory(state.past, state.packages),
+            future: [],
+            packages: nextPackages,
+          }
+        }),
       deletePackage: (id) =>
-        set((state) => ({
-          past: pushHistory(state.past, state.packages),
-          future: [],
-          packages: state.packages.filter((p) => p.id !== id),
-        })),
+        set((state) => {
+          const nextPackages = state.packages.filter((p) => p.id !== id)
+          pushPackagesToCloud(nextPackages)
+          return {
+            past: pushHistory(state.past, state.packages),
+            future: [],
+            packages: nextPackages,
+          }
+        }),
       addPackageReel: (packageId, reel) =>
         set((state) => ({
           past: pushHistory(state.past, state.packages),

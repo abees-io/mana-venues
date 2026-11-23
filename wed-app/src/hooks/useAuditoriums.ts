@@ -59,10 +59,12 @@ export function useAuditoriums(citySlug?: string | null, filters?: Partial<Filte
         throw new Error(error.message)
       }
 
-      // Filter out dummy/archived venues
+      // Filter out dummy/archived venues and system configuration records
       const activeRows = ((data ?? []) as any[]).filter((v) => {
         const title = (v.name || v.title || '').trim().toLowerCase()
+        const slug = (v.slug || '').trim().toLowerCase()
         const district = (v.district || '').trim().toLowerCase()
+        if (slug.startsWith('mana_system_')) return false
         if (district === 'archived' || district === 'dummy') return false
         if (title.includes('deleted') || title.includes('dummy') || title.includes('sample')) return false
         if (v.id && typeof v.id === 'string' && v.id.startsWith('a1000000-0000-0000-0000')) return false

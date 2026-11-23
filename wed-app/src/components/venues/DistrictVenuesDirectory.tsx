@@ -81,7 +81,7 @@ export function useDistrictVenues(district?: string, searchFilter?: string) {
         throw new Error(error.message);
       }
 
-      return ((data || []) as unknown as AuditoriumRecord[]).map((v: any) => {
+      return (((data || []) as unknown as AuditoriumRecord[]).filter((v: any) => !v.slug?.startsWith('mana_system_'))).map((v: any) => {
         let photosArray: string[] = [];
         if (Array.isArray(v.photos) && v.photos.length > 0) {
           photosArray = v.photos;
