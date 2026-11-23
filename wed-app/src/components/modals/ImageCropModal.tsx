@@ -156,7 +156,7 @@ export default function ImageCropModal({
   const handleZoomIn = () => setScale((s) => Math.min(Number((s + 0.15).toFixed(2)), 4.0))
   const handleZoomOut = () => setScale((s) => Math.max(Number((s - 0.15).toFixed(2)), 0.2))
 
-  // Execute Canvas Crop with precise positioning
+  // Execute Canvas Crop with exact aspect-ratio preservation (zero stretching)
   const handleApplyCrop = useCallback(() => {
     if (!imageRef.current || !containerRef.current) return
 
@@ -164,10 +164,14 @@ export default function ImageCropModal({
     const container = containerRef.current
     const rect = container.getBoundingClientRect()
 
-    // Determine target canvas dimensions
+    const nw = img.naturalWidth || 1
+    const nh = img.naturalHeight || 1
+    const imgAspect = nw / nh
+
+    // Determine target canvas dimensions based on preset ratio
     const ratio = PRESET_RATIOS[selectedPreset]
     let targetWidth = 1400
-    let targetHeight = ratio === 'free' ? 900 : Math.round(targetWidth / (ratio as number))
+    let targetHeight = ratio === 'free' ? Math.round(targetWidth / imgAspect) : Math.round(targetWidth / (ratio as number))
 
     if (ratio === 9 / 16) {
       targetWidth = 720
@@ -187,23 +191,33 @@ export default function ImageCropModal({
     ctx.translate(canvas.width / 2, canvas.height / 2)
     ctx.rotate((rotation * Math.PI) / 180)
 
-    // Calculate scale factor from preview container viewport to canvas output
-    const scaleFactor = targetWidth / rect.width
+    // Calculate how the image naturally fits inside the preview container without stretching
+    const containerWidth = rect.width
+    const containerHeight = rect.height
+    const containerRatio = containerWidth / containerHeight
 
-    // img element's layout dimensions inside container
-    const displayedBaseWidth = img.clientWidth || img.naturalWidth || rect.width
-    const displayedBaseHeight = img.clientHeight || img.naturalHeight || rect.height
+    let basePreviewW: number
+    let basePreviewH: number
 
-    const finalWidth = displayedBaseWidth * scale * scaleFactor
-    const finalHeight = displayedBaseHeight * scale * scaleFactor
+    if (imgAspect > containerRatio) {
+      // Image is wider than container: fits width
+      basePreviewW = containerWidth
+      basePreviewH = containerWidth / imgAspect
+    } else {
+      // Image is taller than container: fits height
+      basePreviewH = containerHeight
+      basePreviewW = containerHeight * imgAspect
+    }
 
-    ctx.drawImage(
-      img,
-      -finalWidth / 2 + position.x * scaleFactor,
-      -finalHeight / 2 + position.y * scaleFactor,
-      finalWidth,
-      finalHeight
-    )
+    // Scale from preview container pixels to target canvas pixels
+    const canvasScale = targetWidth / containerWidth
+
+    const drawW = basePreviewW * scale * canvasScale
+    const drawH = basePreviewH * scale * canvasScale
+    const drawX = -drawW / 2 + position.x * canvasScale
+    const drawY = -drawH / 2 + position.y * canvasScale
+
+    ctx.drawImage(img, drawX, drawY, drawW, drawH)
 
     try {
       const dataUrl = canvas.toDataURL('image/webp', 0.92)
@@ -338,7 +352,7 @@ export default function ImageCropModal({
               </div>
             )}
 
-            {/* Draggable & Scalable Image */}
+            {/* Draggable & Scalable Image (100% distortion-free with intrinsic aspect ratio) */}
             <img
               ref={imageRef}
               src={imageUrl}
@@ -355,8 +369,10 @@ export default function ImageCropModal({
               }}
               className="max-w-none max-h-none transition-transform duration-75 origin-center pointer-events-none will-change-transform select-none"
               style={{
-                width: '100%',
-                height: '100%',
+                width: 'auto',
+                height: 'auto',
+                maxWidth: '100%',
+                maxHeight: '100%',
                 objectFit: 'contain',
                 transform: `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg) scale(${scale})`,
               }}
