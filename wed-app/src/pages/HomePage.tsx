@@ -5,10 +5,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   Camera,
   MapPin,
-  Package as PackageIcon,
-  Users,
-  ChevronRight,
-  Building2,
 } from 'lucide-react'
 import Layout from '../components/layout/Layout'
 import LocationModal from '../components/modals/LocationModal'
@@ -20,7 +16,6 @@ import { useAuditoriums } from '../hooks/useAuditoriums'
 import { useCityStore } from '../store/cityStore'
 import { useFilterStore } from '../store/filterStore'
 import { useHomeMediaStore } from '../store/homeMediaStore'
-import { usePackagesStore } from '../store/packagesStore'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -81,16 +76,6 @@ export default function HomePage() {
   const { user, profile } = useAuth()
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
   const { selectedCity } = useCityStore()
-
-  // User's preferred city: from authenticated profile or stored in localStorage
-  const preferredCity = useMemo(() => {
-    if (profile?.preferred_city) return profile.preferred_city
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('mana_preferred_city')
-      if (stored) return stored
-    }
-    return user ? 'kochi' : null
-  }, [profile?.preferred_city, user])
 
   const capacityMin = useFilterStore((state) => state.capacityMin)
   const capacityMax = useFilterStore((state) => state.capacityMax)
@@ -571,11 +556,6 @@ export default function HomePage() {
       {/* SECTION: OUR MISSION */}
       <VisionSection />
 
-      {/* SECTION 3: CITY PACKAGES & LISTINGS (Dedicated for user's selected city, separated from Find Venues) */}
-      {preferredCity && (
-        <CityPackagesSection preferredCitySlug={preferredCity} />
-      )}
-
       {/* Location Modal */}
       <LocationModal
         isOpen={isLocationModalOpen}
@@ -588,219 +568,5 @@ export default function HomePage() {
         onClose={() => setEditingImageTarget(null)}
       />
     </Layout>
-  )
-}
-
-const KERALA_CITY_NAMES: Record<string, string> = {
-  kochi: 'Kochi',
-  thiruvananthapuram: 'Thiruvananthapuram',
-  thrissur: 'Thrissur',
-  kozhikode: 'Kozhikode',
-  kannur: 'Kannur',
-  kollam: 'Kollam',
-  palakkad: 'Palakkad',
-  alappuzha: 'Alappuzha',
-  malappuram: 'Malappuram',
-  kottayam: 'Kottayam',
-  wayanad: 'Wayanad',
-  idukki: 'Idukki',
-  pathanamthitta: 'Pathanamthitta',
-  kasaragod: 'Kasaragod',
-}
-
-function CityPackagesSection({ preferredCitySlug }: { preferredCitySlug: string }) {
-  const navigate = useNavigate()
-  const packages = usePackagesStore((s) => s.packages)
-  const cityName =
-    KERALA_CITY_NAMES[preferredCitySlug.toLowerCase()] ||
-    preferredCitySlug.charAt(0).toUpperCase() + preferredCitySlug.slice(1)
-
-  // Fetch auditoriums specifically for this preferred city (isolated hook call)
-  const { data: cityAuditoriums, isLoading: venuesLoading } = useAuditoriums(
-    preferredCitySlug.toLowerCase(),
-    {}
-  )
-
-  // Find packages matching the preferred city
-  const cityPackages = useMemo(() => {
-    const slug = preferredCitySlug.toLowerCase()
-    const matches = packages.filter((pkg) => {
-      const loc = pkg.location.toLowerCase()
-      const title = pkg.title.toLowerCase()
-      return loc.includes(slug) || title.includes(slug)
-    })
-    // If no direct matches for this specific city, display all packages with "Available for {cityName}"
-    return matches.length > 0 ? matches : packages
-  }, [packages, preferredCitySlug])
-
-  const [activeTab, setActiveTab] = useState<'packages' | 'venues'>('packages')
-
-  return (
-    <div className="max-w-5xl mx-auto px-3 sm:px-6 pt-4 pb-10">
-      {/* Header with City Badge */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 border-b border-[#D8F0EC] pb-4">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7E1F3E]/10 text-[#7E1F3E] text-xs font-bold mb-1.5 border border-[#7E1F3E]/20">
-            <MapPin className="w-3.5 h-3.5 text-[#f98093]" />
-            <span>Selected City: {cityName}</span>
-          </div>
-          <h2
-            className="text-2xl sm:text-3xl font-bold uppercase tracking-wide text-[#7E1F3E] text-left drop-shadow-xs"
-            style={{ fontFamily: "'Cinzel', serif" }}
-          >
-            Packages & Venues in {cityName}
-          </h2>
-          <p className="text-xs sm:text-sm font-medium text-[#7E1F3E]/80 mt-0.5">
-            Wedding packages and verified auditoriums listed in {cityName}
-          </p>
-        </div>
-
-        {/* View Switcher Tabs */}
-        <div className="flex items-center gap-2 self-start sm:self-auto bg-[#F0F9F8] p-1 rounded-xl border border-[#D8F0EC]">
-          <button
-            type="button"
-            onClick={() => setActiveTab('packages')}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${activeTab === 'packages'
-              ? 'bg-[#f98093] text-white shadow-sm'
-              : 'text-[#5A172D]/70 hover:text-[#5A172D]'
-              }`}
-          >
-            <PackageIcon className="w-3.5 h-3.5" />
-            <span>Packages ({cityPackages.length})</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('venues')}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${activeTab === 'venues'
-              ? 'bg-[#f98093] text-white shadow-sm'
-              : 'text-[#5A172D]/70 hover:text-[#5A172D]'
-              }`}
-          >
-            <Building2 className="w-3.5 h-3.5" />
-            <span>Venues ({cityAuditoriums?.length || 0})</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Content based on Active Tab */}
-      {activeTab === 'packages' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {cityPackages.map((pkg) => (
-            <div
-              key={pkg.id}
-              onClick={() => navigate('/packages#packages-section')}
-              className="group relative bg-white rounded-2xl overflow-hidden border border-[#D8F0EC] shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col"
-            >
-              {/* Image banner */}
-              <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">
-                <img
-                  src={pkg.image}
-                  alt={pkg.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />
-
-                {/* Badges */}
-                <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                  <span className="px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold">
-                    {pkg.backdrop}
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#7E1F3E]/90 text-white text-[11px] font-semibold flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-[#f98093]" />
-                    {cityName}
-                  </span>
-                </div>
-
-                <div className="absolute bottom-3 left-3 right-3 text-white">
-                  <div className="text-xs font-semibold text-[#f98093]">
-                    {pkg.startingPrice?.toLowerCase().includes('demand') ? pkg.startingPrice : `Starts at ${pkg.startingPrice}`}
-                  </div>
-                  <h3
-                    className="text-base sm:text-lg font-bold leading-tight drop-shadow-md"
-                    style={{ fontFamily: "'Cinzel', serif" }}
-                  >
-                    {pkg.title}
-                  </h3>
-                </div>
-              </div>
-
-              {/* Body */}
-              <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-                <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                  {pkg.tagline}
-                </p>
-
-                <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
-                  <div className="flex items-center gap-1 text-[#7E1F3E] font-medium">
-                    <Users className="w-3.5 h-3.5" />
-                    <span>{pkg.guestCapacity}</span>
-                  </div>
-                  <span className="text-[#f98093] font-bold inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                    <span>View Package</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div>
-          {venuesLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="aspect-[4/3] rounded-2xl bg-[#D8F0EC] animate-pulse" />
-              ))}
-            </div>
-          ) : !cityAuditoriums || cityAuditoriums.length === 0 ? (
-            <div className="text-center py-8 bg-[#F0F9F8] rounded-2xl border border-[#D8F0EC]">
-              <p className="text-sm font-semibold text-[#7E1F3E]">
-                No auditoriums currently listed for {cityName}.
-              </p>
-              <button
-                type="button"
-                onClick={() => navigate(`/city/${preferredCitySlug}`)}
-                className="mt-3 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#f98093] hover:bg-[#e06b7e]"
-              >
-                Browse All Kerala Venues
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-              {cityAuditoriums.slice(0, 6).map((venue) => (
-                <div
-                  key={venue.id}
-                  onClick={() => navigate(`/auditorium/${venue.slug || venue.id}`)}
-                  className="group relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer shadow-md border border-[#D8F0EC]/60 hover:shadow-lg active:scale-[0.98] transition-all will-change-transform bg-white"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
-                >
-                  <img
-                    src={venue.photos?.[0] || '/venue-ai-dummy.jpg'}
-                    alt={venue.title || venue.name}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent pointer-events-none" />
-                  <div className="absolute bottom-2.5 left-2.5 right-2.5 pointer-events-none text-white">
-                    <p
-                      className="text-xs sm:text-sm font-bold drop-shadow-md leading-tight line-clamp-1 tracking-wide"
-                      style={{ fontFamily: "'Cinzel', serif" }}
-                    >
-                      {venue.title || venue.name}
-                    </p>
-                    <div className="flex items-center justify-between text-[10px] sm:text-xs text-white/80 mt-1">
-                      <span>{venue.seating_capacity || venue.capacity || 200} guests</span>
-                      <span className="text-[#f98093] font-semibold">
-                        ₹{(venue.base_price_per_day || venue.starting_price || 50000).toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
   )
 }

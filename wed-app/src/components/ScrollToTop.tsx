@@ -15,9 +15,19 @@ export function ScrollToTop() {
   }, [pathname])
 
   // Automatically open the login gate every 7s on the website if not signed in
+  // DO NOT prompt if user is already signed in, if the popup is already open,
+  // or if the user is on any auth/registration routes (/auth, /vendor/login, /vendor/register)
   useEffect(() => {
     if (user || loading || isOpen) return
-    if (pathname.startsWith('/auth') || pathname.startsWith('/vendor/auth')) return
+    const isAuthRoute =
+      pathname.startsWith('/auth') ||
+      pathname.startsWith('/vendor/auth') ||
+      pathname.startsWith('/vendor/login') ||
+      pathname.startsWith('/vendor/register')
+    if (isAuthRoute) return
+
+    // Also check if user dismissed the prompt in this session
+    if (sessionStorage.getItem('mana_login_gate_dismissed') === 'true') return
 
     const timer = setTimeout(() => {
       openLoginGate('to access exclusive wedding packages and venue details')

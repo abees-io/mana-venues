@@ -556,6 +556,15 @@ export default function PackagesPage() {
     if (searchFilter) {
       setSearchFilter('')
     }
+    setTimeout(() => {
+      const el = document.getElementById(`package-${pkgId}`)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        el.classList.remove('package-card-pop')
+        void el.offsetWidth
+        el.classList.add('package-card-pop')
+      }
+    }, 60)
   }
 
   // Filter packages based on backdrop and search
@@ -584,10 +593,9 @@ export default function PackagesPage() {
     prevPackagesLengthRef.current = packages.length
   }, [packages])
 
-  // The package currently active in the 3D stack — directly drives the detail card right underneath
-  const currentActivePackage = filteredPackages[activePackageIndex] || filteredPackages[0]
-  // Show only the related active package right under the animation (no scrolling down)
-  const displayedPackages = currentActivePackage ? [currentActivePackage] : []
+  // Display all matching packages in a clean, comprehensive list on both desktop & mobile
+  // so users can see full descriptions, inclusions, and details for every package at once
+  const displayedPackages = filteredPackages
 
   const renderExclusiveLinks = (pkg: WeddingPackage, extraClass = '') => (
     <div className={`flex flex-wrap items-center justify-between gap-2.5 bg-[#F0F9F8] p-2.5 sm:px-3 sm:py-2.5 rounded-xl border border-[#D8F0EC] ${extraClass}`}>

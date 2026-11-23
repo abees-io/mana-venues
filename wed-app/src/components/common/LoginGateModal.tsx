@@ -77,6 +77,10 @@ export function LoginGateModal() {
   }
 
   const handleClose = () => {
+    // When user dismisses the sign in modal, do not re-prompt them repeatedly
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('mana_login_gate_dismissed', 'true')
+    }
     resetForm()
     closeLoginGate()
   }
@@ -196,7 +200,7 @@ export function LoginGateModal() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 14 }}
           transition={{ duration: 0.22, ease: 'easeOut' }}
-          className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-[#D8F0EC] overflow-hidden z-10 my-auto text-[#5A172D]"
+          className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#5A172D]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Top Brand Banner */}
@@ -228,7 +232,7 @@ export function LoginGateModal() {
           {/* Body Section */}
           <div className="p-6">
             {/* Mode Tabs */}
-            <div className="flex bg-[#F0F9F8] p-1 rounded-xl mb-5 border border-[#D8F0EC]">
+            <div className="flex bg-gray-100 p-1 rounded-xl mb-5">
               <button
                 type="button"
                 onClick={() => handleModeSwitch('login')}
@@ -285,7 +289,7 @@ export function LoginGateModal() {
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="John Doe"
                         required
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#D8F0EC] focus:border-[#C83B68] focus:ring-2 focus:ring-[#C83B68]/20 text-xs sm:text-sm outline-none transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#C83B68] focus:ring-2 focus:ring-[#C83B68]/20 text-xs sm:text-sm outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -302,7 +306,7 @@ export function LoginGateModal() {
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+91 98765 43210"
                         required
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#D8F0EC] focus:border-[#C83B68] focus:ring-2 focus:ring-[#C83B68]/20 text-xs sm:text-sm outline-none transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#C83B68] focus:ring-2 focus:ring-[#C83B68]/20 text-xs sm:text-sm outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -321,7 +325,7 @@ export function LoginGateModal() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
                     required
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#D8F0EC] focus:border-[#C83B68] focus:ring-2 focus:ring-[#C83B68]/20 text-xs sm:text-sm outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#C83B68] focus:ring-2 focus:ring-[#C83B68]/20 text-xs sm:text-sm outline-none transition-all"
                   />
                 </div>
               </div>
@@ -349,7 +353,7 @@ export function LoginGateModal() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-[#D8F0EC] focus:border-[#C83B68] focus:ring-2 focus:ring-[#C83B68]/20 text-xs sm:text-sm outline-none transition-all"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-200 focus:border-[#C83B68] focus:ring-2 focus:ring-[#C83B68]/20 text-xs sm:text-sm outline-none transition-all"
                   />
                   <button
                     type="button"
@@ -379,7 +383,7 @@ export function LoginGateModal() {
                     value={selectedCity}
                     onChange={(e) => setSelectedCity(e.target.value)}
                     required
-                    className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-[#D8F0EC] focus:border-[#C83B68] focus:ring-2 focus:ring-[#C83B68]/20 text-xs sm:text-sm outline-none transition-all bg-white appearance-none cursor-pointer text-[#5A172D] font-medium"
+                    className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-gray-200 focus:border-[#C83B68] focus:ring-2 focus:ring-[#C83B68]/20 text-xs sm:text-sm outline-none transition-all bg-white appearance-none cursor-pointer text-[#5A172D] font-medium"
                   >
                     <option value="" disabled>-- Select Your City --</option>
                     {KERALA_CITIES.map((city) => (
@@ -406,7 +410,7 @@ export function LoginGateModal() {
                       className={`shrink-0 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${
                         selectedCity === city.value
                           ? 'bg-[#7E1F3E] text-white border-[#7E1F3E] shadow-xs'
-                          : 'bg-white text-[#7E1F3E] border-[#D8F0EC] hover:border-[#C83B68]'
+                          : 'bg-white text-[#7E1F3E] border-gray-200 hover:border-[#C83B68]'
                       }`}
                     >
                       {city.label}
@@ -438,7 +442,7 @@ export function LoginGateModal() {
             </form>
 
             {/* Vendor Register Button */}
-            <div className="mt-5 pt-4 border-t border-[#D8F0EC] text-center">
+            <div className="mt-5 pt-4 border-t border-gray-100 text-center">
               <p className="text-xs text-gray-500 mb-2">Are you a venue owner or wedding vendor?</p>
               <Link
                 to="/vendor/register"
