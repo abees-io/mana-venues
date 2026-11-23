@@ -36,16 +36,16 @@ interface HomeMediaState {
   future: HomeMediaSnapshot[]
   fetchGlobalMedia: () => Promise<void>
   syncToSupabase: () => Promise<void>
-  setHeroImage: (url: string) => void
-  setVisionImage: (url: string) => void
-  setVenueFeatureImage: (url: string) => void
-  setCategoryImage: (categoryId: string, url: string) => void
-  setSiteImage: (key: string, url: string) => void
-  resetHeroImage: () => void
-  resetVisionImage: () => void
-  resetVenueFeatureImage: () => void
-  resetCategoryImage: (categoryId: string) => void
-  resetSiteImage: (key: string) => void
+  setHeroImage: (url: string) => Promise<void>
+  setVisionImage: (url: string) => Promise<void>
+  setVenueFeatureImage: (url: string) => Promise<void>
+  setCategoryImage: (categoryId: string, url: string) => Promise<void>
+  setSiteImage: (key: string, url: string) => Promise<void>
+  resetHeroImage: () => Promise<void>
+  resetVisionImage: () => Promise<void>
+  resetVenueFeatureImage: () => Promise<void>
+  resetCategoryImage: (categoryId: string) => Promise<void>
+  resetSiteImage: (key: string) => Promise<void>
   undo: () => void
   redo: () => void
 }
@@ -62,7 +62,7 @@ function takeSnapshot(state: HomeMediaState): HomeMediaSnapshot {
   }
 }
 
-// Background push to Supabase so changes go live globally to all users & devices
+// Push to Supabase with verification so changes immediately publish live globally
 async function pushMediaToCloud(snapshot: HomeMediaSnapshot) {
   try {
     const payload = JSON.stringify({
@@ -72,12 +72,16 @@ async function pushMediaToCloud(snapshot: HomeMediaSnapshot) {
       categoryImages: snapshot.categoryImages,
       siteImages: snapshot.siteImages,
     })
-    await supabase
+    const { error } = await supabase
       .from('auditoriums')
       .update({ description: payload } as any)
       .eq('slug', 'mana_system_media_config')
+
+    if (error) {
+      console.error('Failed to sync media to Supabase:', error.message)
+    }
   } catch (err) {
-    console.warn('Failed to sync media to Supabase:', err)
+    console.error('Failed to sync media to Supabase:', err)
   }
 }
 
@@ -115,70 +119,81 @@ export const useHomeMediaStore = create<HomeMediaState>()(
               },
             }))
           }
-        } catch {
-          // Fall back gracefully to local store
+        } catch (err) {
+          console.warn('Failed to fetch global media config:', err)
         }
       },
       syncToSupabase: async () => {
         const state = get()
         await pushMediaToCloud(takeSnapshot(state))
       },
-      setHeroImage: (url) => {
+      setHeroImage: async (url) => {
+        let snapshot: HomeMediaSnapshot | null = null
         set((state) => {
           const next = {
             past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
             future: [],
             heroImage: url || DEFAULT_HERO_IMAGE,
           }
-          pushMediaToCloud(takeSnapshot({ ...state, ...next }))
+          snapshot = takeSnapshot({ ...state, ...next })
           return next
         })
+        if (snapshot) await pushMediaToCloud(snapshot)
       },
-      setVisionImage: (url) => {
+      setVisionImage: async (url) => {
+        let snapshot: HomeMediaSnapshot | null = null
         set((state) => {
           const next = {
             past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
             future: [],
             visionImage: url || DEFAULT_VISION_IMAGE,
           }
-          pushMediaToCloud(takeSnapshot({ ...state, ...next }))
+          snapshot = takeSnapshot({ ...state, ...next })
           return next
         })
+        if (snapshot) await pushMediaToCloud(snapshot)
       },
-      resetVisionImage: () => {
+      resetVisionImage: async () => {
+        let snapshot: HomeMediaSnapshot | null = null
         set((state) => {
           const next = {
             past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
             future: [],
             visionImage: DEFAULT_VISION_IMAGE,
           }
-          pushMediaToCloud(takeSnapshot({ ...state, ...next }))
+          snapshot = takeSnapshot({ ...state, ...next })
           return next
         })
+        if (snapshot) await pushMediaToCloud(snapshot)
       },
-      setVenueFeatureImage: (url) => {
+      setVenueFeatureImage: async (url) => {
+        let snapshot: HomeMediaSnapshot | null = null
         set((state) => {
           const next = {
             past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
             future: [],
             venueFeatureImage: url || DEFAULT_VENUE_FEATURE_IMAGE,
           }
-          pushMediaToCloud(takeSnapshot({ ...state, ...next }))
+          snapshot = takeSnapshot({ ...state, ...next })
           return next
         })
+        if (snapshot) await pushMediaToCloud(snapshot)
       },
-      resetVenueFeatureImage: () => {
+      resetVenueFeatureImage: async () => {
+        let snapshot: HomeMediaSnapshot | null = null
         set((state) => {
           const next = {
             past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
             future: [],
             venueFeatureImage: DEFAULT_VENUE_FEATURE_IMAGE,
           }
-          pushMediaToCloud(takeSnapshot({ ...state, ...next }))
+          snapshot = takeSnapshot({ ...state, ...next })
           return next
         })
+        if (snapshot) await pushMediaToCloud(snapshot)
       },
-      setSiteImage: (key, url) => {
+      setSiteImage: async (key, url) => {
+        let snapshot: HomeMediaSnapshot | null = null
         set((state) => {
           const next = {
             past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
@@ -188,11 +203,13 @@ export const useHomeMediaStore = create<HomeMediaState>()(
               [key]: url,
             },
           }
-          pushMediaToCloud(takeSnapshot({ ...state, ...next }))
+          snapshot = takeSnapshot({ ...state, ...next })
           return next
         })
+        if (snapshot) await pushMediaToCloud(snapshot)
       },
-      resetSiteImage: (key) => {
+      resetSiteImage: async (key) => {
+        let snapshot: HomeMediaSnapshot | null = null
         set((state) => {
           const updated = { ...state.siteImages }
           delete updated[key]
@@ -201,11 +218,13 @@ export const useHomeMediaStore = create<HomeMediaState>()(
             future: [],
             siteImages: updated,
           }
-          pushMediaToCloud(takeSnapshot({ ...state, ...next }))
+          snapshot = takeSnapshot({ ...state, ...next })
           return next
         })
+        if (snapshot) await pushMediaToCloud(snapshot)
       },
-      setCategoryImage: (categoryId, url) => {
+      setCategoryImage: async (categoryId, url) => {
+        let snapshot: HomeMediaSnapshot | null = null
         set((state) => {
           const next = {
             past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
@@ -215,22 +234,26 @@ export const useHomeMediaStore = create<HomeMediaState>()(
               [categoryId]: url || DEFAULT_CATEGORY_IMAGES[categoryId] || DEFAULT_HERO_IMAGE,
             },
           }
-          pushMediaToCloud(takeSnapshot({ ...state, ...next }))
+          snapshot = takeSnapshot({ ...state, ...next })
           return next
         })
+        if (snapshot) await pushMediaToCloud(snapshot)
       },
-      resetHeroImage: () => {
+      resetHeroImage: async () => {
+        let snapshot: HomeMediaSnapshot | null = null
         set((state) => {
           const next = {
             past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
             future: [],
             heroImage: DEFAULT_HERO_IMAGE,
           }
-          pushMediaToCloud(takeSnapshot({ ...state, ...next }))
+          snapshot = takeSnapshot({ ...state, ...next })
           return next
         })
+        if (snapshot) await pushMediaToCloud(snapshot)
       },
-      resetCategoryImage: (categoryId) => {
+      resetCategoryImage: async (categoryId) => {
+        let snapshot: HomeMediaSnapshot | null = null
         set((state) => {
           const next = {
             past: [...state.past.slice(-(MAX_HISTORY - 1)), takeSnapshot(state)],
@@ -240,9 +263,10 @@ export const useHomeMediaStore = create<HomeMediaState>()(
               [categoryId]: DEFAULT_CATEGORY_IMAGES[categoryId] || DEFAULT_HERO_IMAGE,
             },
           }
-          pushMediaToCloud(takeSnapshot({ ...state, ...next }))
+          snapshot = takeSnapshot({ ...state, ...next })
           return next
         })
+        if (snapshot) await pushMediaToCloud(snapshot)
       },
       undo: () =>
         set((state) => {

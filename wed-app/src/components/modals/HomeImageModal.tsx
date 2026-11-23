@@ -96,40 +96,55 @@ export default function HomeImageModal({ target, onClose }: HomeImageModalProps)
     }
   }
 
-  const handleSave = (e: React.FormEvent) => {
+  const [isSaving, setIsSaving] = useState(false)
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     const trimmed = urlInput.trim()
     if (!trimmed) {
       setErrorMsg('Please upload an image or enter an image URL.')
       return
     }
-    if (target.type === 'hero') {
-      setHeroImage(trimmed)
-    } else if (target.type === 'vision') {
-      setVisionImage(trimmed)
-    } else if (target.type === 'venueFeature') {
-      setVenueFeatureImage(trimmed)
-    } else if (target.type === 'site') {
-      setSiteImage(target.id, trimmed)
-    } else {
-      setCategoryImage(target.id, trimmed)
+    setIsSaving(true)
+    setErrorMsg(null)
+    try {
+      if (target.type === 'hero') {
+        await setHeroImage(trimmed)
+      } else if (target.type === 'vision') {
+        await setVisionImage(trimmed)
+      } else if (target.type === 'venueFeature') {
+        await setVenueFeatureImage(trimmed)
+      } else if (target.type === 'site') {
+        await setSiteImage(target.id, trimmed)
+      } else {
+        await setCategoryImage(target.id, trimmed)
+      }
+      onClose()
+    } catch {
+      setErrorMsg('Failed to save to cloud. Please try again.')
+    } finally {
+      setIsSaving(false)
     }
-    onClose()
   }
 
-  const handleReset = () => {
-    if (target.type === 'hero') {
-      resetHeroImage()
-    } else if (target.type === 'vision') {
-      resetVisionImage()
-    } else if (target.type === 'venueFeature') {
-      resetVenueFeatureImage()
-    } else if (target.type === 'site') {
-      resetSiteImage(target.id)
-    } else {
-      resetCategoryImage(target.id)
+  const handleReset = async () => {
+    setIsSaving(true)
+    try {
+      if (target.type === 'hero') {
+        await resetHeroImage()
+      } else if (target.type === 'vision') {
+        await resetVisionImage()
+      } else if (target.type === 'venueFeature') {
+        await resetVenueFeatureImage()
+      } else if (target.type === 'site') {
+        await resetSiteImage(target.id)
+      } else {
+        await resetCategoryImage(target.id)
+      }
+      onClose()
+    } finally {
+      setIsSaving(false)
     }
-    onClose()
   }
 
   return (
@@ -296,10 +311,11 @@ export default function HomeImageModal({ target, onClose }: HomeImageModalProps)
                 </button>
                 <button
                   type="submit"
-                  disabled={isUploading}
-                  className="px-6 py-2.5 rounded-full bg-[#f98093] hover:bg-[#e86e81] text-white font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                  disabled={isUploading || isSaving}
+                  className="px-6 py-2.5 rounded-full bg-[#f98093] hover:bg-[#e86e81] text-white font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
                 >
-                  Save Photo
+                  {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{isSaving ? 'Publishing...' : 'Save & Publish Live'}</span>
                 </button>
               </div>
             </div>
