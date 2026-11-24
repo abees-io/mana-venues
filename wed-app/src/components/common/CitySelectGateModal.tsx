@@ -22,6 +22,38 @@ export function CitySelectGateModal() {
   const [isOpen, setIsOpen] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Track whether the intro splash has finished playing
+  const [splashFinished, setSplashFinished] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return Boolean((window as any).__mana_splash_completed)
+    }
+    return false
+  })
+
+  // Listen for the intro splash to close
+  useEffect(() => {
+    if (splashFinished) return
+
+    const handleSplashEnd = () => {
+      if (typeof window !== 'undefined') {
+        (window as any).__mana_splash_completed = true
+      }
+      setSplashFinished(true)
+    }
+
+    window.addEventListener('mana-splash-end', handleSplashEnd)
+
+    // Fallback: If splash event was missed or skipped, intro takes ~3550ms
+    const fallbackTimer = setTimeout(() => {
+      handleSplashEnd()
+    }, 3800)
+
+    return () => {
+      window.removeEventListener('mana-splash-end', handleSplashEnd)
+      clearTimeout(fallbackTimer)
+    }
+  }, [splashFinished])
+
   // Listen for manual open trigger (e.g. from "Change City" button in header)
   useEffect(() => {
     const handleManualOpen = () => {
@@ -40,12 +72,22 @@ export function CitySelectGateModal() {
     )
   }, [dbCities])
 
-  // Popup logic:
-  // If user has not confirmed city, show immediately.
-  // If dismissed without choosing, pop up again in 5 seconds.
-  // Once confirmed, stop recurring timer completely.
+  // Initial trigger: Show popup ONLY AFTER the intro closes (with a gentle 350ms delay)
   useEffect(() => {
-    if (hasConfirmed) {
+    if (!hasConfirmed && splashFinished) {
+      const initialTimer = setTimeout(() => {
+        setIsOpen(true)
+      }, 350)
+      return () => clearTimeout(initialTimer)
+    }
+  }, [hasConfirmed, splashFinished])
+
+  // Recurring 5-second popup logic:
+  // ONLY runs AFTER intro has finished playing.
+  // If dismissed without choosing, pops up again in 5 seconds.
+  // Once confirmed, stops recurring timer completely.
+  useEffect(() => {
+    if (hasConfirmed || !splashFinished) {
       if (timerRef.current) {
         clearTimeout(timerRef.current)
         timerRef.current = null
@@ -62,17 +104,7 @@ export function CitySelectGateModal() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [hasConfirmed, isOpen])
-
-  // Initial trigger immediately on mount if not confirmed
-  useEffect(() => {
-    if (!hasConfirmed) {
-      const initialTimer = setTimeout(() => {
-        setIsOpen(true)
-      }, 400)
-      return () => clearTimeout(initialTimer)
-    }
-  }, [hasConfirmed])
+  }, [hasConfirmed, splashFinished, isOpen])
 
   // Lock body scroll when open
   useEffect(() => {

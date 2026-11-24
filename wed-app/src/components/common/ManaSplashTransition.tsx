@@ -23,6 +23,7 @@ export const ManaSplashTransition: React.FC = () => {
     const completeTimer = setTimeout(() => {
       setIsPlaying(false);
       if (typeof window !== 'undefined') {
+        (window as any).__mana_splash_completed = true;
         window.dispatchEvent(new CustomEvent('mana-splash-end'));
       }
     }, 3550);
@@ -37,6 +38,7 @@ export const ManaSplashTransition: React.FC = () => {
   const handleSkip = () => {
     setIsPlaying(false);
     if (typeof window !== 'undefined') {
+      (window as any).__mana_splash_completed = true;
       window.dispatchEvent(new CustomEvent('mana-splash-reveal'));
       window.dispatchEvent(new CustomEvent('mana-splash-end'));
     }
