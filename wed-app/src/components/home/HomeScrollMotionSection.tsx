@@ -36,15 +36,16 @@ export default function HomeScrollMotionSection() {
       // 2. Bold kinetic line motion animation on scroll (Mobile & Desktop)
       const lines = [
         { el: mobileLineRef.current, len: 2100 },
-        { el: desktopLineRef.current, len: 2600 },
+        { el: desktopLineRef.current, len: 2800 },
       ]
 
       lines.forEach(({ el, len }) => {
         if (!el) return
+        const actualLen = typeof el.getTotalLength === 'function' ? el.getTotalLength() : len
         gsap.set(el, {
           opacity: 0,
-          strokeDashoffset: len,
-          strokeDasharray: len,
+          strokeDashoffset: actualLen,
+          strokeDasharray: actualLen,
         })
       })
 
@@ -64,8 +65,9 @@ export default function HomeScrollMotionSection() {
           onLeaveBack: () => {
             lines.forEach(({ el, len }) => {
               if (el) {
+                const actualLen = typeof el.getTotalLength === 'function' ? el.getTotalLength() : len
                 el.style.opacity = '0'
-                gsap.set(el, { strokeDashoffset: len })
+                gsap.set(el, { strokeDashoffset: actualLen })
               }
             })
           },
@@ -91,33 +93,31 @@ export default function HomeScrollMotionSection() {
   return (
     <div
       ref={containerRef}
-      className="editorial-quote-section editorial-quote-card max-w-6xl lg:max-w-7xl 2xl:max-w-[1536px] mx-auto px-2 sm:px-6 lg:px-8 xl:px-10 pt-2 sm:pt-6 pb-2 sm:pb-4 relative overflow-visible"
+      className="editorial-quote-section editorial-quote-card w-full max-w-[1400px] xl:max-w-[1520px] 2xl:max-w-[1680px] mx-auto px-2 sm:px-4 md:px-6 lg:px-8 pt-2 sm:pt-4 pb-0 relative overflow-visible"
     >
-      {/* TOP TEXT: "we connect" & "we elevate" — RIGHT SIDE */}
-      <div className="flex flex-col items-end text-right w-full mb-0">
-        <div className="relative pr-2 sm:pr-3 border-r-3 sm:border-r-4 border-[#C83B68]">
-          <div ref={topTextRef} className="space-y-0.5 sm:space-y-1">
-            <h2
-              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[#1F2937] leading-[1.02]"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
-              we connect
-            </h2>
-            <h2
-              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[#f98093] leading-[1.02]"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
-              we elevate
-            </h2>
-          </div>
+      {/* TOP TEXT: "we connect" & "we elevate" — Aligned right touching the border, no symbols */}
+      <div className="flex flex-col items-end text-right w-full pr-1 sm:pr-2 md:pr-3 lg:pr-4 mb-0">
+        <div ref={topTextRef} className="space-y-0.5 sm:space-y-1">
+          <h2
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight text-[#1F2937] leading-[1.02]"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            we connect
+          </h2>
+          <h2
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight text-[#f98093] leading-[1.02]"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            we elevate
+          </h2>
         </div>
       </div>
 
       {/* MOBILE VECTOR ANIMATION (Preserved exactly as-is for mobile screens) */}
-      <div className="md:hidden -mt-3 sm:-mt-6 my-0 relative w-full overflow-visible select-none py-0">
+      <div className="md:hidden -mt-4 sm:-mt-6 my-0 relative w-full overflow-visible select-none py-0">
         <svg
           viewBox="-150 -60 1300 440"
-          className="w-full h-auto max-h-[220px] sm:max-h-[280px] overflow-visible"
+          className="w-full h-auto max-h-[180px] sm:max-h-[220px] overflow-visible"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -147,11 +147,11 @@ export default function HomeScrollMotionSection() {
         </svg>
       </div>
 
-      {/* DESKTOP FULL-BLEED VECTOR ANIMATION (Enlarged so ends reach the desktop window borders) */}
-      <div className="hidden md:block w-screen relative left-1/2 -translate-x-1/2 overflow-hidden select-none -mt-8 lg:-mt-14 py-2 pointer-events-none">
+      {/* DESKTOP FULL-BLEED VECTOR ANIMATION (Tight under the text, reduced vertical room) */}
+      <div className="hidden md:block w-full overflow-hidden select-none -mt-10 lg:-mt-16 py-0 pointer-events-none">
         <svg
-          viewBox="0 0 1920 420"
-          className="w-full h-auto min-h-[160px] max-h-[300px] sm:max-h-[360px] lg:max-h-[420px]"
+          viewBox="0 0 1920 320"
+          className="w-full h-auto min-h-[140px] max-h-[220px] lg:max-h-[260px]"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -168,13 +168,13 @@ export default function HomeScrollMotionSection() {
           </defs>
           <path
             ref={desktopLineRef}
-            d="M -50 80 C 350 480 650 -20 1020 280 C 1320 500 1650 180 1970 240"
+            d="M -40 70 C 360 360 680 -20 1020 200 C 1340 380 1660 110 1960 170"
             stroke="url(#tealPinkGradDesktop)"
-            strokeWidth="90"
+            strokeWidth="85"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeDasharray="2600"
-            strokeDashoffset="2600"
+            strokeDasharray="2800"
+            strokeDashoffset="2800"
             filter="url(#curveShadowDesktop)"
             style={{ opacity: 0, transition: 'opacity 0.25s ease' }}
           />

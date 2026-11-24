@@ -95,7 +95,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 bg-[#F0F9F8]/95 backdrop-blur-sm w-full">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
+      <div className="w-full max-w-7xl lg:max-w-[1400px] xl:max-w-[1520px] 2xl:max-w-[1680px] mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
         {/* Left: Logo + City Selector */}
         <div className="flex items-center gap-2 sm:gap-4 shrink min-w-0">
           <Link to="/" className="flex items-center gap-2 shrink-0 group">

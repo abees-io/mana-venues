@@ -309,8 +309,8 @@ export default function HomePage() {
       {/* SECTION 1: HERO & CATEGORIES (Matches User Reference Image) */}
       <section ref={heroRef} className="w-full pt-0 pb-4">
         {/* HERO CARD CONTAINER — Enlarged and centered on desktop viewports */}
-        <div className="max-w-5xl lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1536px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-10 flex justify-center">
-          <div className="w-full hero-card-animate relative rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/10] md:aspect-[2.1/1] lg:aspect-[2.35/1] min-h-[440px] sm:min-h-[460px] lg:min-h-[520px] xl:min-h-[580px] shadow-2xl border border-[#D8F0EC] group will-change-[transform,opacity] transform-gpu mx-auto">
+        <div className="w-full max-w-[1400px] xl:max-w-[1520px] 2xl:max-w-[1680px] mx-auto px-3 sm:px-6 lg:px-8 flex justify-center">
+          <div className="w-full hero-card-animate relative rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/10] md:aspect-[2.2/1] lg:aspect-[2.45/1] min-h-[440px] sm:min-h-[480px] lg:min-h-[520px] xl:min-h-[580px] shadow-2xl border border-[#D8F0EC] group will-change-[transform,opacity] transform-gpu mx-auto">
             {/* Background Mandap Image */}
             <img
               src={heroImage}
@@ -341,14 +341,14 @@ export default function HomePage() {
             <div className="relative h-full flex flex-col items-center justify-center text-center p-6 sm:p-10 z-10 space-y-3 sm:space-y-4">
               {/* Grand Venues Heading — Bubble Gum & Candy Floss Crisp Gradient */}
               <h1
-                className="hero-text-reveal text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-wide leading-tight bg-gradient-to-r from-white via-[#F3A2BE] to-[#F0F9F8] bg-clip-text text-transparent drop-shadow-md"
+                className="hero-text-reveal text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold uppercase tracking-wide leading-tight bg-gradient-to-r from-white via-[#F3A2BE] to-[#F0F9F8] bg-clip-text text-transparent drop-shadow-md max-w-4xl"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 CURATED KERALA WEDDINGS, MADE EFFORTLESS
               </h1>
 
               {/* Subtitle / Description */}
-              <p className="hero-text-reveal text-sm sm:text-base md:text-lg font-medium text-white/95 max-w-xl mx-auto drop-shadow-md leading-relaxed">
+              <p className="hero-text-reveal text-sm sm:text-base md:text-lg font-medium text-white/95 max-w-2xl mx-auto drop-shadow-md leading-relaxed">
                 From backwater resorts to top destination wedding planners all in one place
               </p>
 
@@ -380,7 +380,7 @@ export default function HomePage() {
           onClick={() => {
             if (!isAdmin) navigate('/packages')
           }}
-          className={`categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-8 sm:pt-12 ${!isAdmin ? 'cursor-pointer' : ''
+          className={`categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-2 sm:pt-4 ${!isAdmin ? 'cursor-pointer' : ''
             }`}
           style={{ perspective: '800px' }}
         >
