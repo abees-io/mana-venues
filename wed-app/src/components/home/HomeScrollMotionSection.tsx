@@ -113,8 +113,8 @@ export default function HomeScrollMotionSection() {
         </div>
       </div>
 
-      {/* MOBILE VECTOR ANIMATION (Preserved exactly as-is for mobile screens) */}
-      <div className="md:hidden -mt-4 sm:-mt-6 my-0 relative w-full overflow-visible select-none py-0">
+      {/* MOBILE VECTOR ANIMATION (Preserved with breathing room on mobile to prevent overlapping categories) */}
+      <div className="md:hidden -mt-4 sm:-mt-6 mb-6 sm:mb-8 relative w-full overflow-visible select-none py-0">
         <svg
           viewBox="-150 -60 1300 440"
           className="w-full h-auto max-h-[180px] sm:max-h-[220px] overflow-visible"

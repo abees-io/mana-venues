@@ -380,7 +380,7 @@ export default function HomePage() {
           onClick={() => {
             if (!isAdmin) navigate('/packages')
           }}
-          className={`categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-2 sm:pt-4 ${!isAdmin ? 'cursor-pointer' : ''
+          className={`categories-section max-w-5xl mx-auto px-3 sm:px-6 pt-5 sm:pt-6 md:pt-2 lg:pt-4 ${!isAdmin ? 'cursor-pointer' : ''
             }`}
           style={{ perspective: '800px' }}
         >
