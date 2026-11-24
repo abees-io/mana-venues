@@ -1,19 +1,38 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, Search, Check, Building2, Sparkles, AlertCircle } from 'lucide-react'
+import { MapPin, Search, Check, Building2, Sparkles, AlertCircle, X } from 'lucide-react'
 import { useCityStore } from '../../store/cityStore'
 import { useCities, KERALA_DISTRICTS_CITIES } from '../../hooks/useCities'
 import type { City } from '../../lib/types'
 
 const POPULAR_CITIES = ['kochi', 'thiruvananthapuram', 'thrissur', 'kozhikode', 'alappuzha', 'wayanad']
+const CONFIRM_KEY = 'mana_city_confirmed_v1'
 
 export function CitySelectGateModal() {
   const { selectedCity, setCity } = useCityStore()
   const { data: dbCities } = useCities()
 
+  const [hasConfirmed, setHasConfirmed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(CONFIRM_KEY) === 'true'
+    }
+    return false
+  })
+
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Listen for manual open trigger (e.g. from "Change City" buttons)
+  useEffect(() => {
+    const handleManualOpen = () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+      setIsOpen(true)
+    }
+    window.addEventListener('mana_open_city_gate', handleManualOpen)
+    return () => window.removeEventListener('mana_open_city_gate', handleManualOpen)
+  }, [])
 
   // Combine database cities with default 14 Kerala districts
   const allCities: City[] = useMemo(() => {
@@ -35,45 +54,52 @@ export function CitySelectGateModal() {
     )
   }, [allCities, searchTerm])
 
-  // 5-second recurring popup logic:
-  // If user has not chosen a city (selectedCity is null), popup appears.
-  // If closed or dismissed, pops up again in 5 seconds.
-  // As soon as selectedCity is chosen, the timer is cancelled and modal closes permanently.
+  // Popup logic:
+  // If user has not confirmed city, show immediately.
+  // If dismissed without choosing, pop up again in 5 seconds.
+  // Once confirmed, stop recurring timer completely.
   useEffect(() => {
-    if (selectedCity) {
+    if (hasConfirmed) {
       if (timerRef.current) {
         clearTimeout(timerRef.current)
         timerRef.current = null
       }
-      setIsOpen(false)
       return
     }
 
-    // If modal is already open, do not schedule another timer
+    // If modal is open, don't schedule
     if (isOpen) return
 
-    // Popup every 5 seconds until user selects a city
+    // Show initial popup or repeat every 5 seconds
     timerRef.current = setTimeout(() => {
       setIsOpen(true)
     }, 5000)
 
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-      }
+      if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [selectedCity, isOpen])
+  }, [hasConfirmed, isOpen])
 
-  // Initial prompt on page load if no city selected
+  // Initial trigger immediately on mount if not confirmed
   useEffect(() => {
-    if (!selectedCity) {
-      // Short delay for smooth entrance
+    if (!hasConfirmed) {
       const initialTimer = setTimeout(() => {
         setIsOpen(true)
-      }, 600)
+      }, 500)
       return () => clearTimeout(initialTimer)
     }
-  }, [selectedCity])
+  }, [hasConfirmed])
+
+  // Lock body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      const original = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = original
+      }
+    }
+  }, [isOpen])
 
   const handleSelectCity = (city: City) => {
     if (timerRef.current) {
@@ -87,24 +113,26 @@ export function CitySelectGateModal() {
     })
     try {
       localStorage.setItem('mana_preferred_city', city.slug)
+      localStorage.setItem(CONFIRM_KEY, 'true')
     } catch {
       // ignore
     }
+    setHasConfirmed(true)
     setIsOpen(false)
   }
 
   const handleDismissAttempt = () => {
-    // If they try to close without selecting, close temporarily and re-trigger in 5 seconds
+    // If dismissed without confirming, will pop back up in 5 seconds
     setIsOpen(false)
   }
 
-  if (!isOpen && selectedCity) return null
+  if (!isOpen) return null
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md"
+          className="fixed inset-0 z-[999999] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md"
           role="dialog"
           aria-modal="true"
           aria-labelledby="city-select-title"
@@ -116,13 +144,23 @@ export function CitySelectGateModal() {
             exit={{ opacity: 0, scale: 0.94, y: 16 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-lg bg-[#151119] border border-[#f98093]/30 rounded-3xl shadow-2xl p-5 sm:p-6 text-white overflow-hidden max-h-[92vh] flex flex-col"
+            className="relative w-full max-w-lg bg-[#151119] border border-[#f98093]/40 rounded-3xl shadow-2xl p-5 sm:p-6 text-white overflow-hidden max-h-[92vh] flex flex-col"
           >
             {/* Top decorative gradient glow */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#f98093] to-transparent" />
 
+            {/* Close button (will re-trigger in 5s if not confirmed) */}
+            <button
+              type="button"
+              onClick={handleDismissAttempt}
+              className="absolute top-4 right-4 p-1.5 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
             {/* Header */}
-            <div className="flex items-start gap-3.5 mb-4">
+            <div className="flex items-start gap-3.5 mb-3.5 pr-8">
               <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#7E1F3E] to-[#C83B68] flex items-center justify-center shrink-0 shadow-lg border border-white/10">
                 <MapPin className="w-5 h-5 text-white" />
               </div>
@@ -139,7 +177,7 @@ export function CitySelectGateModal() {
                 >
                   Select Your City
                 </h2>
-                <p className="text-xs sm:text-sm text-gray-300 mt-1 leading-snug">
+                <p className="text-xs sm:text-sm text-gray-300 mt-0.5 leading-snug">
                   Choose your city to explore exclusive wedding packages and verified venues tailored to your location.
                 </p>
               </div>
@@ -148,7 +186,7 @@ export function CitySelectGateModal() {
             {/* Warning requirement callout */}
             <div className="flex items-center gap-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200 text-xs mb-3">
               <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>You must select a city to browse local packages and venues.</span>
+              <span>You must select a city to continue exploring local packages and venues.</span>
             </div>
 
             {/* Quick Popular City Chips */}
@@ -167,7 +205,7 @@ export function CitySelectGateModal() {
                       key={city.slug}
                       type="button"
                       onClick={() => handleSelectCity(city)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 border active:scale-95 ${
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 border active:scale-95 cursor-pointer ${
                         isSelected
                           ? 'bg-[#C83B68] text-white border-[#C83B68] shadow-sm'
                           : 'bg-white/5 hover:bg-white/15 text-gray-200 border-white/10 hover:border-white/20'
@@ -194,7 +232,7 @@ export function CitySelectGateModal() {
             </div>
 
             {/* Scrollable City List */}
-            <div className="flex-1 overflow-y-auto pr-1 space-y-1.5 max-h-[300px] scrollbar-thin scrollbar-thumb-white/20">
+            <div className="flex-1 overflow-y-auto pr-1 space-y-1.5 max-h-[260px] scrollbar-thin scrollbar-thumb-white/20">
               {filteredCities.length === 0 ? (
                 <div className="text-center py-8 text-gray-400 text-xs">
                   No cities found matching &quot;{searchTerm}&quot;
@@ -210,7 +248,7 @@ export function CitySelectGateModal() {
                       key={city.id || city.slug}
                       type="button"
                       onClick={() => handleSelectCity(city)}
-                      className={`w-full flex items-center justify-between p-3 rounded-xl border text-left transition-all active:scale-[0.99] group ${
+                      className={`w-full flex items-center justify-between p-3 rounded-xl border text-left transition-all active:scale-[0.99] group cursor-pointer ${
                         isSelected
                           ? 'bg-gradient-to-r from-[#7E1F3E]/60 to-[#C83B68]/60 border-[#f98093] text-white shadow-md'
                           : 'bg-white/5 hover:bg-white/10 border-white/10 text-gray-200 hover:border-white/20'
@@ -249,12 +287,12 @@ export function CitySelectGateModal() {
 
             {/* Footer */}
             <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-gray-400">
-              <span>You can switch cities anytime from the top bar</span>
-              {selectedCity && (
+              <span>You can change city anytime from the top bar</span>
+              {hasConfirmed && (
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="text-gray-300 hover:text-white font-semibold transition-colors"
+                  className="text-gray-300 hover:text-white font-semibold transition-colors cursor-pointer"
                 >
                   Close
                 </button>
@@ -265,4 +303,6 @@ export function CitySelectGateModal() {
       )}
     </AnimatePresence>
   )
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : null
 }

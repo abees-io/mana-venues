@@ -1346,7 +1346,7 @@ export default function PackagesPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setIsLocationModalOpen(true)}
+                    onClick={() => window.dispatchEvent(new CustomEvent('mana_open_city_gate'))}
                     className="text-[#C83B68] hover:underline font-bold text-xs shrink-0 ml-2 cursor-pointer"
                   >
                     Change City
@@ -1454,7 +1454,7 @@ export default function PackagesPage() {
               <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
                 <button
                   type="button"
-                  onClick={() => setIsLocationModalOpen(true)}
+                  onClick={() => window.dispatchEvent(new CustomEvent('mana_open_city_gate'))}
                   className="px-4 py-2 rounded-xl bg-[#C83B68] text-white hover:bg-[#A42A51] font-bold text-xs transition-all shadow-sm cursor-pointer"
                 >
                   Change City

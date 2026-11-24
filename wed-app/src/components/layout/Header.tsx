@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Undo2, Redo2, UtensilsCrossed, Store, LayoutGrid, Sparkles } from 'lucide-react'
+import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Undo2, Redo2, UtensilsCrossed, Store, LayoutGrid, Sparkles, MapPin } from 'lucide-react'
 import CoolCameraIcon from '../common/CoolCameraIcon'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
@@ -129,6 +129,19 @@ export default function Header() {
 
         {/* Right: Auth Buttons or User Avatar Dropdown */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* City Selection Pill */}
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('mana_open_city_gate'))}
+            className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-700 bg-white/90 border border-[#D8F0EC] hover:bg-white hover:border-[#C83B68]/40 transition-all cursor-pointer shadow-2xs"
+            title="Change City"
+          >
+            <MapPin className="w-3.5 h-3.5 text-[#C83B68]" />
+            <span className="max-w-[70px] sm:max-w-[110px] truncate font-bold text-gray-900">
+              {selectedCity?.name?.replace(/\s*\(.*?\)\s*/g, '') || 'Select City'}
+            </span>
+          </button>
+
           {/* Consolidated Categories Button / Dropdown Menu */}
           <div className="relative" ref={categoriesMenuRef}>
             <Link
