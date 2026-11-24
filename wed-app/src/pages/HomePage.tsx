@@ -308,9 +308,9 @@ export default function HomePage() {
 
       {/* SECTION 1: HERO & CATEGORIES (Matches User Reference Image) */}
       <section ref={heroRef} className="w-full pt-0 pb-4">
-        {/* HERO CARD CONTAINER */}
-        <div className="max-w-5xl mx-auto px-3 sm:px-6">
-          <div className="hero-card-animate relative rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/10] md:aspect-[2.1/1] min-h-[440px] sm:min-h-[460px] shadow-2xl border border-[#D8F0EC] group will-change-[transform,opacity] transform-gpu">
+        {/* HERO CARD CONTAINER — Enlarged and centered on desktop viewports */}
+        <div className="max-w-5xl lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1536px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-10 flex justify-center">
+          <div className="w-full hero-card-animate relative rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/10] md:aspect-[2.1/1] lg:aspect-[2.35/1] min-h-[440px] sm:min-h-[460px] lg:min-h-[520px] xl:min-h-[580px] shadow-2xl border border-[#D8F0EC] group will-change-[transform,opacity] transform-gpu mx-auto">
             {/* Background Mandap Image */}
             <img
               src={heroImage}

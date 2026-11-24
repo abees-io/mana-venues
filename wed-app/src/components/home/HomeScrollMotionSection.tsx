@@ -6,7 +6,8 @@ gsap.registerPlugin(ScrollTrigger)
 
 export default function HomeScrollMotionSection() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const kineticLineRef = useRef<SVGPathElement>(null)
+  const mobileLineRef = useRef<SVGPathElement>(null)
+  const desktopLineRef = useRef<SVGPathElement>(null)
   const topTextRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -32,15 +33,20 @@ export default function HomeScrollMotionSection() {
         )
       }
 
-      // 2. Bold kinetic line motion animation on scroll
-      // Ensure initial state is strictly hidden at app start
-      if (kineticLineRef.current) {
-        gsap.set(kineticLineRef.current, {
+      // 2. Bold kinetic line motion animation on scroll (Mobile & Desktop)
+      const lines = [
+        { el: mobileLineRef.current, len: 2100 },
+        { el: desktopLineRef.current, len: 2600 },
+      ]
+
+      lines.forEach(({ el, len }) => {
+        if (!el) return
+        gsap.set(el, {
           opacity: 0,
-          strokeDashoffset: 2100,
-          strokeDasharray: 2100,
+          strokeDashoffset: len,
+          strokeDasharray: len,
         })
-      }
+      })
 
       const motionTimeline = gsap.timeline({
         scrollTrigger: {
@@ -50,33 +56,33 @@ export default function HomeScrollMotionSection() {
           end: 'bottom 20%',
           scrub: 1,
           onUpdate: (self) => {
-            if (!kineticLineRef.current) return
-            // Strictly hide if at top of page or before scroll trigger threshold
-            if (window.scrollY < 20 || self.progress <= 0.005) {
-              kineticLineRef.current.style.opacity = '0'
-            } else {
-              kineticLineRef.current.style.opacity = '1'
-            }
+            const isVisible = window.scrollY >= 20 && self.progress > 0.005
+            lines.forEach(({ el }) => {
+              if (el) el.style.opacity = isVisible ? '1' : '0'
+            })
           },
           onLeaveBack: () => {
-            if (kineticLineRef.current) {
-              kineticLineRef.current.style.opacity = '0'
-              gsap.set(kineticLineRef.current, { strokeDashoffset: 2100 })
-            }
+            lines.forEach(({ el, len }) => {
+              if (el) {
+                el.style.opacity = '0'
+                gsap.set(el, { strokeDashoffset: len })
+              }
+            })
           },
         },
       })
 
-      if (kineticLineRef.current) {
+      lines.forEach(({ el }) => {
+        if (!el) return
         motionTimeline.to(
-          kineticLineRef.current,
+          el,
           {
             strokeDashoffset: 0,
             ease: 'none',
           },
           0
         )
-      }
+      })
     }, containerRef)
 
     return () => ctx.revert()
@@ -85,7 +91,7 @@ export default function HomeScrollMotionSection() {
   return (
     <div
       ref={containerRef}
-      className="editorial-quote-section editorial-quote-card max-w-6xl mx-auto px-2 sm:px-6 pt-2 sm:pt-6 pb-2 sm:pb-4 relative overflow-visible"
+      className="editorial-quote-section editorial-quote-card max-w-6xl lg:max-w-7xl 2xl:max-w-[1536px] mx-auto px-2 sm:px-6 lg:px-8 xl:px-10 pt-2 sm:pt-6 pb-2 sm:pb-4 relative overflow-visible"
     >
       {/* TOP TEXT: "we connect" & "we elevate" — RIGHT SIDE */}
       <div className="flex flex-col items-end text-right w-full mb-0">
@@ -107,35 +113,69 @@ export default function HomeScrollMotionSection() {
         </div>
       </div>
 
-      {/* SINGLE BOLD KINETIC MOTION LINE */}
-      <div className="-mt-3 sm:-mt-6 md:-mt-10 lg:-mt-14 my-0 relative w-full overflow-visible select-none py-0">
+      {/* MOBILE VECTOR ANIMATION (Preserved exactly as-is for mobile screens) */}
+      <div className="md:hidden -mt-3 sm:-mt-6 my-0 relative w-full overflow-visible select-none py-0">
         <svg
           viewBox="-150 -60 1300 440"
-          className="w-full h-auto max-h-[220px] sm:max-h-[280px] md:max-h-[300px] lg:max-h-[340px] overflow-visible"
+          className="w-full h-auto max-h-[220px] sm:max-h-[280px] overflow-visible"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
-            <linearGradient id="tealPinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id="tealPinkGradMobile" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#f98093" />
               <stop offset="45%" stopColor="#f98093" />
               <stop offset="75%" stopColor="#699407" />
               <stop offset="100%" stopColor="#699407" />
             </linearGradient>
-            <filter id="curveShadow" x="-10%" y="-10%" width="200%" height="200%">
+            <filter id="curveShadowMobile" x="-10%" y="-10%" width="200%" height="200%">
               <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#0f172a" floodOpacity="0.14" />
             </filter>
           </defs>
           <path
-            ref={kineticLineRef}
+            ref={mobileLineRef}
             d="M -199,-30 C 132,538 692,-9 528,288 S 891,240 1175,180"
-            stroke="url(#tealPinkGrad)"
+            stroke="url(#tealPinkGradMobile)"
             strokeWidth="100"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeDasharray="2100"
             strokeDashoffset="2100"
-            filter="url(#curveShadow)"
+            filter="url(#curveShadowMobile)"
+            style={{ opacity: 0, transition: 'opacity 0.25s ease' }}
+          />
+        </svg>
+      </div>
+
+      {/* DESKTOP FULL-BLEED VECTOR ANIMATION (Enlarged so ends reach the desktop window borders) */}
+      <div className="hidden md:block w-screen relative left-1/2 -translate-x-1/2 overflow-hidden select-none -mt-8 lg:-mt-14 py-2 pointer-events-none">
+        <svg
+          viewBox="0 0 1920 420"
+          className="w-full h-auto min-h-[160px] max-h-[300px] sm:max-h-[360px] lg:max-h-[420px]"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <linearGradient id="tealPinkGradDesktop" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#f98093" />
+              <stop offset="45%" stopColor="#f98093" />
+              <stop offset="75%" stopColor="#699407" />
+              <stop offset="100%" stopColor="#699407" />
+            </linearGradient>
+            <filter id="curveShadowDesktop" x="-10%" y="-10%" width="120%" height="140%">
+              <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#0f172a" floodOpacity="0.16" />
+            </filter>
+          </defs>
+          <path
+            ref={desktopLineRef}
+            d="M -50 80 C 350 480 650 -20 1020 280 C 1320 500 1650 180 1970 240"
+            stroke="url(#tealPinkGradDesktop)"
+            strokeWidth="90"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="2600"
+            strokeDashoffset="2600"
+            filter="url(#curveShadowDesktop)"
             style={{ opacity: 0, transition: 'opacity 0.25s ease' }}
           />
         </svg>
