@@ -105,17 +105,38 @@ export const useHomeMediaStore = create<HomeMediaState>()(
 
           if (!error && data?.description) {
             const parsed = JSON.parse(data.description)
+            const cleanUrl = (val: any, fallback: string) =>
+              typeof val === 'string' && val.length > 0 && val.length < 50000 ? val : fallback
+
+            const cleanCategoryMap: Record<string, string> = {}
+            if (parsed.categoryImages && typeof parsed.categoryImages === 'object') {
+              for (const [k, v] of Object.entries(parsed.categoryImages)) {
+                if (typeof v === 'string' && v.length < 50000) {
+                  cleanCategoryMap[k] = v
+                }
+              }
+            }
+
+            const cleanSiteMap: Record<string, string> = {}
+            if (parsed.siteImages && typeof parsed.siteImages === 'object') {
+              for (const [k, v] of Object.entries(parsed.siteImages)) {
+                if (typeof v === 'string' && v.length < 50000) {
+                  cleanSiteMap[k] = v
+                }
+              }
+            }
+
             set((state) => ({
-              heroImage: parsed.heroImage || state.heroImage,
-              visionImage: parsed.visionImage || state.visionImage,
-              venueFeatureImage: parsed.venueFeatureImage || state.venueFeatureImage,
+              heroImage: cleanUrl(parsed.heroImage, state.heroImage),
+              visionImage: cleanUrl(parsed.visionImage, state.visionImage),
+              venueFeatureImage: cleanUrl(parsed.venueFeatureImage, state.venueFeatureImage),
               categoryImages: {
                 ...state.categoryImages,
-                ...(parsed.categoryImages || {}),
+                ...cleanCategoryMap,
               },
               siteImages: {
                 ...state.siteImages,
-                ...(parsed.siteImages || {}),
+                ...cleanSiteMap,
               },
             }))
           }
@@ -297,6 +318,7 @@ export const useHomeMediaStore = create<HomeMediaState>()(
       name: 'manavenues_home_media',
       partialize: (state) => ({
         heroImage: state.heroImage,
+        visionImage: state.visionImage,
         venueFeatureImage: state.venueFeatureImage,
         categoryImages: state.categoryImages,
         siteImages: state.siteImages,

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { X, Upload, Image as ImageIcon, Loader2, RotateCcw, Crop as CropIcon } from 'lucide-react'
-import { uploadOrConvertPhoto } from '../../lib/imageUtils'
+import { uploadOrConvertPhoto, uploadDataUrlToCloud } from '../../lib/imageUtils'
 import {
   useHomeMediaStore,
   DEFAULT_HERO_IMAGE,
@@ -107,20 +107,30 @@ export default function HomeImageModal({ target, onClose }: HomeImageModalProps)
     setIsSaving(true)
     setErrorMsg(null)
     try {
+      let finalUrl = trimmed
+      if (trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
+        finalUrl = await uploadDataUrlToCloud(
+          trimmed,
+          'homepage',
+          `${target.type}-${target.id || 'image'}.jpg`
+        )
+      }
+
       if (target.type === 'hero') {
-        await setHeroImage(trimmed)
+        await setHeroImage(finalUrl)
       } else if (target.type === 'vision') {
-        await setVisionImage(trimmed)
+        await setVisionImage(finalUrl)
       } else if (target.type === 'venueFeature') {
-        await setVenueFeatureImage(trimmed)
+        await setVenueFeatureImage(finalUrl)
       } else if (target.type === 'site') {
-        await setSiteImage(target.id, trimmed)
+        await setSiteImage(target.id, finalUrl)
       } else {
-        await setCategoryImage(target.id, trimmed)
+        await setCategoryImage(target.id, finalUrl)
       }
       onClose()
-    } catch {
-      setErrorMsg('Failed to save to cloud. Please try again.')
+    } catch (err: unknown) {
+      console.error('Failed to save to cloud:', err)
+      setErrorMsg(err instanceof Error ? err.message : 'Failed to save to cloud. Please try again.')
     } finally {
       setIsSaving(false)
     }

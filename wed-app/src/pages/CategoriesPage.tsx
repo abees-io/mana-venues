@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useCategoriesStore, type CategoryOffer } from '../store/categoriesStore'
+import { uploadOrConvertPhoto, uploadDataUrlToCloud } from '../lib/imageUtils'
 
 export default function CategoriesPage() {
   const navigate = useNavigate()
@@ -30,6 +31,7 @@ export default function CategoriesPage() {
   const [tempBadge, setTempBadge] = useState('')
   const [tempImageUrl, setTempImageUrl] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   const openAdminEdit = (e: React.MouseEvent, cat: CategoryOffer) => {
     e.stopPropagation()
@@ -41,26 +43,32 @@ export default function CategoriesPage() {
     setSaveSuccess(false)
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setTempImageUrl(reader.result)
-      }
+    setIsUploading(true)
+    try {
+      const uploadedUrl = await uploadOrConvertPhoto(file, 'categories')
+      setTempImageUrl(uploadedUrl)
+    } catch (err) {
+      console.error('Failed to upload category image:', err)
+    } finally {
+      setIsUploading(false)
     }
-    reader.readAsDataURL(file)
   }
 
-  const handleSaveCategory = (e: React.FormEvent) => {
+  const handleSaveCategory = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingCategory) return
+    let finalUrl = tempImageUrl.trim() || editingCategory.imageUrl
+    if (finalUrl.startsWith('data:') || finalUrl.startsWith('blob:')) {
+      finalUrl = await uploadDataUrlToCloud(finalUrl, 'categories')
+    }
     updateCategory(editingCategory.id, {
       title: tempTitle.trim() || editingCategory.title,
       subtitle: tempSubtitle.trim() || editingCategory.subtitle,
       badge: tempBadge.trim() || editingCategory.badge,
-      imageUrl: tempImageUrl.trim() || editingCategory.imageUrl,
+      imageUrl: finalUrl,
     })
     setSaveSuccess(true)
     setTimeout(() => {
@@ -355,11 +363,12 @@ export default function CategoriesPage() {
                     className="flex-1 px-3.5 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C83B68]/30"
                   />
                   <label className="inline-flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-semibold cursor-pointer transition-colors shrink-0">
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Upload</span>
+                    <Upload className={`w-3.5 h-3.5 ${isUploading ? 'animate-bounce' : ''}`} />
+                    <span>{isUploading ? 'Uploading...' : 'Upload'}</span>
                     <input
                       type="file"
                       accept="image/*"
+                      disabled={isUploading}
                       onChange={handleFileUpload}
                       className="hidden"
                     />

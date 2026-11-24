@@ -68,23 +68,64 @@ export async function optimizeImageFile(
 }
 
 /**
- * Attempts to upload an image to Supabase Storage if the bucket is configured.
- * If storage upload fails or bucket doesn't exist, seamlessly falls back to
- * the client-side optimized image data URL so venue creation never fails.
+ * Uploads a base64 data URL to Cloud Storage (via /api/upload endpoint or Supabase Storage).
+ * If the cloud upload succeeds, returns the permanent HTTPS CDN URL.
+ * If all cloud endpoints are completely unreachable, returns the dataUrl as safe fallback.
  */
-export async function uploadOrConvertPhoto(
-  file: File,
-  folder = 'venues'
+export async function uploadDataUrlToCloud(
+  dataUrl: string,
+  folder = 'homepage',
+  filename?: string
 ): Promise<string> {
-  // Always optimize locally first
-  const optimizedDataUrl = await optimizeImageFile(file)
+  // If already an HTTP/HTTPS or local path, no need to upload
+  if (!dataUrl || (!dataUrl.startsWith('data:') && !dataUrl.startsWith('blob:'))) {
+    return dataUrl
+  }
 
+  // If it's a blob: URL, convert to base64 dataUrl first
+  let payloadDataUrl = dataUrl
+  if (dataUrl.startsWith('blob:')) {
+    try {
+      const resp = await fetch(dataUrl)
+      const blob = await resp.blob()
+      payloadDataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      })
+    } catch (e) {
+      console.warn('Could not read blob URL:', e)
+    }
+  }
+
+  // 1. Try /api/upload endpoint first (works on Vercel and local dev server)
   try {
-    const cleanFileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        dataUrl: payloadDataUrl,
+        folder,
+        filename,
+      }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      if (data?.url) {
+        return data.url
+      }
+    }
+  } catch (apiErr) {
+    console.warn('/api/upload request failed, trying client storage fallback:', apiErr)
+  }
+
+  // 2. Client-side Supabase storage fallback
+  try {
+    const cleanFileName = `${Date.now()}-${filename ? filename.replace(/[^a-zA-Z0-9.-]/g, '_') : 'image.jpg'}`
     const filePath = `${folder}/${cleanFileName}`
 
-    // Convert data URL to Blob for upload
-    const response = await fetch(optimizedDataUrl)
+    const response = await fetch(payloadDataUrl)
     const blob = await response.blob()
 
     const { error: uploadError } = await supabase.storage
@@ -103,12 +144,28 @@ export async function uploadOrConvertPhoto(
         return urlData.publicUrl
       }
     }
-  } catch (err) {
-    console.warn('Storage upload fallback triggered:', err)
+  } catch (storageErr) {
+    console.warn('Client storage upload failed:', storageErr)
   }
 
-  // Return optimized data URL fallback
-  return optimizedDataUrl
+  // Return optimized data URL fallback if offline
+  return payloadDataUrl
+}
+
+/**
+ * Attempts to upload an image to Supabase Storage if the bucket is configured.
+ * Optimizes the image locally first to ensure quick uploads and low bandwidth,
+ * then uploads to Supabase Storage and returns the permanent CDN URL.
+ */
+export async function uploadOrConvertPhoto(
+  file: File,
+  folder = 'venues'
+): Promise<string> {
+  // Always optimize locally first
+  const optimizedDataUrl = await optimizeImageFile(file)
+
+  // Upload to cloud storage
+  return uploadDataUrlToCloud(optimizedDataUrl, folder, file.name)
 }
 
 /**
