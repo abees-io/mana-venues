@@ -27,6 +27,7 @@ export interface WeddingPackage {
   tagline: string
   backdrop: 'Backwaters' | 'Coast' | 'Hills' | 'Heritage'
   location: string
+  cities?: string[]
   startingPrice: string
   guestCapacity: string
   image: string
@@ -44,6 +45,69 @@ export interface WeddingPackage {
   vendorId?: string
 }
 
+/**
+ * Checks whether a package is available in the specified city.
+ * Matches against package.cities array, package.location text,
+ * and known Kerala city aliases (e.g. Kochi <-> Ernakulam, Trivandrum <-> Thiruvananthapuram).
+ */
+export function packageMatchesCity(
+  pkg: WeddingPackage,
+  city: { name: string; slug: string } | string | null | undefined
+): boolean {
+  if (!city) return true // Show all if no city filter is selected
+
+  const cityName = (typeof city === 'string' ? city : city.name).toLowerCase()
+  const citySlug = (typeof city === 'string' ? city : city.slug).toLowerCase()
+
+  // Match against cities array if defined
+  if (Array.isArray(pkg.cities) && pkg.cities.length > 0) {
+    const matched = pkg.cities.some((c) => {
+      const lower = c.toLowerCase()
+      return (
+        lower === citySlug ||
+        lower === cityName ||
+        cityName.includes(lower) ||
+        lower.includes(citySlug)
+      )
+    })
+    if (matched) return true
+  }
+
+  // Location string check
+  const loc = (pkg.location || '').toLowerCase()
+  if (loc.includes(citySlug) || loc.includes(cityName)) {
+    return true
+  }
+
+  // Common Kerala aliases
+  if (
+    (citySlug.includes('kochi') || citySlug.includes('ernakulam')) &&
+    (loc.includes('kochi') || loc.includes('ernakulam'))
+  ) {
+    return true
+  }
+  if (
+    (citySlug.includes('thiruvananthapuram') || citySlug.includes('trivandrum')) &&
+    (loc.includes('thiruvananthapuram') || loc.includes('trivandrum'))
+  ) {
+    return true
+  }
+  if (
+    (citySlug.includes('kozhikode') || citySlug.includes('calicut')) &&
+    (loc.includes('kozhikode') || loc.includes('calicut'))
+  ) {
+    return true
+  }
+  if (
+    (citySlug.includes('alappuzha') || citySlug.includes('alleppey')) &&
+    (loc.includes('alappuzha') || loc.includes('alleppey'))
+  ) {
+    return true
+  }
+
+  return false
+}
+
 export const DEFAULT_PACKAGES: WeddingPackage[] = [
   {
     id: 'meliora-signature',
@@ -51,6 +115,7 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
     tagline: 'Elegant event design, stage décor & full-service management',
     backdrop: 'Coast',
     location: 'Kochi, Kottayam & Ernakulam',
+    cities: ['kochi', 'ernakulam', 'kottayam', 'thiruvananthapuram', 'alappuzha', 'kollam', 'pathanamthitta'],
     startingPrice: 'Price on Request',
     guestCapacity: '200 - 800 Guests',
     image: '/dest-wedding-2.jpg',
@@ -89,6 +154,7 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
     tagline: 'Bespoke marquees, floral canopies & complete celebration curation',
     backdrop: 'Heritage',
     location: 'Kochi, Thrissur & Calicut',
+    cities: ['kochi', 'thrissur', 'kozhikode', 'malappuram', 'palakkad', 'kannur', 'kasaragod'],
     startingPrice: 'Price on Request',
     guestCapacity: '250 - 1,000 Guests',
     image: '/dest-wedding-3.jpg',
@@ -125,6 +191,7 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
     tagline: 'Grand royal banquet halls, chandelier illumination & imperial feasts',
     backdrop: 'Backwaters',
     location: 'Ernakulam & Alappuzha',
+    cities: ['ernakulam', 'kochi', 'alappuzha', 'kollam', 'idukki', 'wayanad', 'kottayam'],
     startingPrice: 'Price on Request',
     guestCapacity: '300 - 1,500 Guests',
     image: '/dest-wedding-1.jpg',
@@ -148,6 +215,80 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
         id: 'reel-regal-1',
         title: 'Regal Banquet Hall & Golden Mandap',
         location: 'Ernakulam, Alappuzha',
+        videoUrl: 'dummy-5s',
+        posterUrl: '/dest-wedding-1.jpg',
+        aspectRatio: '9:16',
+        size: 'md',
+      },
+    ],
+  },
+  {
+    id: 'wayanad-hills-celebration',
+    title: 'Misty Hills & Tea Estate Celebration',
+    tagline: 'Open-air amphitheatre, pine canopy mandap & mountain breeze wedding',
+    backdrop: 'Hills',
+    location: 'Wayanad, Idukki & Munnar',
+    cities: ['wayanad', 'idukki', 'palakkad', 'kozhikode', 'kannur'],
+    startingPrice: 'Price on Request',
+    guestCapacity: '150 - 600 Guests',
+    image: '/dest-wedding-3.jpg',
+    images: ['/dest-wedding-3.jpg', '/dest-wedding-1.jpg'],
+    description:
+      'Celebrate your special day nestled amidst misty mountain heights, lush spice gardens, and serene tea estates. Includes panoramic hill ceremony, eco-luxe floral styling, and artisanal mountain banquet.',
+    inclusions: [
+      'Hilltop Tea Estate Ceremony Deck',
+      'Eco-luxe Floral Arch & Pine Mandap',
+      'Gourmet Mountain Buffet & Live Barbecue',
+      'Cinematic Drone & Candid Photography',
+      'Mountain Resort Suite Accommodation for Couple',
+      'Acoustic Live Strings & Evening Bonfire',
+    ],
+    partnerPlanner: 'Meliora Events',
+    verified: true,
+    instagramUrl: 'https://instagram.com/manaweddings',
+    whatsappNumber: '919847012345',
+    reels: [
+      {
+        id: 'reel-hills-1',
+        title: 'Hillside Tea Garden Wedding',
+        location: 'Wayanad, Munnar',
+        videoUrl: 'dummy-5s',
+        posterUrl: '/dest-wedding-3.jpg',
+        aspectRatio: '9:16',
+        size: 'md',
+      },
+    ],
+  },
+  {
+    id: 'travancore-royal-heritage',
+    title: 'Travancore Royal Heritage Package',
+    tagline: 'Authentic temple architecture, traditional nadaswaram & royal court feasts',
+    backdrop: 'Heritage',
+    location: 'Thiruvananthapuram, Kollam & Pathanamthitta',
+    cities: ['thiruvananthapuram', 'kollam', 'pathanamthitta', 'alappuzha', 'kottayam'],
+    startingPrice: 'Price on Request',
+    guestCapacity: '350 - 1,200 Guests',
+    image: '/dest-wedding-1.jpg',
+    images: ['/dest-wedding-1.jpg', '/dest-wedding-2.jpg'],
+    description:
+      'Immerse in the timeless splendour of Travancore heritage. Featuring authentic teakwood mandap carving, traditional brass oil lamp lighting, classical Kerala musical ensembles, and an authentic royal feast.',
+    inclusions: [
+      'Heritage Palace & Courtyard Architecture',
+      'Carved Teakwood Mandap Styling',
+      'Traditional 36-dish Travancore Royal Sadya',
+      'Classical Nadaswaram & Panchavadyam Performance',
+      'Royal Elephant Welcome & VIP Escort Service',
+      'Ultra-HD Cinematic Traditional Video & Album',
+    ],
+    partnerPlanner: 'Regal Castle',
+    verified: true,
+    instagramUrl: 'https://instagram.com/manaweddings',
+    whatsappNumber: '919847012348',
+    reels: [
+      {
+        id: 'reel-travancore-1',
+        title: 'Royal Travancore Heritage Celebration',
+        location: 'Thiruvananthapuram, Kollam',
         videoUrl: 'dummy-5s',
         posterUrl: '/dest-wedding-1.jpg',
         aspectRatio: '9:16',

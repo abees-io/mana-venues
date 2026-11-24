@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useLoginGate } from '../../contexts/LoginGateContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { useCityStore } from '../../store/cityStore'
 import {
   checkRateLimit,
   recordRateLimitAttempt,
@@ -58,12 +59,22 @@ export function LoginGateModal() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
+  const currentStoreCity = useCityStore((s) => s.selectedCity)
   const [selectedCity, setSelectedCity] = useState<string>(() => {
+    const storeSlug = useCityStore.getState().selectedCity?.slug
+    if (storeSlug) return storeSlug
     if (typeof window !== 'undefined') {
       return localStorage.getItem('mana_preferred_city') || 'kochi'
     }
     return 'kochi'
   })
+
+  // Sync with current store city if changed
+  useEffect(() => {
+    if (currentStoreCity?.slug) {
+      setSelectedCity(currentStoreCity.slug)
+    }
+  }, [currentStoreCity])
 
   const resetForm = () => {
     setEmail('')
@@ -130,6 +141,10 @@ export function LoginGateModal() {
         await signIn(email.trim(), password)
         resetRateLimit(limitKey)
         localStorage.setItem('mana_preferred_city', selectedCity)
+        const matchedCity = KERALA_CITIES.find((c) => c.value === selectedCity)
+        if (matchedCity) {
+          useCityStore.getState().setCity({ id: matchedCity.value, name: matchedCity.label, slug: matchedCity.value })
+        }
         try {
           await updateProfile({ preferred_city: selectedCity })
         } catch {
@@ -150,6 +165,10 @@ export function LoginGateModal() {
           throw new Error('Password must be at least 6 characters.')
         }
         localStorage.setItem('mana_preferred_city', selectedCity)
+        const matchedCity = KERALA_CITIES.find((c) => c.value === selectedCity)
+        if (matchedCity) {
+          useCityStore.getState().setCity({ id: matchedCity.value, name: matchedCity.label, slug: matchedCity.value })
+        }
         const { session } = await signUp(email.trim(), password, fullName.trim(), phone.trim(), {
           preferred_city: selectedCity,
         })

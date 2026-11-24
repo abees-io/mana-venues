@@ -16,9 +16,12 @@ import {
 } from '../lib/rateLimit'
 import {
   usePackagesStore,
+  packageMatchesCity,
   type WeddingPackage,
   type PackageReel,
 } from '../store/packagesStore'
+import { useCityStore } from '../store/cityStore'
+import LocationModal from '../components/modals/LocationModal'
 import {
   MapPin,
   Users,
@@ -216,6 +219,8 @@ export default function PackagesPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [selectedPlannerFilter, setSelectedPlannerFilter] = useState('All')
   const prevPackagesLengthRef = useRef(0)
+  const selectedCity = useCityStore((s) => s.selectedCity)
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   // (packages list is always shown)
 
   // Smooth scroll when navigating with hash (e.g. from Explore Categories "Destination Wedding")
@@ -468,36 +473,47 @@ export default function PackagesPage() {
     }, 250)
   }
 
-  const handleSquarePackageClick = (pkgId: string) => {
-    const idx = filteredPackages.findIndex((p) => p.id === pkgId)
-    if (idx !== -1) {
-      setActivePackageIndex(idx)
-    }
-    const pkg = packages.find((p) => p.id === pkgId)
-    if (
-      pkg &&
-      selectedBackdrop !== 'All' &&
-      pkg.backdrop.toLowerCase() !== selectedBackdrop.toLowerCase()
-    ) {
-      setSelectedBackdrop('All')
-    }
-    if (searchFilter) {
-      setSearchFilter('')
-    }
-    setSelectedPackageId(pkgId)
-    setTimeout(() => {
-      const el = document.getElementById(`package-${pkgId}`)
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        el.classList.remove('package-card-pop')
-        void el.offsetWidth
-        el.classList.add('package-card-pop')
+  const handleOpenPackage = (pkgId: string) => {
+    requireAuth('to view exclusive wedding package details, pricing, and booking dates', () => {
+      const idx = filteredPackages.findIndex((p) => p.id === pkgId)
+      if (idx !== -1) {
+        setActivePackageIndex(idx)
       }
-    }, 60)
+      const pkg = packages.find((p) => p.id === pkgId)
+      if (
+        pkg &&
+        selectedBackdrop !== 'All' &&
+        pkg.backdrop.toLowerCase() !== selectedBackdrop.toLowerCase()
+      ) {
+        setSelectedBackdrop('All')
+      }
+      if (searchFilter) {
+        setSearchFilter('')
+      }
+      setSelectedPackageId(pkgId)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
   }
 
-  // Filter packages based on backdrop, planner, and search
+  const handleSquarePackageClick = (pkgId: string) => {
+    handleOpenPackage(pkgId)
+  }
+
+  // Guard selectedPackageId so unauthenticated users cannot view packages without signing in
+  useEffect(() => {
+    if (selectedPackageId && !user) {
+      const pendingPkgId = selectedPackageId
+      setSelectedPackageId(null)
+      requireAuth('to view exclusive wedding package details, pricing, and booking dates', () => {
+        setSelectedPackageId(pendingPkgId)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
+    }
+  }, [selectedPackageId, user, requireAuth])
+
+  // Filter packages based on selected city, backdrop, planner, and search
   const filteredPackages = packages.filter((pkg) => {
+    const matchesCity = packageMatchesCity(pkg, selectedCity)
     const matchesBackdrop =
       selectedBackdrop === 'All' || pkg.backdrop.toLowerCase() === selectedBackdrop.toLowerCase()
     const matchesPlanner =
@@ -508,7 +524,7 @@ export default function PackagesPage() {
       pkg.title.toLowerCase().includes(searchFilter.toLowerCase()) ||
       pkg.location.toLowerCase().includes(searchFilter.toLowerCase()) ||
       pkg.description.toLowerCase().includes(searchFilter.toLowerCase())
-    return matchesBackdrop && matchesPlanner && matchesSearch
+    return matchesCity && matchesBackdrop && matchesPlanner && matchesSearch
   })
 
   const activeFilterCount =
@@ -641,8 +657,7 @@ export default function PackagesPage() {
       <div
         key={pkg.id}
         onClick={() => {
-          setSelectedPackageId(pkg.id)
-          window.scrollTo({ top: 0, behavior: 'smooth' })
+          handleOpenPackage(pkg.id)
         }}
         className="bg-white rounded-2xl overflow-hidden border border-gray-200/80 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer active:scale-[0.98] group hover:-translate-y-1"
       >
@@ -1320,6 +1335,25 @@ export default function PackagesPage() {
                 </p>
               </div>
 
+              {/* Active City Indicator */}
+              {selectedCity && (
+                <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-[#F0F9F8] border border-[#D8F0EC] text-xs">
+                  <div className="flex items-center gap-1.5 text-gray-700 min-w-0">
+                    <MapPin className="w-3.5 h-3.5 text-[#C83B68] shrink-0" />
+                    <span className="truncate">
+                      Packages available in <strong className="text-gray-900 font-bold">{selectedCity.name}</strong>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsLocationModalOpen(true)}
+                    className="text-[#C83B68] hover:underline font-bold text-xs shrink-0 ml-2 cursor-pointer"
+                  >
+                    Change City
+                  </button>
+                </div>
+              )}
+
               {/* Packages found counter + Filters Button */}
               <div className="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-white border border-gray-200/90 shadow-2xs">
                 <span className="text-xs sm:text-sm text-gray-700 font-medium">
@@ -1409,23 +1443,36 @@ export default function PackagesPage() {
 
           {/* Empty State */}
           {!isLoading && !hasError && filteredPackages.length === 0 && (
-            <div className="rounded-2xl border border-[#D8F0EC] bg-[#FFF2F6] p-10 text-center max-w-md mx-auto space-y-4 shadow-sm">
+            <div className="rounded-2xl border border-[#D8F0EC] bg-[#FFF2F6] p-8 sm:p-10 text-center max-w-md mx-auto space-y-4 shadow-sm">
               <Package className="w-12 h-12 text-[#C83B68] mx-auto opacity-70" />
-              <h3 className="text-lg font-bold text-[#5A172D]">No Matching Packages Found</h3>
-              <p className="text-sm text-[#7E1F3E]/80">
-                We could not find any destination packages matching your filter criteria. Try resetting your filters.
+              <h3 className="text-lg font-bold text-[#5A172D]">
+                No Packages Found {selectedCity ? `in ${selectedCity.name}` : ''}
+              </h3>
+              <p className="text-xs sm:text-sm text-[#7E1F3E]/80 leading-relaxed">
+                We could not find any wedding packages available in {selectedCity ? selectedCity.name : 'this location'} matching your current filters.
               </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedBackdrop('All')
-                  setSelectedPlannerFilter('All')
-                  setSearchFilter('')
-                }}
-                className="px-5 py-2 rounded-full bg-[#C83B68] text-white hover:bg-[#A42A51] font-semibold text-xs border border-[#D8F0EC] transition-all shadow-sm"
-              >
-                Reset Filters
-              </button>
+              <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setIsLocationModalOpen(true)}
+                  className="px-4 py-2 rounded-xl bg-[#C83B68] text-white hover:bg-[#A42A51] font-bold text-xs transition-all shadow-sm cursor-pointer"
+                >
+                  Change City
+                </button>
+                {(selectedBackdrop !== 'All' || selectedPlannerFilter !== 'All' || searchFilter) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedBackdrop('All')
+                      setSelectedPlannerFilter('All')
+                      setSearchFilter('')
+                    }}
+                    className="px-4 py-2 rounded-xl bg-white text-gray-700 hover:bg-gray-100 font-semibold text-xs border border-gray-200 transition-all cursor-pointer"
+                  >
+                    Reset Filters
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
@@ -1812,6 +1859,11 @@ export default function PackagesPage() {
             </div>
           </div>
         )}
+        {/* Location / City Switcher Modal */}
+        <LocationModal
+          isOpen={isLocationModalOpen}
+          onClose={() => setIsLocationModalOpen(false)}
+        />
       </div>
     </Layout>
   )
