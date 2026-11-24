@@ -19,6 +19,7 @@ import {
 import Layout from '../../components/layout/Layout'
 import VendorStatsCard from '../../components/vendor/VendorStatsCard'
 import VendorBookingsList from '../../components/vendor/VendorBookingsList'
+import VendorCalendarSync from '../../components/vendor/VendorCalendarSync'
 import AddVenueModal from '../../components/modals/AddVenueModal'
 import PackageFormModal from '../../components/modals/PackageFormModal'
 import { useVendorStats } from '../../hooks/useVendorStats'
@@ -455,6 +456,16 @@ export default function VendorDashboard() {
                 <VendorBookingsList bookings={bookingsQuery.data ?? []} />
               )}
             </div>
+
+            {/* Vendor Calendar & Two-Way iCal Sync Component */}
+            {firstAuditoriumId && (
+              <div className="pt-4">
+                <VendorCalendarSync
+                  vendorId={firstAuditoriumId}
+                  venueTitle={profile?.business_name || 'My Venue'}
+                />
+              </div>
+            )}
           </>
         )}
       </div>

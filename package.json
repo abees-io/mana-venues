@@ -5,6 +5,9 @@
     "build": "npm --prefix wed-app run build",
     "dev": "npm --prefix wed-app run dev",
     "install": "npm --prefix wed-app install"
+  },
+  "dependencies": {
+    "ical-generator": "^11.1.4",
+    "node-ical": "^0.27.6"
   }
 }
-

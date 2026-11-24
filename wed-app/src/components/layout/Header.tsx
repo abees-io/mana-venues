@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Undo2, Redo2, UtensilsCrossed, Store } from 'lucide-react'
+import { Search, ChevronDown, User, LogOut, ShieldAlert, LayoutDashboard, Undo2, Redo2, UtensilsCrossed, Store, LayoutGrid, Sparkles } from 'lucide-react'
 import CoolCameraIcon from '../common/CoolCameraIcon'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
@@ -25,13 +25,18 @@ export default function Header() {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [isCategoriesMenuOpen, setIsCategoriesMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
+  const categoriesMenuRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setIsUserMenuOpen(false)
+      }
+      if (categoriesMenuRef.current && !categoriesMenuRef.current.contains(event.target as Node)) {
+        setIsCategoriesMenuOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -124,55 +129,74 @@ export default function Header() {
 
         {/* Right: Auth Buttons or User Avatar Dropdown */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-          {/* Destination Packages Link */}
-          <Link
-            to="/packages"
-            className={`hidden sm:inline-flex items-center px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0 ${
-              location.pathname === '/packages'
-                ? 'bg-[#C83B68] text-white shadow-xs font-bold'
-                : 'text-black bg-white/80 border border-[#D8F0EC] hover:bg-white active:bg-[#D8F0EC]/40'
-            }`}
-          >
-            <span>Packages</span>
-          </Link>
+          {/* Consolidated Categories Button / Dropdown Menu */}
+          <div className="relative" ref={categoriesMenuRef}>
+            <Link
+              to="/categories"
+              className={`hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                location.pathname === '/categories' ||
+                location.pathname.startsWith('/packages') ||
+                location.pathname.startsWith('/photography') ||
+                location.pathname.startsWith('/bridal-makeup') ||
+                location.pathname.startsWith('/catering')
+                  ? 'bg-[#C83B68] text-white shadow-xs font-bold'
+                  : 'text-black bg-white/80 border border-[#D8F0EC] hover:bg-white active:bg-[#D8F0EC]/40'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Categories</span>
+            </Link>
 
-          {/* Photography Packages Link */}
-          <Link
-            to="/photography"
-            className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0 ${
-              location.pathname === '/photography'
-                ? 'bg-[#C83B68] text-white shadow-xs font-bold'
-                : 'text-black bg-white/80 border border-[#D8F0EC] hover:bg-white active:bg-[#D8F0EC]/40'
-            }`}
-          >
-            <CoolCameraIcon className={`w-3.5 h-3.5 ${location.pathname === '/photography' ? 'text-white' : 'text-[#C83B68]'}`} />
-            <span>Photography</span>
-          </Link>
-
-          {/* Bridal & Makeup Link */}
-          <Link
-            to="/bridal-makeup"
-            className={`hidden md:inline-flex items-center px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0 ${
-              location.pathname === '/bridal-makeup'
-                ? 'bg-[#C83B68] text-white shadow-xs font-bold'
-                : 'text-black bg-white/80 border border-[#D8F0EC] hover:bg-white active:bg-[#D8F0EC]/40'
-            }`}
-          >
-            <span>Bridal & Makeup</span>
-          </Link>
-
-          {/* Catering Link */}
-          <Link
-            to="/catering"
-            className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors shrink-0 ${
-              location.pathname === '/catering'
-                ? 'bg-[#C83B68] text-white shadow-xs font-bold'
-                : 'text-black bg-white/80 border border-[#D8F0EC] hover:bg-white active:bg-[#D8F0EC]/40'
-            }`}
-          >
-            <UtensilsCrossed className={`w-3.5 h-3.5 ${location.pathname === '/catering' ? 'text-white' : 'text-[#C83B68]'}`} />
-            <span>Catering</span>
-          </Link>
+            {isCategoriesMenuOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-[#D8F0EC] py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="px-3.5 py-2 border-b border-[#D8F0EC]/70">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    Explore Categories
+                  </span>
+                </div>
+                <Link
+                  to="/packages"
+                  onClick={() => setIsCategoriesMenuOpen(false)}
+                  className={`flex items-center gap-2.5 px-3.5 py-2 text-xs sm:text-sm font-medium hover:bg-[#F0F9F8] transition-colors ${
+                    location.pathname === '/packages' ? 'text-[#C83B68] font-bold bg-[#F0F9F8]' : 'text-gray-700'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-[#C83B68]" />
+                  <span>Destination Wedding Packages</span>
+                </Link>
+                <Link
+                  to="/photography"
+                  onClick={() => setIsCategoriesMenuOpen(false)}
+                  className={`flex items-center gap-2.5 px-3.5 py-2 text-xs sm:text-sm font-medium hover:bg-[#F0F9F8] transition-colors ${
+                    location.pathname === '/photography' ? 'text-[#C83B68] font-bold bg-[#F0F9F8]' : 'text-gray-700'
+                  }`}
+                >
+                  <CoolCameraIcon className="w-4 h-4 text-[#C83B68]" />
+                  <span>Photography & Video</span>
+                </Link>
+                <Link
+                  to="/bridal-makeup"
+                  onClick={() => setIsCategoriesMenuOpen(false)}
+                  className={`flex items-center gap-2.5 px-3.5 py-2 text-xs sm:text-sm font-medium hover:bg-[#F0F9F8] transition-colors ${
+                    location.pathname === '/bridal-makeup' ? 'text-[#C83B68] font-bold bg-[#F0F9F8]' : 'text-gray-700'
+                  }`}
+                >
+                  <span className="text-sm">💄</span>
+                  <span>Bridal & Makeup</span>
+                </Link>
+                <Link
+                  to="/catering"
+                  onClick={() => setIsCategoriesMenuOpen(false)}
+                  className={`flex items-center gap-2.5 px-3.5 py-2 text-xs sm:text-sm font-medium hover:bg-[#F0F9F8] transition-colors ${
+                    location.pathname === '/catering' ? 'text-[#C83B68] font-bold bg-[#F0F9F8]' : 'text-gray-700'
+                  }`}
+                >
+                  <UtensilsCrossed className="w-4 h-4 text-[#C83B68]" />
+                  <span>Catering & Banquets</span>
+                </Link>
+              </div>
+            )}
+          </div>
 
           {/* Admin-only Global Undo / Redo Buttons */}
           {user && isAdmin && (

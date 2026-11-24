@@ -14,6 +14,8 @@ import {
 } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { usePricingSlots } from '../../hooks/usePricingSlots'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '../../lib/supabase'
 import { cn } from '../../lib/utils'
 import type { PricingSlot } from '../../lib/types'
 
@@ -42,6 +44,42 @@ export default function AvailabilityCalendar({
   const monthEnd = endOfMonth(currentMonth)
 
   const { data: slots = [] } = usePricingSlots(auditoriumId, monthStart, monthEnd)
+
+  // Query availability_blocks for real-time ical/locks/bookings
+  const { data: availabilityBlocks = [] } = useQuery<{ event_date: string; status: string; hold_expires_at?: string | null }[]>({
+    queryKey: ['availability_blocks', auditoriumId, format(monthStart, 'yyyy-MM-dd')],
+    queryFn: async () => {
+      if (!auditoriumId) return []
+      const startStr = format(monthStart, 'yyyy-MM-dd')
+      const endStr = format(monthEnd, 'yyyy-MM-dd')
+
+      const { data, error } = await (supabase
+        .from('availability_blocks' as any)
+        .select('event_date, status, hold_expires_at')
+        .eq('vendor_id', auditoriumId)
+        .gte('event_date', startStr)
+        .lte('event_date', endStr) as any)
+
+      if (error) {
+        console.warn('Error fetching availability_blocks:', error)
+        return []
+      }
+      return (data || []) as { event_date: string; status: string; hold_expires_at?: string | null }[]
+    },
+    staleTime: 1000 * 30, // 30 seconds
+  })
+
+  const blockedMap = useMemo(() => {
+    const map = new Map<string, { status: string; hold_expires_at?: string | null }>()
+    const now = new Date().toISOString()
+    for (const b of availabilityBlocks) {
+      if (b.status === 'held' && b.hold_expires_at && b.hold_expires_at <= now) {
+        continue // expired hold
+      }
+      map.set(b.event_date, b)
+    }
+    return map
+  }, [availabilityBlocks])
 
   const slotMap = useMemo(() => {
     const map = new Map<string, PricingSlot>()
@@ -143,12 +181,14 @@ export default function AvailabilityCalendar({
         {days.map((day) => {
           const dayKey = format(day, 'yyyy-MM-dd')
           const slot = slotMap.get(dayKey)
+          const block = blockedMap.get(dayKey)
           const isPast = isBefore(day, today)
-          const status = slot?.status ?? 'available'
+          const status = block ? block.status : (slot?.status ?? 'available')
           const isBooked = status === 'booked'
-          const isBlocked = status === 'blocked'
+          const isHeld = status === 'held'
+          const isBlocked = status === 'blocked' || status === 'blocked_external'
           const isSelected = selectedDate ? isSameDay(day, selectedDate) : false
-          const isAvailable = !isPast && !isBooked && !isBlocked
+          const isAvailable = !isPast && !isBooked && !isBlocked && !isHeld
           const price = getEffectivePrice(day)
 
           return (
@@ -163,9 +203,10 @@ export default function AvailabilityCalendar({
               }}
               className={cn(
                 'relative flex flex-col items-center justify-center p-1 rounded-lg text-xs transition-all min-h-[52px] group',
-                (isPast || isBooked || isBlocked) && 'opacity-35 cursor-not-allowed',
-                isPast && !isBooked && !isBlocked && 'bg-green-950/40 text-green-600',
+                (isPast || isBooked || isBlocked || isHeld) && 'opacity-35 cursor-not-allowed',
+                isPast && !isBooked && !isBlocked && !isHeld && 'bg-green-950/40 text-green-600',
                 isBooked && 'bg-red-950/40 text-red-400 line-through border border-red-900/30',
+                isHeld && 'bg-amber-950/40 text-amber-300 border border-amber-900/40',
                 isBlocked && 'bg-gray-900/40 text-gray-500',
                 isAvailable && !isSelected && 'bg-green-950/60 border border-green-800/30 hover:bg-green-900 hover:text-white cursor-pointer text-green-100',
                 isSelected && 'bg-brand-secondary text-brand-dark ring-2 ring-brand-secondary font-bold cursor-pointer'

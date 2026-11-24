@@ -10,6 +10,8 @@ import { ProtectedRoute } from '../components/ProtectedRoute'
 import { ScrollToTop } from '../components/ScrollToTop'
 
 const PackagesPage = lazy(() => import('../pages/PackagesPage'))
+const CategoriesPage = lazy(() => import('../pages/CategoriesPage'))
+const PackageBookingPage = lazy(() => import('../pages/PackageBookingPage'))
 const PhotographyPage = lazy(() => import('../pages/PhotographyPage'))
 const BridalMakeupPage = lazy(() => import('../pages/BridalMakeupPage'))
 const CateringPage = lazy(() => import('../pages/CateringPage'))
@@ -39,6 +41,22 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <PackagesPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/categories',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <CategoriesPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/book-package',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <PackageBookingPage />
           </Suspense>
         ),
       },

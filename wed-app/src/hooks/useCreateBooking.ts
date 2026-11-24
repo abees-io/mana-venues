@@ -51,7 +51,19 @@ export function useCreateBooking() {
 
       const dateStr = format(payload.date, 'yyyy-MM-dd')
 
-      // 1. Insert pending booking
+      // 1. First initiate date hold via API route (calls hold_booking_dates RPC)
+      // or directly invoke hold_booking_dates RPC function
+      const { data: holdSuccess, error: holdError } = await (supabase.rpc as any)('hold_booking_dates', {
+        p_vendor_id: payload.auditoriumId,
+        p_dates: [dateStr],
+        p_booking_id: null,
+      })
+
+      if (holdError || holdSuccess === false) {
+        throw new Error('This date was just locked or booked by another customer. Please choose another date.')
+      }
+
+      // 2. Insert pending booking
       const { data: booking, error: bookingError } = await supabase
         .from('bookings')
         .insert({
@@ -117,20 +129,35 @@ export function useCreateBooking() {
                 return
               }
 
-              // 4. Mark pricing slot as booked
-              await supabase
-                .from('pricing_slots')
-                .upsert(
-                  {
-                    auditorium_id: payload.auditoriumId,
-                    date: dateStr,
-                    status: 'booked',
-                  },
-                  { onConflict: 'auditorium_id,date' }
-                )
+              // 4. Mark pricing slot as booked and update availability_blocks to booked
+              await Promise.all([
+                supabase
+                  .from('pricing_slots')
+                  .upsert(
+                    {
+                      auditorium_id: payload.auditoriumId,
+                      date: dateStr,
+                      status: 'booked',
+                    },
+                    { onConflict: 'auditorium_id,date' }
+                  ),
+                (supabase
+                  .from('availability_blocks' as any)
+                  .upsert(
+                    {
+                      vendor_id: payload.auditoriumId,
+                      event_date: dateStr,
+                      status: 'booked',
+                      booking_id: booking.id,
+                      hold_expires_at: null,
+                    } as any,
+                    { onConflict: 'vendor_id,event_date' }
+                  ) as any)
+              ])
 
               // 5. Invalidate queries
               queryClient.invalidateQueries({ queryKey: ['pricing_slots', payload.auditoriumId] })
+              queryClient.invalidateQueries({ queryKey: ['availability_blocks', payload.auditoriumId] })
               queryClient.invalidateQueries({ queryKey: ['auditoriums'] })
               queryClient.invalidateQueries({ queryKey: ['auditorium'] })
 
@@ -141,14 +168,22 @@ export function useCreateBooking() {
           },
           modal: {
             ondismiss: async () => {
-              // Cancel the pending booking if user closes modal
+              // Cancel the pending booking and delete held availability block if user closes modal
               try {
-                await supabase
-                  .from('bookings')
-                  .update({ booking_status: 'cancelled' })
-                  .eq('id', booking.id)
+                await Promise.all([
+                  supabase
+                    .from('bookings')
+                    .update({ booking_status: 'cancelled' })
+                    .eq('id', booking.id),
+                  supabase
+                    .from('availability_blocks' as any)
+                    .delete()
+                    .eq('vendor_id', payload.auditoriumId)
+                    .eq('event_date', dateStr)
+                    .eq('status', 'held')
+                ])
               } catch (err) {
-                console.warn('Failed to mark booking cancelled after modal dismissal:', err)
+                console.warn('Failed to clean up hold after modal dismissal:', err)
               }
               reject(new Error('Payment cancelled'))
             },

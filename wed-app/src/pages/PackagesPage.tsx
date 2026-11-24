@@ -1,5 +1,5 @@
 import { useState, useId, useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import gsap from 'gsap'
 import Layout from '../components/layout/Layout'
 import StackedDestinationImages from '../components/home/StackedDestinationImages'
@@ -18,7 +18,6 @@ import {
   usePackagesStore,
   type WeddingPackage,
   type PackageReel,
-  type PackageTextGroup,
 } from '../store/packagesStore'
 import {
   MapPin,
@@ -39,21 +38,41 @@ import {
   ChevronLeft,
   ChevronRight,
   Film,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeftRight,
-  GripVertical,
   Undo2,
   Redo2,
-  RotateCcw,
-  Move,
   Save,
   Monitor,
   Smartphone,
   Check,
   CopyCheck,
   Lock,
+  Info,
+  Clock,
+  Heart,
+  Share2,
+  MessageCircle,
+  SlidersHorizontal,
+  ChevronDown as ChevronDownIcon,
+  ChevronUp as ChevronUpIcon,
 } from 'lucide-react'
+
+// ─── 23-Day Advance Booking Settings ───────────────────────────────────
+const MIN_LEAD_DAYS = 23
+
+function getIST_YYYY_MM_DD(date: Date): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date)
+}
+
+function addDays(date: Date, n: number): Date {
+  const d = new Date(date)
+  d.setDate(d.getDate() + n)
+  return d
+}
 
 function InstagramIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
@@ -89,105 +108,95 @@ function PackageImageGallery({
   const safeIdx = photoIdx < photos.length ? photoIdx : 0
 
   return (
-    <div
-      onClick={() => {
-        if (photos.length > 1) {
-          setPhotoIdx((prev) => (prev + 1) % photos.length)
-        }
-      }}
-      className={`relative aspect-[16/10] sm:aspect-video lg:aspect-auto lg:h-full lg:min-h-[340px] w-full overflow-hidden bg-[#FDF0F4] ${
-        photos.length > 1 ? 'cursor-pointer' : ''
-      }`}
-    >
-      <img
-        src={photos[safeIdx]}
-        alt={pkg.title}
-        loading="lazy"
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+    <div className="w-full flex flex-col gap-3">
+      {/* Main Image Stage */}
+      <div className="relative aspect-[4/3] sm:aspect-[16/11] w-full overflow-hidden rounded-2xl bg-[#FDF0F4] border border-[#D8F0EC]/60 group">
+        <img
+          src={photos[safeIdx]}
+          alt={pkg.title}
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
-      {/* Backdrop Badge */}
-      <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-[#D8F0EC] text-xs font-semibold text-[#7E1F3E] shadow-md">
-        <span>{pkg.backdrop} Experience</span>
+        {/* Location tag in photo corner */}
+        <div className="absolute bottom-3 right-3 text-[11px] font-bold tracking-wider uppercase text-white/90 drop-shadow-sm pointer-events-none">
+          {pkg.location}
+        </div>
+
+        {/* Carousel arrows */}
+        {photos.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setPhotoIdx((prev) => (prev - 1 + photos.length) % photos.length)
+              }}
+              aria-label="Previous photo"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 hover:bg-white text-gray-800 shadow-md backdrop-blur-xs transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setPhotoIdx((prev) => (prev + 1) % photos.length)
+              }}
+              aria-label="Next photo"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 hover:bg-white text-gray-800 shadow-md backdrop-blur-xs transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </>
+        )}
+
+        {/* Admin Edit/Delete */}
+        {isAdmin && (
+          <div
+            className="absolute top-3 right-3 flex items-center gap-1.5 z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={onEdit}
+              aria-label={`Edit ${pkg.title}`}
+              className="p-2 rounded-full bg-white/90 backdrop-blur-md text-[#C83B68] hover:bg-white border border-[#D8F0EC] shadow-md transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              aria-label={`Delete ${pkg.title}`}
+              className="p-2 rounded-full bg-white/90 backdrop-blur-md text-red-500 hover:bg-red-50 border border-red-200 shadow-md transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Admin Edit / Delete Controls */}
-      {isAdmin && (
-        <div
-          className="absolute top-3 right-3 flex items-center gap-1.5 z-10"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            type="button"
-            onClick={onEdit}
-            aria-label={`Edit ${pkg.title}`}
-            className="p-2 rounded-full bg-white/90 backdrop-blur-md text-[#C83B68] hover:bg-white border border-[#D8F0EC] shadow-md transition-colors"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            aria-label={`Delete ${pkg.title}`}
-            className="p-2 rounded-full bg-white/90 backdrop-blur-md text-red-500 hover:bg-red-50 border border-red-200 shadow-md transition-colors"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
-
-      {/* Multi-Image Carousel Arrows (Admin only — regular users tap image to switch) */}
-      {isAdmin && photos.length > 1 && (
-        <>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setPhotoIdx((prev) => (prev - 1 + photos.length) % photos.length)
-            }}
-            aria-label="Previous package photo"
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/50 hover:bg-black/75 text-white backdrop-blur-xs transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setPhotoIdx((prev) => (prev + 1) % photos.length)
-            }}
-            aria-label="Next package photo"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/50 hover:bg-black/75 text-white backdrop-blur-xs transition-colors"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </>
-      )}
-
-      {/* Photo indicator dots */}
+      {/* Thumbnails Row */}
       {photos.length > 1 && (
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 pointer-events-none">
-          {photos.map((_, idx) => (
-            <span
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+          {photos.map((src, idx) => (
+            <button
               key={idx}
-              className={`h-1.5 rounded-full transition-all ${
-                idx === safeIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/45'
+              type="button"
+              onClick={() => setPhotoIdx(idx)}
+              className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
+                idx === safeIdx
+                  ? 'border-[#C83B68] ring-2 ring-[#C83B68]/30 shadow-xs'
+                  : 'border-transparent opacity-70 hover:opacity-100'
               }`}
-            />
+            >
+              <img src={src} alt="" className="w-full h-full object-cover" />
+            </button>
           ))}
         </div>
       )}
-
-      {/* Pricing tag */}
-      <div className="absolute bottom-3 right-3 px-3.5 py-1.5 rounded-lg bg-white/95 backdrop-blur-md border border-[#D8F0EC] shadow-md text-right">
-        <span className="block text-[9px] uppercase tracking-wider text-[#7E1F3E]/80 font-bold">
-          Pricing
-        </span>
-        <span className="text-sm sm:text-base font-extrabold text-[#C83B68]">
-          {pkg.startingPrice}
-        </span>
-      </div>
     </div>
   )
 }
@@ -339,7 +348,6 @@ export default function PackagesPage() {
     setAppliedAllPkgId(targetId)
     setTimeout(() => setAppliedAllPkgId(null), 2200)
   }
-  const updatePackage = usePackagesStore((s) => s.updatePackage)
   const deletePackage = usePackagesStore((s) => s.deletePackage)
   const updatePackageReel = usePackagesStore((s) => s.updatePackageReel)
   const deletePackageReel = usePackagesStore((s) => s.deletePackageReel)
@@ -347,96 +355,11 @@ export default function PackagesPage() {
   const movePackageReel = usePackagesStore((s) => s.movePackageReel)
 
   // Cursor Drag-and-Drop states (Admin only)
-  const [draggedTextGroup, setDraggedTextGroup] = useState<{
-    pkgId: string
-    group: PackageTextGroup
-  } | null>(null)
-  const [freeDragState, setFreeDragState] = useState<{
-    pkgId: string
-    group: PackageTextGroup
-    x: number
-    y: number
-  } | null>(null)
   const [draggedReel, setDraggedReel] = useState<{
     pkgId: string
     reelId: string
     index: number
   } | null>(null)
-
-  const handleFreeMoveStart = (
-    pkg: WeddingPackage,
-    group: PackageTextGroup,
-    e: React.PointerEvent<HTMLSpanElement>
-  ) => {
-    if (!isAdmin) return
-    e.stopPropagation()
-    e.preventDefault()
-
-    const currentOffset = pkg.textOffsets?.[group] || { x: 0, y: 0 }
-    const startX = e.clientX
-    const startY = e.clientY
-    let latest = { ...currentOffset }
-
-    setFreeDragState({ pkgId: pkg.id, group, x: latest.x, y: latest.y })
-
-    const onPointerMove = (moveEvent: PointerEvent) => {
-      const dx = moveEvent.clientX - startX
-      const dy = moveEvent.clientY - startY
-      latest = {
-        x: Math.round(currentOffset.x + dx),
-        y: Math.round(currentOffset.y + dy),
-      }
-      setFreeDragState({ pkgId: pkg.id, group, x: latest.x, y: latest.y })
-    }
-
-    const onPointerUp = () => {
-      window.removeEventListener('pointermove', onPointerMove)
-      window.removeEventListener('pointerup', onPointerUp)
-      setFreeDragState(null)
-      setLastEditedPkgId(pkg.id)
-      updatePackage(pkg.id, {
-        textOffsets: {
-          ...(pkg.textOffsets || {}),
-          [group]: latest,
-        },
-      })
-    }
-
-    window.addEventListener('pointermove', onPointerMove)
-    window.addEventListener('pointerup', onPointerUp)
-  }
-
-  const handleMoveTextGroup = (
-    pkg: WeddingPackage,
-    group: PackageTextGroup,
-    direction: -1 | 1
-  ) => {
-    const order: PackageTextGroup[] = pkg.textOrder?.length
-      ? [...pkg.textOrder]
-      : ['header', 'inclusions', 'footer']
-    const idx = order.indexOf(group)
-    const targetIdx = idx + direction
-    if (idx === -1 || targetIdx < 0 || targetIdx >= order.length) return
-    const next = [...order]
-    ;[next[idx], next[targetIdx]] = [next[targetIdx], next[idx]]
-    updatePackage(pkg.id, { textOrder: next })
-  }
-
-  const handleDropTextGroup = (pkg: WeddingPackage, targetGroup: PackageTextGroup) => {
-    if (!draggedTextGroup || draggedTextGroup.pkgId !== pkg.id) return
-    if (draggedTextGroup.group === targetGroup) return
-    const order: PackageTextGroup[] = pkg.textOrder?.length
-      ? [...pkg.textOrder]
-      : ['header', 'inclusions', 'footer']
-    const fromIdx = order.indexOf(draggedTextGroup.group)
-    const toIdx = order.indexOf(targetGroup)
-    if (fromIdx === -1 || toIdx === -1) return
-    const next = [...order]
-    const [moved] = next.splice(fromIdx, 1)
-    next.splice(toIdx, 0, moved)
-    updatePackage(pkg.id, { textOrder: next })
-    setDraggedTextGroup(null)
-  }
 
   const handleDropReel = (targetPkgId: string, targetIndex?: number) => {
     if (!draggedReel) return
@@ -475,6 +398,8 @@ export default function PackagesPage() {
     notes: '',
   })
   const [formSubmitting, setFormSubmitting] = useState(false)
+  const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({})
+  const [pincodes, setPincodes] = useState<Record<string, string>>({})
 
   // Unique IDs for accessible form controls
   const fullNameId = useId()
@@ -696,8 +621,23 @@ export default function PackagesPage() {
   return (
     <Layout>
       <div ref={pageRef}>
-      {/* Top Hero Banner with Destination Wedding Showcase */}
-      <section className="relative overflow-hidden bg-[#F0F9F8] py-12 sm:py-16 px-4 sm:px-6 lg:px-8 border-b border-[#D8F0EC]">
+        {/* Top Breadcrumb Navigation */}
+        <div className="bg-white border-b border-[#D8F0EC]/80 py-3 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto flex items-center gap-2 text-xs sm:text-sm text-gray-500 overflow-x-auto whitespace-nowrap">
+            <Link to="/" className="hover:text-[#C83B68] transition-colors font-medium">Home</Link>
+            <span className="text-gray-300">/</span>
+            <Link to="/packages" className="hover:text-[#C83B68] transition-colors font-medium">Services</Link>
+            <span className="text-gray-300">/</span>
+            <span className="text-gray-600 font-medium">Event Management</span>
+            <span className="text-gray-300">/</span>
+            <span className="text-[#5A172D] font-bold truncate max-w-[260px] sm:max-w-md">
+              {displayedPackages[activePackageIndex]?.title || 'Signature Wedding Experience'}
+            </span>
+          </div>
+        </div>
+
+        {/* Top Hero Banner with Destination Wedding Showcase */}
+        <section className="relative overflow-hidden bg-[#F0F9F8] py-12 sm:py-16 px-4 sm:px-6 lg:px-8 border-b border-[#D8F0EC]">
         <div className="absolute inset-0 pointer-events-none opacity-25">
           <div className="absolute top-0 right-1/4 w-80 h-80 rounded-full bg-[#D8F0EC]/60 blur-3xl" />
           <div className="absolute bottom-0 left-1/4 w-96 h-96 rounded-full bg-[#D8F0EC]/50 blur-3xl" />
@@ -891,20 +831,58 @@ export default function PackagesPage() {
         {/* EXPLORE PACKAGES LOOPING STACK SECTION */}
         <section
           id="packages-section"
-          className="scroll-mt-24 mb-12 sm:mb-16 pt-1"
+          className="scroll-mt-24 mb-10 pt-1"
           aria-label="Explore Destination Packages"
         >
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 sm:mb-6 gap-2">
+          {/* Header section matching screenshot: Title + Subtitle + Filters Counter Bar */}
+          <div className="mb-6 space-y-4">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/90 border border-[#D8F0EC] text-[11px] font-bold text-[#C83B68] mb-1.5 shadow-xs">
-                <span>Destination Wedding Packages</span>
-              </div>
               <h2
-                className="text-2xl sm:text-3xl font-bold text-[#7E1F3E] tracking-wide text-left drop-shadow-xs"
+                className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1A1A1A] tracking-tight text-left drop-shadow-xs"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
-                Explore Packages
+                Event Management
               </h2>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">
+                Discover verified professionals near you
+              </p>
+            </div>
+
+            {/* Packages found counter + Filters Icon Button */}
+            <div className="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-white border border-gray-200/90 shadow-2xs">
+              <span className="text-xs sm:text-sm text-gray-700 font-medium">
+                <strong className="text-gray-900 font-bold">{filteredPackages.length}</strong> packages found
+              </span>
+              <div className="flex items-center gap-2">
+                {/* Backdrop Pill Filters Dropdown / Toggle */}
+                <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+                  {['All', 'Backwaters', 'Coast', 'Hills', 'Heritage'].map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => handleBackdropChange(tab)}
+                      className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                        selectedBackdrop === tab
+                          ? 'bg-[#B8710B] text-white shadow-xs'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = selectedBackdrop === 'All' ? 'Coast' : selectedBackdrop === 'Coast' ? 'Heritage' : 'All'
+                    handleBackdropChange(next)
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 hover:border-[#B8710B]/50 bg-white text-xs font-bold text-gray-800 hover:text-[#B8710B] shadow-2xs transition-all shrink-0"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#B8710B]" />
+                  <span>Filters</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -996,7 +974,7 @@ export default function PackagesPage() {
                   }`}
                 >
                   {/* Left: Photo Gallery & Admin Controls */}
-                  <div className="w-full lg:w-[44%] shrink-0">
+                  <div className="w-full lg:w-[48%] shrink-0 p-5 sm:p-6 lg:p-7">
                     <PackageImageGallery
                       pkg={pkg}
                       isAdmin={Boolean(isAdmin || (isPlannerVendor && pkg.vendorId === profile?.id))}
@@ -1012,225 +990,198 @@ export default function PackagesPage() {
                     />
                   </div>
 
-                  {/* Right: Package Content with Admin-Movable Text Groups */}
-                  <div className="p-5 sm:p-6 lg:p-7 flex-1 flex flex-col justify-between space-y-4 min-w-0">
-                    {isAdmin && (
-                      <div className="hidden lg:flex flex-wrap items-center justify-end gap-2">
-                        {pkg.textOffsets && Object.keys(pkg.textOffsets).length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => updatePackage(pkg.id, { textOffsets: {} })}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-[#F0F9F8] text-[#C83B68] text-[10px] font-semibold border border-[#D8F0EC] transition-colors"
+                  {/* Right: Package Content styled cleanly according to screenshot */}
+                  <div className="p-5 sm:p-6 lg:p-7 flex-1 flex flex-col justify-between space-y-5 min-w-0">
+                    {/* Top Category + Action Icons (Like, Share, WhatsApp) */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#C83B68]">
+                        EVENT MANAGEMENT
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          aria-label="Save package"
+                          className="w-8 h-8 rounded-full border border-gray-200 hover:border-pink-300 text-gray-500 hover:text-[#C83B68] flex items-center justify-center transition-colors bg-white shadow-2xs"
+                        >
+                          <Heart className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Share package"
+                          onClick={() => {
+                            if (navigator.share) {
+                              navigator.share({ title: pkg.title, url: window.location.href }).catch(() => {})
+                            } else {
+                              navigator.clipboard.writeText(window.location.href)
+                              alert('Package link copied to clipboard!')
+                            }
+                          }}
+                          className="w-8 h-8 rounded-full border border-gray-200 hover:border-pink-300 text-gray-500 hover:text-[#C83B68] flex items-center justify-center transition-colors bg-white shadow-2xs"
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </button>
+                        {pkg.whatsappNumber && (
+                          <a
+                            href={`https://wa.me/${pkg.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                              `Hi! I found the "${pkg.title}" destination wedding package on MANA and would like to inquire.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Chat on WhatsApp"
+                            className="w-8 h-8 rounded-full border border-gray-200 hover:border-green-300 text-emerald-600 flex items-center justify-center transition-colors bg-white shadow-2xs"
                           >
-                            <RotateCcw className="w-3 h-3" />
-                            <span>Reset Text Positions</span>
-                          </button>
+                            <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                          </a>
                         )}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updatePackage(pkg.id, {
-                              reverseDesktopLayout: !pkg.reverseDesktopLayout,
-                            })
-                          }
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-[#F0F9F8] text-[#7E1F3E] text-[10px] font-semibold border border-[#D8F0EC] transition-colors"
-                        >
-                          <ArrowLeftRight className="w-3 h-3 text-brand-secondary" />
-                          <span>Swap Image / Text Side</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleApplyToAll(pkg.id)}
-                          title="Apply this package's layout & reel settings to all packages"
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-secondary/20 hover:bg-brand-secondary/35 text-brand-secondary text-[10px] font-bold border border-brand-secondary/50 transition-colors"
-                        >
-                          {appliedAllPkgId === pkg.id ? (
-                            <Check className="w-3 h-3 text-emerald-300" />
-                          ) : (
-                            <CopyCheck className="w-3 h-3" />
-                          )}
-                          <span>
-                            {appliedAllPkgId === pkg.id ? 'Applied to All!' : 'Apply to All Packages'}
-                          </span>
-                        </button>
                       </div>
-                    )}
+                    </div>
 
-                    {(pkg.textOrder?.length
-                      ? pkg.textOrder
-                      : (['header', 'inclusions', 'footer'] as PackageTextGroup[])
-                    ).map((groupKey, gIdx, arr) => {
-                      const activeFreeOffset =
-                        freeDragState?.pkgId === pkg.id && freeDragState.group === groupKey
-                          ? { x: freeDragState.x, y: freeDragState.y }
-                          : pkg.textOffsets?.[groupKey]
+                    {/* Title & Planner */}
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
+                        {pkg.title}
+                      </h2>
+                      <p className="text-xs sm:text-sm font-medium text-gray-500 mt-1">
+                        {pkg.partnerPlanner}
+                      </p>
+                      <div className="mt-2.5">
+                        <span className="inline-block px-3 py-1 rounded-md bg-[#FFF5E6] text-[#B8710B] text-xs font-bold border border-[#FFE0B2]">
+                          Price on Request
+                        </span>
+                      </div>
+                    </div>
 
-                      // Scope free-drag offsets to Desktop (lg:) so Mobile alignment remains 100% frozen
-                      const hasOffset =
-                        activeFreeOffset && (activeFreeOffset.x !== 0 || activeFreeOffset.y !== 0)
-                      const freeStyle = hasOffset
-                        ? ({
-                            '--pkg-tx': `${activeFreeOffset.x}px`,
-                            '--pkg-ty': `${activeFreeOffset.y}px`,
-                            zIndex: freeDragState?.group === groupKey ? 30 : 10,
-                          } as React.CSSProperties)
-                        : undefined
-                      const freeClass = hasOffset
-                        ? 'lg:relative lg:[transform:translate3d(var(--pkg-tx,0px),var(--pkg-ty,0px),0)]'
-                        : ''
+                    {/* Description with "Read Full Description" toggle */}
+                    <div>
+                      <p className={`text-xs sm:text-sm text-gray-600 leading-relaxed transition-all ${
+                        expandedDescriptions[pkg.id] ? '' : 'line-clamp-2'
+                      }`}>
+                        {pkg.description}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedDescriptions((prev) => ({ ...prev, [pkg.id]: !prev[pkg.id] }))
+                        }
+                        className="mt-1.5 text-xs font-bold text-gray-800 hover:text-[#C83B68] inline-flex items-center gap-1 transition-colors"
+                      >
+                        <span>{expandedDescriptions[pkg.id] ? 'Show Less' : 'Read Full Description'}</span>
+                        {expandedDescriptions[pkg.id] ? (
+                          <ChevronUpIcon className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronDownIcon className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
 
-                      const moveControls = isAdmin ? (
-                        <div className="hidden lg:flex items-center gap-1 shrink-0">
-                          <span
-                            onPointerDown={(e) => handleFreeMoveStart(pkg, groupKey, e)}
-                            title="Grab & drag anywhere on this package"
-                            className="inline-flex items-center gap-0.5 px-1.5 py-1 rounded bg-brand-secondary/20 text-brand-secondary hover:bg-brand-secondary/35 cursor-move border border-brand-secondary/50 select-none"
-                          >
-                            <Move className="w-3 h-3" />
-                            <span className="text-[9px] font-bold">Move</span>
-                          </span>
-                          <span
-                            title="Drag to swap vertical order"
-                            className="p-1 rounded bg-emerald-950/80 text-emerald-200 cursor-grab active:cursor-grabbing border border-emerald-800/60"
-                          >
-                            <GripVertical className="w-3 h-3" />
-                          </span>
-                          <button
-                            type="button"
-                            disabled={gIdx === 0}
-                            onClick={() => handleMoveTextGroup(pkg, groupKey, -1)}
-                            aria-label={`Move ${groupKey} up`}
-                            className="p-1 rounded bg-emerald-950/80 text-emerald-200 hover:text-brand-secondary border border-emerald-800/60 disabled:opacity-30"
-                          >
-                            <ArrowUp className="w-3 h-3" />
-                          </button>
-                          <button
-                            type="button"
-                            disabled={gIdx === arr.length - 1}
-                            onClick={() => handleMoveTextGroup(pkg, groupKey, 1)}
-                            aria-label={`Move ${groupKey} down`}
-                            className="p-1 rounded bg-emerald-950/80 text-emerald-200 hover:text-brand-secondary border border-emerald-800/60 disabled:opacity-30"
-                          >
-                            <ArrowDown className="w-3 h-3" />
-                          </button>
+                    {/* WHAT'S AVAILABLE (Inclusions with green checkmarks) */}
+                    <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden shadow-2xs">
+                      <div className="px-4 py-3 bg-gray-50/60 border-b border-gray-100">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                          WHAT'S AVAILABLE
+                        </span>
+                      </div>
+                      <div className="divide-y divide-gray-100">
+                        {pkg.inclusions.map((item, idx) => (
+                          <div key={idx} className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-700 font-medium">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* AVAILABILITY BOX matching screenshot */}
+                    <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 space-y-3.5 shadow-2xs">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">
+                        AVAILABILITY
+                      </span>
+
+                      {/* Location Input */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Location</label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={pincodes[pkg.id] ?? '682001'}
+                            onChange={(e) => {
+                              const val = e.target.value
+                              setPincodes((prev) => ({ ...prev, [pkg.id]: val }))
+                            }}
+                            placeholder="Enter pincode or city..."
+                            className="w-full pl-9 pr-8 py-2 text-xs bg-gray-50/70 border border-gray-200 rounded-lg text-gray-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C83B68]/30 transition-all"
+                          />
+                          <MapPin className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          {(pincodes[pkg.id] ?? '682001') && (
+                            <button
+                              type="button"
+                              onClick={() => setPincodes((prev) => ({ ...prev, [pkg.id]: '' }))}
+                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
-                      ) : null
+                      </div>
 
-                      const dragWrapperProps = isAdmin
-                        ? {
-                            draggable: true,
-                            onDragStart: (e: React.DragEvent) => {
-                              e.stopPropagation()
-                              setDraggedTextGroup({ pkgId: pkg.id, group: groupKey })
-                            },
-                            onDragOver: (e: React.DragEvent) => {
-                              if (draggedTextGroup?.pkgId === pkg.id) {
-                                e.preventDefault()
-                              }
-                            },
-                            onDrop: (e: React.DragEvent) => {
-                              e.preventDefault()
-                              handleDropTextGroup(pkg, groupKey)
-                            },
-                            onDragEnd: () => setDraggedTextGroup(null),
-                          }
-                        : {}
-
-                      const isBeingDragged =
-                        draggedTextGroup?.pkgId === pkg.id && draggedTextGroup.group === groupKey
-
-                      if (groupKey === 'header') {
-                        return (
-                          <div
-                            key="header"
-                            {...dragWrapperProps}
-                            style={freeStyle}
-                            className={`space-y-2 rounded-xl transition-shadow ${freeClass} ${
-                              isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-[#C83B68]/70 lg:p-1 lg:-m-1' : ''
-                            } ${isBeingDragged ? 'opacity-45' : ''}`}
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2 text-xs font-semibold text-black flex-wrap">
-                                <MapPin className="w-3.5 h-3.5 text-[#C83B68] shrink-0" />
-                                <span>{pkg.location}</span>
-                                <span className="text-black">•</span>
-                                <Users className="w-3.5 h-3.5 text-[#C83B68] shrink-0" />
-                                <span>{pkg.guestCapacity}</span>
-                              </div>
-                              {moveControls}
-                            </div>
-
-                            <h2 className="text-xl sm:text-2xl font-bold text-black transition-colors leading-snug">
-                              {pkg.title}
-                            </h2>
-
-                            <p className="text-xs sm:text-sm text-black leading-relaxed">
-                              {pkg.description}
-                            </p>
-                          </div>
-                        )
-                      }
-
-                      if (groupKey === 'inclusions') {
-                        return (
-                          <div
-                            key="inclusions"
-                            {...dragWrapperProps}
-                            style={freeStyle}
-                            className={`space-y-2 pt-2 border-t border-[#D8F0EC] rounded-xl transition-shadow ${freeClass} ${
-                              isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-[#C83B68]/70 lg:p-1 lg:-m-1' : ''
-                            } ${isBeingDragged ? 'opacity-45' : ''}`}
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="text-xs font-bold uppercase tracking-wider text-black">
-                                Bespoke Inclusions
-                              </p>
-                              {moveControls}
-                            </div>
-                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-black">
-                              {pkg.inclusions.map((inc, idx) => (
-                                <li key={idx} className="flex items-start gap-2">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-black shrink-0 mt-1.5" />
-                                  <span>{inc}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )
-                      }
-
-                      return (
-                        <div
-                          key="footer"
-                          {...dragWrapperProps}
-                          style={freeStyle}
-                          className={`pt-3 border-t border-[#D8F0EC] space-y-3 rounded-xl transition-shadow ${freeClass} ${
-                            isAdmin ? 'lg:hover:outline lg:hover:outline-1 lg:hover:outline-dashed lg:hover:outline-[#C83B68]/70 lg:p-1 lg:-m-1' : ''
-                          } ${isBeingDragged ? 'opacity-45' : ''}`}
-                        >
-                          {/* Exclusive Social Media & Direct Chat Links (Desktop / Tablet view) */}
-                          {renderExclusiveLinks(pkg, 'hidden sm:flex')}
-
-                          <div className="flex items-center justify-between gap-4 pt-1">
-                            <div className="text-[11px] text-black">
-                              <span>Curated by </span>
-                              <strong className="text-black">{pkg.partnerPlanner}</strong>
-                            </div>
-
-                            <div className="flex items-center gap-2 shrink-0">
-                              {moveControls}
-                              <button
-                                type="button"
-                                onClick={() => handleInquireClick(pkg)}
-                                className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#E05A85] via-[#F3A2BE] to-[#E05A85] hover:brightness-105 text-white font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0 cursor-pointer"
-                              >
-                                <span>Inquire Package</span>
-                              </button>
-                            </div>
-                          </div>
+                      {/* Event Date Input */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Event Date</label>
+                        <div className="relative">
+                          <input
+                            type="date"
+                            value={formData.eventDate || getIST_YYYY_MM_DD(addDays(new Date(), MIN_LEAD_DAYS))}
+                            min={getIST_YYYY_MM_DD(addDays(new Date(), MIN_LEAD_DAYS))}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, eventDate: e.target.value }))}
+                            className="w-full pl-3 pr-9 py-2 text-xs bg-gray-50/70 border border-gray-200 rounded-lg text-gray-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C83B68]/30 transition-all cursor-pointer"
+                          />
+                          <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
-                      )
-                    })}
+                        <p className="mt-1.5 text-[11px] font-medium text-rose-500">
+                          Booking must be made at least 23 days in advance. Earliest available date is{' '}
+                          {getIST_YYYY_MM_DD(addDays(new Date(), MIN_LEAD_DAYS))}.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* CANCELLATION POLICY BOX matching screenshot */}
+                    <div className="rounded-2xl border-l-4 border-l-amber-500 border border-amber-200 bg-amber-50/40 p-4 space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-amber-700 text-xs font-bold uppercase tracking-wider">
+                        <Clock className="w-3.5 h-3.5 text-amber-600" />
+                        <span>CANCELLATION POLICY</span>
+                      </div>
+                      <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc marker:text-amber-500">
+                        <li>50% refund available for cancellations made at least 7 days prior to the delivery date.</li>
+                        <li>No refund will be provided for cancellations made within 7 days of delivery date.</li>
+                      </ul>
+                      <p className="text-[11px] text-gray-500 italic pt-0.5">
+                        Standard processing charges may apply and are non-refundable.
+                      </p>
+                    </div>
+
+                    {/* PAYMENT POLICY BOX matching screenshot */}
+                    <div className="rounded-2xl border-l-4 border-l-sky-500 border border-sky-200 bg-sky-50/40 p-4 space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-sky-800 text-xs font-bold uppercase tracking-wider">
+                        <Info className="w-3.5 h-3.5 text-sky-600" />
+                        <span>PAYMENT POLICY</span>
+                      </div>
+                      <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc marker:text-sky-500">
+                        <li>An advance payment of 10% of the total amount is required online for confirmation.</li>
+                        <li>The remaining balance will be collected at the time of delivery.</li>
+                        <li>Remaining payments will be collected directly by {pkg.partnerPlanner || 'Verified Partner'}.</li>
+                      </ul>
+                    </div>
+
+                    {/* MAKE AN ENQUIRY CTA BUTTON matching screenshot */}
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => handleInquireClick(pkg)}
+                        className="px-8 py-3 rounded-xl bg-black text-white hover:bg-gray-800 font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 cursor-pointer"
+                      >
+                        Make an Enquiry
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -1481,11 +1432,16 @@ export default function PackagesPage() {
                           id={eventDateId}
                           type="date"
                           value={formData.eventDate}
+                          min={getIST_YYYY_MM_DD(addDays(new Date(), MIN_LEAD_DAYS))}
                           onChange={(e) => setFormData({ ...formData, eventDate: e.target.value })}
                           className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#D8F0EC] rounded-lg text-[#5A172D] focus:outline-none focus:ring-2 focus:ring-[#C83B68]/50"
                         />
                         <Calendar className="w-4 h-4 text-[#C83B68] absolute left-3 top-1/2 -translate-y-1/2" />
                       </div>
+                      <p className="mt-1 text-[11px] text-amber-700 flex items-center gap-1">
+                        <Info className="w-3 h-3 shrink-0" />
+                        Minimum 23 days advance booking required
+                      </p>
                     </div>
 
                     <div>
