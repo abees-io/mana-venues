@@ -41,6 +41,9 @@ import {
 } from '../store/photographyStore'
 import { useLoginGate } from '../contexts/LoginGateContext'
 import { useAuth } from '../contexts/AuthContext'
+import { useCityStore } from '../store/cityStore'
+import { matchesPackageCities } from '../lib/cityMatch'
+import { MultiCitySelector } from '../components/common/MultiCitySelector'
 import {
   checkRateLimit,
   recordRateLimitAttempt,
@@ -50,6 +53,7 @@ import {
 export default function PhotographyPage() {
   const { requireAuth } = useLoginGate()
   const { user, profile } = useAuth()
+  const selectedCity = useCityStore((s) => s.selectedCity)
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
   const isPhotoVendor = profile?.role === 'vendor' && profile?.vendor_type === 'photographer'
   const canManagePhotography = Boolean(isAdmin || isPhotoVendor)
@@ -90,6 +94,7 @@ export default function PhotographyPage() {
   const [pkgPhotos, setPkgPhotos] = useState('')
   const [pkgFilms, setPkgFilms] = useState('')
   const [pkgDelivery, setPkgDelivery] = useState('')
+  const [pkgCities, setPkgCities] = useState<string[]>([])
 
   const handleOpenAddModal = () => {
     setPkgTitle('')
@@ -106,6 +111,7 @@ export default function PhotographyPage() {
     setPkgPhotos('')
     setPkgFilms('')
     setPkgDelivery('')
+    setPkgCities([])
     setEditingPkg(null)
     setIsAddEditModalOpen(true)
   }
@@ -125,6 +131,7 @@ export default function PhotographyPage() {
     setPkgPhotos(pkg.deliverables.photos)
     setPkgFilms(pkg.deliverables.films)
     setPkgDelivery(pkg.deliverables.deliveryTime)
+    setPkgCities(pkg.cities || [])
     setEditingPkg(pkg)
     setIsAddEditModalOpen(true)
   }
@@ -139,6 +146,10 @@ export default function PhotographyPage() {
     e.preventDefault()
     if (!pkgTitle.trim() || !pkgPrice.trim()) {
       alert('Please fill in at least a title and price.')
+      return
+    }
+    if (pkgCities.length === 0) {
+      alert('Please select at least one service city.')
       return
     }
     const inclusionsArray = pkgInclusionsText.split('\n').map((s) => s.trim()).filter(Boolean)
@@ -156,6 +167,7 @@ export default function PhotographyPage() {
         badge: pkgBadge.trim(),
         image: pkgImage.trim() || '/photo-wedding.jpg',
         inclusions: inclusionsArray,
+        cities: pkgCities,
         deliverables: {
           reels: pkgReels.trim(),
           photos: pkgPhotos.trim(),
@@ -178,6 +190,7 @@ export default function PhotographyPage() {
         image: pkgImage.trim() || '/photo-wedding.jpg',
         highlights: ['HD Footage', 'Professional Crew', 'Quick Delivery'],
         inclusions: inclusionsArray,
+        cities: pkgCities,
         deliverables: {
           reels: pkgReels.trim(),
           photos: pkgPhotos.trim(),
@@ -227,6 +240,7 @@ export default function PhotographyPage() {
 
   // Filter packages
   const filteredPackages = packages.filter((pkg) => {
+    const matchesCity = matchesPackageCities(pkg.cities, selectedCity, undefined, true)
     const matchesCategory =
       selectedCategory === 'all' || pkg.category === selectedCategory
     const matchesSearch =
@@ -234,7 +248,7 @@ export default function PhotographyPage() {
       pkg.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pkg.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pkg.gear.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
+    return matchesCity && matchesCategory && matchesSearch
   })
 
   const handleOpenPackage = (pkgId: string) => {
@@ -972,6 +986,12 @@ export default function PhotographyPage() {
                   className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
                 />
               </div>
+
+              <MultiCitySelector
+                theme="light"
+                selectedCities={pkgCities}
+                onChange={setPkgCities}
+              />
 
               <div>
                 <label className="block text-xs font-bold text-black/80 mb-1">Badge Text</label>

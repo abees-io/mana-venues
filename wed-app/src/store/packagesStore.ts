@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { supabase } from '../lib/supabase'
+import { matchesPackageCities } from '../lib/cityMatch'
 
 export type ReelAspectRatio = '9:16' | '16:9'
 export type ReelSize = 'sm' | 'md' | 'lg' | 'full'
@@ -54,58 +55,7 @@ export function packageMatchesCity(
   pkg: WeddingPackage,
   city: { name: string; slug: string } | string | null | undefined
 ): boolean {
-  if (!city) return true // Show all if no city filter is selected
-
-  const cityName = (typeof city === 'string' ? city : city.name).toLowerCase()
-  const citySlug = (typeof city === 'string' ? city : city.slug).toLowerCase()
-
-  // Match against cities array if defined
-  if (Array.isArray(pkg.cities) && pkg.cities.length > 0) {
-    const matched = pkg.cities.some((c) => {
-      const lower = c.toLowerCase()
-      return (
-        lower === citySlug ||
-        lower === cityName ||
-        cityName.includes(lower) ||
-        lower.includes(citySlug)
-      )
-    })
-    if (matched) return true
-  }
-
-  // Location string check
-  const loc = (pkg.location || '').toLowerCase()
-  if (loc.includes(citySlug) || loc.includes(cityName)) {
-    return true
-  }
-
-  // Common Kerala aliases
-  if (
-    (citySlug.includes('kochi') || citySlug.includes('ernakulam')) &&
-    (loc.includes('kochi') || loc.includes('ernakulam'))
-  ) {
-    return true
-  }
-  if (
-    (citySlug.includes('thiruvananthapuram') || citySlug.includes('trivandrum')) &&
-    (loc.includes('thiruvananthapuram') || loc.includes('trivandrum'))
-  ) {
-    return true
-  }
-  if (
-    (citySlug.includes('kozhikode') || citySlug.includes('calicut')) &&
-    (loc.includes('kozhikode') || loc.includes('calicut'))
-  ) {
-    return true
-  }
-  if (
-    (citySlug.includes('alappuzha') || citySlug.includes('alleppey')) &&
-    (loc.includes('alappuzha') || loc.includes('alleppey'))
-  ) {
-    return true
-  }
-
-  return false
+  return matchesPackageCities(pkg.cities, city, pkg.location, false)
 }
 
 export const DEFAULT_PACKAGES: WeddingPackage[] = [

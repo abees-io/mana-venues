@@ -25,6 +25,7 @@ export interface PhotographyPackage {
   }
   vendorId?: string
   vendorName?: string
+  cities?: string[]
 }
 
 export const DEFAULT_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [

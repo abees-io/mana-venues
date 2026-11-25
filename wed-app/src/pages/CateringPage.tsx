@@ -41,6 +41,9 @@ import {
 } from '../store/cateringStore'
 import { useAuth } from '../contexts/AuthContext'
 import { useLoginGate } from '../contexts/LoginGateContext'
+import { useCityStore } from '../store/cityStore'
+import { matchesPackageCities } from '../lib/cityMatch'
+import { MultiCitySelector } from '../components/common/MultiCitySelector'
 import {
   checkRateLimit,
   recordRateLimitAttempt,
@@ -62,6 +65,7 @@ export default function CateringPage() {
   const updateHeroTexts = useCateringStore((s) => s.updateHeroTexts)
 
   const { user, profile } = useAuth()
+  const selectedCity = useCityStore((s) => s.selectedCity)
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
   const isCateringVendor = profile?.role === 'vendor' && profile?.vendor_type === 'catering'
   const canManageCatering = Boolean(isAdmin || isCateringVendor)
@@ -97,6 +101,7 @@ export default function CateringPage() {
   const [pkgLiveStalls, setPkgLiveStalls] = useState('')
   const [pkgDesserts, setPkgDesserts] = useState('')
   const [pkgServiceCrew, setPkgServiceCrew] = useState('')
+  const [pkgCities, setPkgCities] = useState<string[]>([])
 
   // Client Inquiry form state
   const [clientName, setClientName] = useState('')
@@ -130,6 +135,7 @@ export default function CateringPage() {
   }
 
   const filteredPackages = packages.filter((pkg) => {
+    const matchesCity = matchesPackageCities(pkg.cities, selectedCity, undefined, true)
     const matchesCategory =
       selectedCategory === 'all' || pkg.category === selectedCategory
     const matchesSearch =
@@ -137,7 +143,7 @@ export default function CateringPage() {
       pkg.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pkg.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pkg.kitchenSpec.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
+    return matchesCity && matchesCategory && matchesSearch
   })
 
   // Open Add Package Modal
@@ -157,6 +163,7 @@ export default function CateringPage() {
     setPkgLiveStalls('Live Payasam Stall')
     setPkgDesserts('4 Payasams')
     setPkgServiceCrew('1 Server per 15 Guests')
+    setPkgCities([])
     setIsAddEditPackageModalOpen(true)
   }
 
@@ -177,6 +184,7 @@ export default function CateringPage() {
     setPkgLiveStalls(pkg.deliverables.liveStalls)
     setPkgDesserts(pkg.deliverables.desserts)
     setPkgServiceCrew(pkg.deliverables.serviceCrew)
+    setPkgCities(pkg.cities || [])
     setIsAddEditPackageModalOpen(true)
   }
 
@@ -185,6 +193,10 @@ export default function CateringPage() {
     e.preventDefault()
     if (!pkgTitle.trim() || !pkgPrice.trim()) {
       alert('Please enter a feast title and price per plate.')
+      return
+    }
+    if (pkgCities.length === 0) {
+      alert('Please select at least one service city.')
       return
     }
 
@@ -212,6 +224,7 @@ export default function CateringPage() {
         badge: pkgBadge.trim(),
         image: pkgImage.trim() || '/catering-sadya.jpg',
         inclusions: inclusionsArray,
+        cities: pkgCities,
         deliverables: {
           courses: pkgCourses.trim(),
           liveStalls: pkgLiveStalls.trim(),
@@ -234,6 +247,7 @@ export default function CateringPage() {
         badge: pkgBadge.trim() || 'Custom Feast',
         highlights: ['Pure Ghee', 'Artisanal Preparation', 'Uniformed Crew'],
         inclusions: inclusionsArray,
+        cities: pkgCities,
         deliverables: {
           courses: pkgCourses.trim(),
           liveStalls: pkgLiveStalls.trim(),
@@ -1074,10 +1088,16 @@ export default function CateringPage() {
                     type="text"
                     value={pkgKitchenSpec}
                     onChange={(e) => setPkgKitchenSpec(e.target.value)}
-                    placeholder="e.g. 100% Traditional Brass Urulis â€¢ Pure Golden Ghee"
+                    placeholder="e.g. 100% Traditional Brass Urulis • Pure Golden Ghee"
                     className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
                   />
                 </div>
+
+                <MultiCitySelector
+                  theme="light"
+                  selectedCities={pkgCities}
+                  onChange={setPkgCities}
+                />
 
                 <div>
                   <label className="block text-xs font-bold text-black/80 mb-1">Short Tagline</label>

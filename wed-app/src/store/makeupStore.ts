@@ -25,6 +25,7 @@ export interface MakeupPackage {
   }
   vendorId?: string
   vendorName?: string
+  cities?: string[]
 }
 
 export interface MakeupHeroText {

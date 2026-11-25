@@ -3,6 +3,9 @@ import { X, Upload, Plus, Trash2, Loader2, Image as ImageIcon, Star, Crop as Cro
 import { uploadOrConvertMultiplePhotos } from '../../lib/imageUtils'
 import { usePackagesStore, type WeddingPackage } from '../../store/packagesStore'
 import { useAuth } from '../../contexts/AuthContext'
+import { useCities, KERALA_DISTRICTS_CITIES } from '../../hooks/useCities'
+import { formatSelectedCitiesLocation } from '../../lib/cityMatch'
+import { MultiCitySelector } from '../common/MultiCitySelector'
 import ImageCropModal from './ImageCropModal'
 
 interface PackageFormModalProps {
@@ -24,6 +27,8 @@ export default function PackageFormModal({
   initialPackage,
 }: PackageFormModalProps) {
   const { profile } = useAuth()
+  const { data: dbCities } = useCities()
+  const allCities = dbCities && dbCities.length > 0 ? dbCities : KERALA_DISTRICTS_CITIES
   const addPackage = usePackagesStore((s) => s.addPackage)
   const updatePackage = usePackagesStore((s) => s.updatePackage)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -32,6 +37,7 @@ export default function PackageFormModal({
   const [tagline, setTagline] = useState('')
   const [backdrop, setBackdrop] = useState<WeddingPackage['backdrop']>('Backwaters')
   const [location, setLocation] = useState('')
+  const [selectedCities, setSelectedCities] = useState<string[]>([])
   const [startingPrice, setStartingPrice] = useState('')
   const [guestCapacity, setGuestCapacity] = useState('')
   const [partnerPlanner, setPartnerPlanner] = useState('MANA Verified Curators')
@@ -52,6 +58,16 @@ export default function PackageFormModal({
       setTagline(initialPackage.tagline)
       setBackdrop(initialPackage.backdrop)
       setLocation(initialPackage.location)
+      if (initialPackage.cities && initialPackage.cities.length > 0) {
+        setSelectedCities(initialPackage.cities)
+      } else {
+        const locLower = (initialPackage.location || '').toLowerCase()
+        const inferred = KERALA_DISTRICTS_CITIES.filter((c) =>
+          locLower.includes(c.slug.toLowerCase()) ||
+          locLower.includes(c.name.toLowerCase().replace(/\s*\(.*?\)\s*/g, ''))
+        ).map((c) => c.slug)
+        setSelectedCities(inferred)
+      }
       setStartingPrice(initialPackage.startingPrice)
       setGuestCapacity(initialPackage.guestCapacity)
       setPartnerPlanner(initialPackage.partnerPlanner)
@@ -71,6 +87,7 @@ export default function PackageFormModal({
       setTagline('')
       setBackdrop('Backwaters')
       setLocation('')
+      setSelectedCities([])
       setStartingPrice('Price on Demand')
       setGuestCapacity('150 - 400 Guests')
       setPartnerPlanner(profile?.business_name || profile?.full_name || 'MANA Verified Curators')
@@ -131,12 +148,21 @@ export default function PackageFormModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const cleanTitle = title.trim()
-    const cleanLocation = location.trim()
+    const cleanLocation =
+      location.trim() || formatSelectedCitiesLocation(selectedCities, allCities)
     const cleanPrice = startingPrice.trim()
     const cleanDesc = description.trim()
 
-    if (!cleanTitle || !cleanLocation || !cleanPrice || !cleanDesc) {
-      setErrorMsg('Please fill in Title, Location, Starting Price, and Description.')
+    if (!cleanTitle || !cleanPrice || !cleanDesc) {
+      setErrorMsg('Please fill in Title, Starting Price, and Description.')
+      return
+    }
+    if (selectedCities.length === 0) {
+      setErrorMsg('Please select at least one service city where this package is available.')
+      return
+    }
+    if (!cleanLocation) {
+      setErrorMsg('Please enter a display location or select service cities.')
       return
     }
 
@@ -151,6 +177,7 @@ export default function PackageFormModal({
       tagline: tagline.trim().slice(0, 160) || `${backdrop} destination wedding experience`,
       backdrop,
       location: cleanLocation.slice(0, 120),
+      cities: selectedCities,
       startingPrice: cleanPrice.slice(0, 40),
       guestCapacity: guestCapacity.trim().slice(0, 60) || '100 - 400 Guests',
       image: finalImages[0],
@@ -248,15 +275,14 @@ export default function PackageFormModal({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-semibold text-emerald-200 mb-1">
-                Location *
+                Display Location (Optional)
               </label>
               <input
                 type="text"
-                required
                 maxLength={120}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. Kumarakom, Kottayam"
+                placeholder="Auto-filled from selected cities"
                 className="w-full px-3 py-2 text-sm bg-emerald-950/60 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-brand-secondary/50"
               />
             </div>
@@ -290,6 +316,12 @@ export default function PackageFormModal({
               />
             </div>
           </div>
+
+          <MultiCitySelector
+            theme="dark"
+            selectedCities={selectedCities}
+            onChange={setSelectedCities}
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>

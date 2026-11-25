@@ -25,6 +25,7 @@ export interface CateringPackage {
   }
   vendorId?: string
   vendorName?: string
+  cities?: string[]
 }
 
 export interface CateringHeroText {

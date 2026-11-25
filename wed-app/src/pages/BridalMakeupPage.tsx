@@ -40,6 +40,9 @@ import {
 } from '../store/makeupStore'
 import { useAuth } from '../contexts/AuthContext'
 import { useLoginGate } from '../contexts/LoginGateContext'
+import { useCityStore } from '../store/cityStore'
+import { matchesPackageCities } from '../lib/cityMatch'
+import { MultiCitySelector } from '../components/common/MultiCitySelector'
 import {
   checkRateLimit,
   recordRateLimitAttempt,
@@ -61,6 +64,7 @@ export default function BridalMakeupPage() {
   const updateHeroTexts = useMakeupStore((s) => s.updateHeroTexts)
 
   const { user, profile } = useAuth()
+  const selectedCity = useCityStore((s) => s.selectedCity)
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
   const isMakeupVendor = profile?.role === 'vendor' && profile?.vendor_type === 'bridal_makeup'
   const canManageMakeup = Boolean(isAdmin || isMakeupVendor)
@@ -96,6 +100,7 @@ export default function BridalMakeupPage() {
   const [pkgTouchups, setPkgTouchups] = useState('')
   const [pkgDraping, setPkgDraping] = useState('')
   const [pkgHairstyling, setPkgHairstyling] = useState('')
+  const [pkgCities, setPkgCities] = useState<string[]>([])
 
   // Client Inquiry form state
   const [clientName, setClientName] = useState('')
@@ -128,6 +133,7 @@ export default function BridalMakeupPage() {
   }
 
   const filteredPackages = packages.filter((pkg) => {
+    const matchesCity = matchesPackageCities(pkg.cities, selectedCity, undefined, true)
     const matchesCategory =
       selectedCategory === 'all' || pkg.category === selectedCategory
     const matchesSearch =
@@ -135,7 +141,7 @@ export default function BridalMakeupPage() {
       pkg.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pkg.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pkg.brandKit.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
+    return matchesCity && matchesCategory && matchesSearch
   })
 
   // Open Add Package Modal
@@ -155,6 +161,7 @@ export default function BridalMakeupPage() {
     setPkgTouchups('2 Touch-ups')
     setPkgDraping('Full Saree Drape')
     setPkgHairstyling('Traditional Floral Braid')
+    setPkgCities([])
     setIsAddEditPackageModalOpen(true)
   }
 
@@ -175,6 +182,7 @@ export default function BridalMakeupPage() {
     setPkgTouchups(pkg.deliverables.touchups)
     setPkgDraping(pkg.deliverables.draping)
     setPkgHairstyling(pkg.deliverables.hairstyling)
+    setPkgCities(pkg.cities || [])
     setIsAddEditPackageModalOpen(true)
   }
 
@@ -183,6 +191,10 @@ export default function BridalMakeupPage() {
     e.preventDefault()
     if (!pkgTitle.trim() || !pkgPrice.trim()) {
       alert('Please enter a package title and price.')
+      return
+    }
+    if (pkgCities.length === 0) {
+      alert('Please select at least one service city.')
       return
     }
 
@@ -210,6 +222,7 @@ export default function BridalMakeupPage() {
         badge: pkgBadge.trim(),
         image: pkgImage.trim() || '/makeup-bridal.jpg',
         inclusions: inclusionsArray,
+        cities: pkgCities,
         deliverables: {
           trials: pkgTrials.trim(),
           touchups: pkgTouchups.trim(),
@@ -232,6 +245,7 @@ export default function BridalMakeupPage() {
         badge: pkgBadge.trim() || 'Custom Package',
         highlights: ['Sweat-proof', 'Hairstyling', 'Draping'],
         inclusions: inclusionsArray,
+        cities: pkgCities,
         deliverables: {
           trials: pkgTrials.trim(),
           touchups: pkgTouchups.trim(),
@@ -1058,10 +1072,16 @@ export default function BridalMakeupPage() {
                     type="text"
                     value={pkgBrandKit}
                     onChange={(e) => setPkgBrandKit(e.target.value)}
-                    placeholder="e.g. Charlotte Tilbury â€¢ MAC Pro â€¢ Huda Beauty"
+                    placeholder="e.g. Charlotte Tilbury • MAC Pro • Huda Beauty"
                     className="w-full px-3 py-1.5 text-xs border border-[#D8F0EC] rounded-xl"
                   />
                 </div>
+
+                <MultiCitySelector
+                  theme="light"
+                  selectedCities={pkgCities}
+                  onChange={setPkgCities}
+                />
 
                 <div>
                   <label className="block text-xs font-bold text-black/80 mb-1">Short Tagline</label>
