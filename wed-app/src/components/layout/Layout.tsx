@@ -22,7 +22,7 @@ export default function Layout({
           <Header />
         </div>
       )}
-      <main className="flex-1 pb-16 md:pb-0">{children}</main>
+      <main className="flex-1 w-full pb-16 md:pb-0">{children}</main>
       <BottomNav />
       <CookieBanner />
       <AdminMediaToolbar />
