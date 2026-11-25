@@ -1302,15 +1302,15 @@ export default function PackagesPage() {
             </div>
           )}
 
-          {/* Desktop: Looping Packages Animation (Only when !selectedPackageId) */}
+          {/* Looping Packages Animation (Only when !selectedPackageId) */}
           {!selectedPackageId && (
             <section
               id="packages-section"
-              className="hidden lg:block scroll-mt-24 mb-10 pt-1"
+              className="scroll-mt-24 mb-10 pt-1"
               aria-label="Explore Destination Packages"
             >
               <LoopingPackagesStack
-                packages={filteredPackages}
+                packages={filteredPackages.length >= 2 ? filteredPackages : packages}
                 activeIndex={activePackageIndex}
                 onActiveIndexChange={(idx) => {
                   setActivePackageIndex(idx)

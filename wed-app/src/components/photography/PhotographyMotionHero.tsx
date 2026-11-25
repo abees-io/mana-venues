@@ -297,7 +297,7 @@ export default function PhotographyMotionHero({
                 aria-label={`Switch to ${type.title}`}
               />
             ))}
-          </div>
+            </div>
         </div>
 
         {/* Right: Active Category Detailed Overview & Highlights */}
