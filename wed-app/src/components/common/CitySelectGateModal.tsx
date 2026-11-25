@@ -19,12 +19,7 @@ export function CitySelectGateModal() {
     return false
   })
 
-  // If selectedCity is cleared, ensure the gate re-activates
-  useEffect(() => {
-    if (!selectedCity) {
-      setHasConfirmed(false)
-    }
-  }, [selectedCity])
+  const isConfirmed = hasConfirmed && Boolean(selectedCity)
 
   const [isOpen, setIsOpen] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -81,20 +76,20 @@ export function CitySelectGateModal() {
 
   // Initial trigger: Show popup ONLY AFTER the intro closes (with a gentle 350ms delay)
   useEffect(() => {
-    if (!hasConfirmed && splashFinished) {
+    if (!isConfirmed && splashFinished) {
       const initialTimer = setTimeout(() => {
         setIsOpen(true)
       }, 350)
       return () => clearTimeout(initialTimer)
     }
-  }, [hasConfirmed, splashFinished])
+  }, [isConfirmed, splashFinished])
 
   // Recurring 5-second popup logic:
   // ONLY runs AFTER intro has finished playing.
   // If dismissed without choosing, pops up again in 5 seconds.
   // Once confirmed, stops recurring timer completely.
   useEffect(() => {
-    if (hasConfirmed || !splashFinished) {
+    if (isConfirmed || !splashFinished) {
       if (timerRef.current) {
         clearTimeout(timerRef.current)
         timerRef.current = null
@@ -111,7 +106,7 @@ export function CitySelectGateModal() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [hasConfirmed, splashFinished, isOpen])
+  }, [isConfirmed, splashFinished, isOpen])
 
   // Lock body scroll when open
   useEffect(() => {
