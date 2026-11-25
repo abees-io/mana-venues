@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -199,11 +200,22 @@ export function LoginGateModal() {
     }
   }
 
+  // Lock body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      const original = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = original
+      }
+    }
+  }, [isOpen])
+
   if (!isOpen) return null
 
-  return (
+  const modalContent = (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+      <div className="fixed inset-0 z-[999999] flex items-center justify-center p-3 sm:p-6">
         {/* Backdrop overlay */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -219,7 +231,7 @@ export function LoginGateModal() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 14 }}
           transition={{ duration: 0.22, ease: 'easeOut' }}
-          className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden z-10 my-auto text-[#5A172D]"
+          className="relative w-full max-w-md max-h-[92vh] bg-white rounded-3xl shadow-2xl overflow-y-auto z-10 text-[#5A172D]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Top Brand Banner */}
@@ -477,4 +489,6 @@ export function LoginGateModal() {
       </div>
     </AnimatePresence>
   )
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : null
 }

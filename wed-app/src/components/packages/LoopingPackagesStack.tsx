@@ -76,7 +76,7 @@ export default function LoopingPackagesStack({
 
   return (
     <div
-      className="relative w-full max-w-5xl mx-auto py-2 select-none"
+      className="relative w-full max-w-5xl mx-auto select-none"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={handleTouchStart}
@@ -84,7 +84,7 @@ export default function LoopingPackagesStack({
     >
       {/* 3D Coverflow Stage Container */}
       <div
-        className="relative w-full h-[280px] sm:h-[340px] md:h-[380px] flex items-center justify-center overflow-hidden py-4 touch-pan-y select-none"
+        className="relative w-full h-[235px] sm:h-[285px] md:h-[315px] flex items-center justify-center overflow-x-clip touch-pan-y select-none"
         style={{ perspective: '1100px' }}
       >
         {packages.map((pkg, index) => {
@@ -136,7 +136,7 @@ export default function LoopingPackagesStack({
                   onActiveIndexChange(index)
                 }
               }}
-              className={`absolute top-0 w-[84%] sm:w-[68%] md:w-[54%] max-w-[460px] aspect-[16/10] sm:aspect-[16/10.5] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-xl`}
+              className={`absolute w-[84%] sm:w-[68%] md:w-[54%] max-w-[460px] aspect-[16/10] sm:aspect-[16/10.5] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-xl`}
               style={{
                 transform: transformStyle,
                 zIndex,

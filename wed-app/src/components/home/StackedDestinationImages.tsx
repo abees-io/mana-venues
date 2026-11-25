@@ -213,10 +213,10 @@ export default function StackedDestinationImages() {
                 WebkitTapHighlightColor: 'transparent',
                 outline: 'none',
               }}
-              className={`absolute inset-0 rounded-2xl overflow-hidden shadow-2xl focus:outline-none focus:ring-0 active:outline-none border-0 ${
+              className={`absolute inset-0 rounded-2xl overflow-hidden focus:outline-none focus:ring-0 active:outline-none border-0 ${
                 isTop
-                  ? 'shadow-[0_25px_50px_rgba(0,0,0,0.85)]'
-                  : 'shadow-[0_15px_35px_rgba(0,0,0,0.6)]'
+                  ? 'shadow-[0_20px_45px_-10px_rgba(90,23,45,0.28),0_12px_24px_-8px_rgba(200,59,104,0.18)]'
+                  : 'shadow-[0_12px_28px_-8px_rgba(90,23,45,0.16)]'
               } bg-brand-dark`}
             >
               {/* Card Photo */}

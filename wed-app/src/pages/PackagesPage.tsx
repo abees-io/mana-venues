@@ -1089,7 +1089,7 @@ export default function PackagesPage() {
 
         {/* Mobile: Top Section with Stacked Destination Images Animation (Visible on mobile when !selectedPackageId) */}
         {!selectedPackageId && (
-          <section className="lg:hidden relative overflow-hidden bg-[#F0F9F8] py-6 px-4 border-b border-[#D8F0EC]">
+          <section className="lg:hidden relative bg-[#F0F9F8] pt-4 pb-6 px-4">
             <div className="max-w-md mx-auto text-center space-y-3">
               <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/90 border border-[#D8F0EC] text-xs font-semibold text-black">
                 <span>God’s Own Country Destination Weddings</span>
@@ -1112,8 +1112,14 @@ export default function PackagesPage() {
         )}
 
         {/* Top Hero Banner with Destination Wedding Showcase (Desktop only) */}
-        <section className="hidden lg:block relative overflow-hidden bg-[#F0F9F8] py-12 sm:py-16 px-4 sm:px-6 lg:px-8 border-b border-[#D8F0EC]">
-          <div className="absolute inset-0 pointer-events-none opacity-25">
+        <section className="hidden lg:block relative overflow-x-clip bg-[#F0F9F8] py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
+          <div
+            className="absolute inset-0 pointer-events-none opacity-25 overflow-hidden"
+            style={{
+              maskImage: 'linear-gradient(to bottom, black 45%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, black 45%, transparent 100%)',
+            }}
+          >
             <div className="absolute top-0 right-1/4 w-80 h-80 rounded-full bg-[#D8F0EC]/60 blur-3xl" />
             <div className="absolute bottom-0 left-1/4 w-96 h-96 rounded-full bg-[#D8F0EC]/50 blur-3xl" />
           </div>
@@ -1192,7 +1198,7 @@ export default function PackagesPage() {
         </section>
 
         {/* Main Packages Content Area */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-10 sm:pt-8 sm:pb-14">
           {/* Admin / Wedding Planner Controls Bar */}
           {canManagePackages && (
             <div className="mb-8 p-4 rounded-2xl bg-[#F0F9F8] border border-[#D8F0EC] flex flex-wrap items-center justify-between gap-3 shadow-xs">
@@ -1306,7 +1312,7 @@ export default function PackagesPage() {
           {!selectedPackageId && (
             <section
               id="packages-section"
-              className="scroll-mt-24 mb-10 pt-1"
+              className="scroll-mt-24 mb-4 sm:mb-6 pt-0"
               aria-label="Explore Destination Packages"
             >
               <LoopingPackagesStack

@@ -614,11 +614,11 @@ export default function PhotographyPage() {
         <div
           ref={packagesListRef}
           id="photography-packages"
-          className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-8 sm:py-14 scroll-mt-20"
+          className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 pt-4 pb-8 sm:pt-6 sm:pb-12 scroll-mt-20"
         >
           {/* Header & Filter Bar (Shown when !selectedPackageId) */}
           {!selectedPackageId && (
-            <div className="mb-6 space-y-4">
+            <div className="mb-4 space-y-4">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                   <h2
@@ -657,32 +657,11 @@ export default function PhotographyPage() {
                 </div>
               </div>
 
-              {/* Packages found counter + Category Pills matching Destination Packages */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3.5 sm:p-4 rounded-2xl bg-white border border-gray-200/90 shadow-2xs">
+              {/* Packages found counter */}
+              <div className="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-white border border-gray-200/90 shadow-2xs">
                 <span className="text-xs sm:text-sm text-gray-700 font-medium">
                   <strong className="text-gray-900 font-bold">{filteredPackages.length}</strong> packages found
                 </span>
-                <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
-                  {[
-                    { id: 'all', label: 'All Packages' },
-                    { id: 'wedding', label: 'Wedding' },
-                    { id: 'mobile', label: 'Mobile' },
-                    { id: 'normal', label: 'Normal' },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => handleCategoryFilter(tab.id as PhotographyCategory | 'all')}
-                      className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer shrink-0 ${
-                        selectedCategory === tab.id
-                          ? 'bg-[#B8710B] text-white shadow-xs font-bold'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
           )}

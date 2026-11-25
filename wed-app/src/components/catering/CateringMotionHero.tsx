@@ -129,13 +129,19 @@ export default function CateringMotionHero({
 
   return (
     <section
-      className="relative overflow-hidden bg-gradient-to-b from-[#FFFDF7] via-[#FFF9ED] to-[#F0F9F8] py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 border-b border-[#D8F0EC]"
+      className="relative overflow-x-clip bg-gradient-to-b from-[#FFFDF7] via-[#FFF9ED] to-[#F0F9F8] pt-5 pb-3 sm:pt-8 sm:pb-5 lg:pt-10 lg:pb-6 px-4 sm:px-6 lg:px-8"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       aria-label="Catering & Royal Banquet Showcase"
     >
-      {/* Background Warm Amber Aroma Glow */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* Background Warm Amber Aroma Glow (masked to fade seamlessly at bottom) */}
+      <div
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        style={{
+          maskImage: 'linear-gradient(to bottom, black 45%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 45%, transparent 100%)',
+        }}
+      >
         <div className="absolute -top-20 -left-20 w-96 h-96 rounded-full bg-[#F59E0B]/20 blur-3xl animate-bokeh-1" />
         <div className="absolute top-1/2 -right-20 w-[460px] h-[460px] rounded-full bg-[#C83B68]/15 blur-3xl animate-bokeh-2" />
         <div className="absolute -bottom-16 left-1/3 w-80 h-80 rounded-full bg-[#D8F0EC]/70 blur-3xl animate-bokeh-3" />
@@ -156,7 +162,7 @@ export default function CateringMotionHero({
         </div>
 
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center mb-8 sm:mb-10 space-y-2">
+        <div className="flex flex-col items-center text-center mb-4 sm:mb-6 space-y-2">
           <div className="flex items-center gap-2">
             <h1
               className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#5A172D] tracking-wide max-w-3xl"
@@ -179,35 +185,12 @@ export default function CateringMotionHero({
           <p className="text-xs sm:text-sm text-black/75 max-w-xl font-medium">
             {heroTexts.description}
           </p>
-
-          {/* 3 Category Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-3">
-            {CATERING_FEASTS.map((type, idx) => {
-              const isCurrent = idx === activeIndex
-              const Icon = type.icon
-              return (
-                <button
-                  key={type.id}
-                  type="button"
-                  onClick={() => handleSelectType(idx)}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 shadow-xs cursor-pointer active:scale-95 ${
-                    isCurrent
-                      ? 'bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] text-white shadow-md shadow-[#C83B68]/30 scale-105'
-                      : 'bg-white hover:bg-[#FFF9ED] text-[#5A172D] border border-[#D8F0EC]'
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 ${isCurrent ? 'text-white' : 'text-[#C83B68]'}`} />
-                  <span>{type.title}</span>
-                </button>
-              )
-            })}
-          </div>
         </div>
 
         {/* 3D ROYAL BANQUET & PLATTER CASCADE ANIMATION (Centered on Desktop) */}
         <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center">
           <div
-            className="relative w-full h-[320px] sm:h-[390px] md:h-[430px] flex items-center justify-center select-none overflow-hidden touch-pan-y"
+            className="relative w-full h-[245px] sm:h-[295px] md:h-[315px] flex items-center justify-center select-none overflow-x-clip touch-pan-y"
             style={{ perspective: '1200px' }}
           >
               {CATERING_FEASTS.map((type, idx) => {
@@ -248,7 +231,7 @@ export default function CateringMotionHero({
                   <div
                     key={type.id}
                     onClick={() => handleSelectType(idx)}
-                    className={`absolute top-0 w-[84%] sm:w-[76%] md:w-[68%] max-w-[440px] aspect-[16/11] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border-2 border-[#D4AF37]/40 shadow-2xl ${
+                    className={`absolute w-[84%] sm:w-[76%] md:w-[68%] max-w-[440px] aspect-[16/11] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border-2 border-[#D4AF37]/40 shadow-2xl ${
                       isCenter
                         ? 'ring-2 ring-[#C83B68]/40 shadow-[0_24px_50px_rgba(200,59,104,0.22)]'
                         : ''
@@ -333,7 +316,7 @@ export default function CateringMotionHero({
             </div>
 
             {/* Stepper Dots */}
-            <div className="flex items-center gap-2 mt-4">
+            <div className="flex items-center gap-2 mt-2.5">
               {CATERING_FEASTS.map((type, idx) => (
                 <button
                   key={type.id}

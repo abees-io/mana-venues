@@ -116,13 +116,19 @@ export default function PhotographyMotionHero({
 
   return (
     <section
-      className="relative overflow-hidden bg-gradient-to-b from-[#F0F9F8] via-[#FAF5F7] to-[#F0F9F8] py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 border-b border-[#D8F0EC]"
+      className="relative overflow-x-clip bg-gradient-to-b from-[#F0F9F8] via-[#FAF5F7] to-[#F0F9F8] pt-5 pb-3 sm:pt-8 sm:pb-5 lg:pt-10 lg:pb-6 px-4 sm:px-6 lg:px-8"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       aria-label="Photography Showcase Hero"
     >
-      {/* Background Ambient Glow Circles */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* Background Ambient Glow Circles (masked to fade seamlessly at bottom) */}
+      <div
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        style={{
+          maskImage: 'linear-gradient(to bottom, black 45%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 45%, transparent 100%)',
+        }}
+      >
         <div className="absolute -top-24 -left-20 w-96 h-96 rounded-full bg-[#F3A2BE]/20 blur-3xl animate-bokeh-1" />
         <div className="absolute top-1/2 -right-24 w-[450px] h-[450px] rounded-full bg-[#D8F0EC]/70 blur-3xl animate-bokeh-2" />
         <div className="absolute -bottom-16 left-1/3 w-80 h-80 rounded-full bg-[#E05A85]/15 blur-3xl animate-bokeh-3" />
@@ -143,7 +149,7 @@ export default function PhotographyMotionHero({
         </div>
 
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center mb-8 sm:mb-10 space-y-2">
+        <div className="flex flex-col items-center text-center mb-4 sm:mb-6 space-y-2">
           <h1
             className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#5A172D] tracking-wide max-w-3xl"
             style={{ fontFamily: "'Cinzel', serif" }}
@@ -154,34 +160,12 @@ export default function PhotographyMotionHero({
           <p className="text-xs sm:text-sm text-black/75 max-w-xl font-medium">
             Choose from our three signature styles — Grand Wedding ceremonies, fast viral Mobile Reels, or timeless Normal Stage coverage.
           </p>
-
-          {/* 3 Category Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-3">
-            {PHOTOGRAPHY_TYPES.map((type, idx) => {
-              const isCurrent = idx === activeIndex
-              const Icon = type.icon
-              return (
-                <button
-                  key={type.id}
-                  type="button"
-                  onClick={() => handleSelectType(idx)}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 shadow-xs cursor-pointer active:scale-95 ${isCurrent
-                    ? 'bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] text-white shadow-md shadow-[#C83B68]/30 scale-105'
-                    : 'bg-white hover:bg-[#F0F9F8] text-[#5A172D] border border-[#D8F0EC]'
-                    }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 ${isCurrent ? 'text-white' : 'text-[#C83B68]'}`} />
-                  <span>{type.title}</span>
-                </button>
-              )
-            })}
-          </div>
         </div>
 
         {/* 3D FLOATING EDITORIAL SHOWCASE STAGE (Centered, clean without long description) */}
         <div className="flex flex-col items-center justify-center max-w-4xl mx-auto">
           <div
-            className="relative w-full h-[300px] sm:h-[380px] md:h-[420px] flex items-center justify-center select-none overflow-hidden touch-pan-y"
+            className="relative w-full h-[245px] sm:h-[295px] md:h-[315px] flex items-center justify-center select-none overflow-x-clip touch-pan-y"
             style={{ perspective: '1200px' }}
           >
             {PHOTOGRAPHY_TYPES.map((type, idx) => {
@@ -223,7 +207,7 @@ export default function PhotographyMotionHero({
                 <div
                   key={type.id}
                   onClick={() => handleSelectType(idx)}
-                  className={`absolute top-0 w-[84%] sm:w-[76%] md:w-[64%] max-w-[440px] aspect-[16/11] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-2xl hover:opacity-100 ${isCenter ? 'ring-2 ring-[#C83B68]/30 shadow-[0_24px_50px_rgba(200,59,104,0.18)]' : ''
+                  className={`absolute w-[84%] sm:w-[76%] md:w-[64%] max-w-[440px] aspect-[16/11] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-2xl hover:opacity-100 ${isCenter ? 'ring-2 ring-[#C83B68]/30 shadow-[0_24px_50px_rgba(200,59,104,0.18)]' : ''
                     }`}
                   style={{
                     transform: transformStyle,
@@ -284,7 +268,7 @@ export default function PhotographyMotionHero({
           </div>
 
           {/* Hint & Direct Step Dots */}
-          <div className="flex items-center gap-2 mt-4">
+          <div className="flex items-center gap-2 mt-2.5">
             {PHOTOGRAPHY_TYPES.map((type, idx) => (
               <button
                 key={type.id}
