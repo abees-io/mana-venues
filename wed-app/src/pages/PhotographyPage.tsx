@@ -16,6 +16,8 @@ import {
   Edit2,
   Trash2,
   AlertCircle,
+  Star,
+  ChevronLeft,
 } from 'lucide-react'
 import CoolCameraIcon from '../components/common/CoolCameraIcon'
 import Layout from '../components/layout/Layout'
@@ -51,10 +53,18 @@ export default function PhotographyPage() {
   const deletePackage = usePhotographyStore((s) => s.deletePackage)
 
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null)
   const [inquiryPackage, setInquiryPackage] = useState<PhotographyPackage | null>(null)
   const [inquirySuccess, setInquirySuccess] = useState(false)
   const [inquiryError, setInquiryError] = useState<string | null>(null)
   const [expandedInclusions, setExpandedInclusions] = useState<Record<string, boolean>>({})
+
+  const handleOpenPackage = (pkgId: string) => {
+    requireAuth('to view full photography package details and inquire', () => {
+      setSelectedPackageId(pkgId)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  }
 
   // Add/Edit modal state
   const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false)
@@ -364,201 +374,159 @@ export default function PhotographyPage() {
                 Reset Filters
               </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6 lg:gap-8">
-              {filteredPackages.map((pkg) => {
-                const isExpanded = Boolean(expandedInclusions[pkg.id])
-                const canEditPkg = Boolean(isAdmin || (isPhotoVendor && pkg.vendorId === profile?.id))
-                return (
-                  <article
-                    key={pkg.id}
-                    className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-white border border-[#D8F0EC] shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col will-change-transform"
-                  >
-                    {/* Admin / Photographer Vendor Action Buttons on Card */}
-                    {canEditPkg && (
-                      <div className="absolute top-2 left-2 z-30 flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleOpenEditModal(pkg)
-                          }}
-                          title="Edit Package"
-                          className="p-1.5 rounded-full bg-white/90 hover:bg-white text-[#C83B68] shadow-md border border-[#D8F0EC] transition-transform active:scale-90"
-                        >
-                          <Edit2 className="w-3 h-3" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            if (confirm(`Delete "${pkg.title}"?`)) {
-                              deletePackage(pkg.id)
-                            }
-                          }}
-                          title="Delete Package"
-                          className="p-1.5 rounded-full bg-white/90 hover:bg-white text-red-600 shadow-md border border-[#D8F0EC] transition-transform active:scale-90"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    )}
+          ) : selectedPackageId ? (
+            <div className="space-y-4">
+              <button
+                type="button"
+                onClick={() => setSelectedPackageId(null)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-800 hover:text-black shadow-2xs transition-all active:scale-95 cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4 text-[#B8710B]" />
+                <span>Back to all packages</span>
+              </button>
 
-                    {/* Package Cover Image */}
-                    <div className="relative aspect-[16/11] sm:aspect-[16/10] overflow-hidden bg-black/10">
-                      <img
-                        src={pkg.image}
-                        alt={pkg.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
-
-                      {/* Category Badge Top Left (pushed right if edit buttons visible) */}
-                      <div className={`absolute top-2 ${canEditPkg ? 'left-16 sm:left-20' : 'left-2'} sm:top-3 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#D8F0EC] text-[8.5px] sm:text-[10px] font-bold text-[#7E1F3E] shadow-2xs`}>
-                        <span className="sm:hidden capitalize">{pkg.category}</span>
-                        <span className="hidden sm:inline">{pkg.categoryLabel}</span>
-                      </div>
-
-                      {/* Price Badge Top Right */}
-                      <div className="absolute top-2 right-2 sm:top-3 sm:right-3 px-2 sm:px-3.5 py-0.5 sm:py-1 rounded-full bg-gradient-to-r from-[#E05A85] to-[#C83B68] text-white text-[10px] sm:text-xs font-black shadow-xs">
-                        <span>{pkg.price}</span>
-                      </div>
-
-                      {/* Bottom Info on Image (Desktop) */}
-                      <div className="hidden sm:block absolute bottom-3 left-3 right-3 text-white space-y-1 pointer-events-none">
-                        <div className="flex items-center gap-3 text-[11px] text-[#F0F9F8] font-medium">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3.5 h-3.5 text-[#F3A2BE]" />
-                            <span>{pkg.duration}</span>
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="w-3.5 h-3.5 text-[#F3A2BE]" />
-                            <span>{pkg.teamSize}</span>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Content Section */}
-                    <div className="p-2.5 sm:p-5 lg:p-6 flex-1 flex flex-col justify-between space-y-2.5 sm:space-y-4">
-                      <div className="space-y-2 sm:space-y-2.5">
-                        <h3
-                          className="text-xs sm:text-lg lg:text-xl font-bold text-[#5A172D] leading-tight line-clamp-2 group-hover:text-[#C83B68] transition-colors"
-                          style={{ fontFamily: "'Cinzel', serif" }}
-                        >
-                          {pkg.title}
-                        </h3>
-
-                        <p className="text-[10px] sm:text-xs text-black/75 font-medium leading-tight sm:leading-relaxed line-clamp-2">
-                          {pkg.tagline}
-                        </p>
-
-                        {/* Mobile Duration & Crew Mini Row */}
-                        <div className="flex sm:hidden items-center gap-2 text-[9px] text-[#C83B68] font-semibold">
-                          <span className="flex items-center gap-1 truncate">
-                            <Clock className="w-2.5 h-2.5 shrink-0" />
-                            <span>{pkg.duration.split('(')[0].trim()}</span>
-                          </span>
-                          <span className="text-[#D8F0EC]">â€¢</span>
-                          <span className="flex items-center gap-1 truncate">
-                            <Users className="w-2.5 h-2.5 shrink-0" />
-                            <span>{pkg.teamSize.split('+')[0].trim()}</span>
-                          </span>
-                        </div>
-
-                        {/* Camera Gear Spec */}
-                        <div className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-[#F0F9F8] border border-[#D8F0EC] text-[9px] sm:text-[11px] font-mono text-[#5A172D]">
-                          <span className="font-bold text-[#C83B68] block text-[8px] sm:text-[10px] leading-tight mb-0.5">CAMERA RIG</span>
-                          <span className="truncate block leading-tight">{pkg.gear}</span>
-                        </div>
-
-                        {/* Deliverables Matrix */}
-                        <div className="grid grid-cols-2 gap-1 sm:gap-2 pt-0.5 sm:pt-1">
-                          <div className="p-1 sm:p-2 rounded-md sm:rounded-lg bg-gray-50 border border-gray-100 flex items-center gap-1 sm:gap-2">
-                            <Video className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#C83B68] shrink-0" />
-                            <div className="text-[8px] sm:text-[10px] leading-tight">
-                              <span className="font-bold text-black/90 block leading-tight">Reels</span>
-                              <span className="text-black/60 truncate block leading-tight">{pkg.deliverables.reels}</span>
-                            </div>
-                          </div>
-
-                          <div className="p-1 sm:p-2 rounded-md sm:rounded-lg bg-gray-50 border border-gray-100 flex items-center gap-1 sm:gap-2">
-                            <ImageIcon className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#C83B68] shrink-0" />
-                            <div className="text-[8px] sm:text-[10px] leading-tight">
-                              <span className="font-bold text-black/90 block leading-tight">Photos</span>
-                              <span className="text-black/60 truncate block leading-tight">{pkg.deliverables.photos}</span>
-                            </div>
-                          </div>
-
-                          <div className="p-1 sm:p-2 rounded-md sm:rounded-lg bg-gray-50 border border-gray-100 flex items-center gap-1 sm:gap-2">
-                            <Sparkles className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#C83B68] shrink-0" />
-                            <div className="text-[8px] sm:text-[10px] leading-tight">
-                              <span className="font-bold text-black/90 block leading-tight">Film</span>
-                              <span className="text-black/60 truncate block leading-tight">{pkg.deliverables.films}</span>
-                            </div>
-                          </div>
-
-                          <div className="p-1 sm:p-2 rounded-md sm:rounded-lg bg-gray-50 border border-gray-100 flex items-center gap-1 sm:gap-2">
-                            <Clock className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#C83B68] shrink-0" />
-                            <div className="text-[8px] sm:text-[10px] leading-tight">
-                              <span className="font-bold text-black/90 block leading-tight">Delivery</span>
-                              <span className="text-black/60 truncate block leading-tight">{pkg.deliverables.deliveryTime}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Expandable Inclusions Accordion */}
-                        <div className="pt-1 sm:pt-2">
+              {filteredPackages
+                .filter((p) => p.id === selectedPackageId)
+                .map((pkg) => {
+                  const isExpanded = Boolean(expandedInclusions[pkg.id])
+                  const canEditPkg = Boolean(isAdmin || (isPhotoVendor && pkg.vendorId === profile?.id))
+                  return (
+                    <article
+                      key={pkg.id}
+                      className="group relative rounded-3xl overflow-hidden bg-white border border-[#D8F0EC] shadow-md flex flex-col max-w-4xl mx-auto"
+                    >
+                      {canEditPkg && (
+                        <div className="absolute top-3 left-3 z-30 flex items-center gap-1">
                           <button
                             type="button"
-                            onClick={() => toggleInclusions(pkg.id)}
-                            className="text-[9px] sm:text-xs font-bold text-[#C83B68] hover:underline flex items-center gap-1"
+                            onClick={(e) => { e.stopPropagation(); handleOpenEditModal(pkg); }}
+                            title="Edit Package"
+                            className="p-2 rounded-full bg-white/90 hover:bg-white text-[#C83B68] shadow-md border border-[#D8F0EC] transition-transform active:scale-90"
                           >
-                            <span className="sm:hidden">{isExpanded ? 'Hide Inclusions' : 'Inclusions (5+)'}</span>
-                            <span className="hidden sm:inline">{isExpanded ? 'Hide All Inclusions' : 'View Full Inclusions (5+)'}</span>
-                            <span className="text-[8px] sm:text-[10px]">{isExpanded ? 'â–²' : 'â–¼'}</span>
+                            <Edit2 className="w-3.5 h-3.5" />
                           </button>
-
-                          {isExpanded && (
-                            <ul className="mt-1.5 space-y-1 sm:space-y-1.5 pl-0.5 border-t border-[#D8F0EC] pt-1.5 text-[8.5px] sm:text-xs text-black/80">
-                              {pkg.inclusions.map((inc, iIdx) => (
-                                <li key={iIdx} className="flex items-start gap-1 sm:gap-1.5">
-                                  <CheckCircle2 className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#C83B68] shrink-0 mt-0.5" />
-                                  <span className="leading-tight">{inc}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (confirm(`Delete "${pkg.title}"?`)) { deletePackage(pkg.id); setSelectedPackageId(null); }
+                            }}
+                            title="Delete Package"
+                            className="p-2 rounded-full bg-white/90 hover:bg-white text-red-600 shadow-md border border-[#D8F0EC] transition-transform active:scale-90"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                      <div className="relative aspect-[16/9] max-h-[380px] overflow-hidden bg-black/10">
+                        <img src={pkg.image} alt={pkg.title} className="w-full h-full object-cover object-center" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+                        <div className={`absolute top-3 ${canEditPkg ? 'left-20' : 'left-3'} px-3 py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#D8F0EC] text-xs font-bold text-[#7E1F3E] shadow-2xs`}>
+                          {pkg.categoryLabel}
+                        </div>
+                        <div className="absolute top-3 right-3 px-3.5 py-1 rounded-full bg-gradient-to-r from-[#E05A85] to-[#C83B68] text-white text-xs font-black shadow-xs">
+                          {pkg.price}
+                        </div>
+                        <div className="absolute bottom-4 left-4 right-4 text-white flex items-center gap-4 text-xs font-medium pointer-events-none">
+                          <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-[#F3A2BE]" /><span>{pkg.duration}</span></span>
+                          <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-[#F3A2BE]" /><span>{pkg.teamSize}</span></span>
                         </div>
                       </div>
-
-                      {/* Card Action Buttons */}
-                      <div className="pt-2 sm:pt-3 border-t border-[#D8F0EC] flex items-center gap-1.5 sm:gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            requireAuth(`to view photographer details and inquire about "${pkg.title}"`, () => {
-                              setInquiryPackage(pkg)
-                              setInquirySuccess(false)
-                            })
-                          }}
-                          className="flex-1 inline-flex items-center justify-center gap-1 py-1.5 sm:py-2.5 px-2 sm:px-4 rounded-xl sm:rounded-full bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] hover:brightness-105 text-white font-extrabold text-[10px] sm:text-xs md:text-sm shadow-sm active:scale-95 transition-all cursor-pointer"
-                        >
-                          <Send className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
-                          <span className="sm:hidden">Inquire</span>
-                          <span className="hidden sm:inline">Inquire Package</span>
-                        </button>
+                      <div className="p-5 sm:p-7 space-y-5">
+                        <div className="space-y-2">
+                          <h3 className="text-xl sm:text-2xl font-bold text-[#5A172D] leading-tight" style={{ fontFamily: "'Cinzel', serif" }}>{pkg.title}</h3>
+                          <p className="text-xs sm:text-sm text-black/75 font-medium leading-relaxed">{pkg.tagline}</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-[#F0F9F8] border border-[#D8F0EC] text-xs font-mono text-[#5A172D]">
+                          <span className="font-bold text-[#C83B68] block text-[10px] leading-tight mb-0.5">CAMERA RIG</span>
+                          <span>{pkg.gear}</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                          <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center gap-2">
+                            <Video className="w-4 h-4 text-[#C83B68] shrink-0" />
+                            <div className="text-xs leading-tight"><span className="font-bold text-black/90 block">Reels</span><span className="text-black/60">{pkg.deliverables.reels}</span></div>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4 text-[#C83B68] shrink-0" />
+                            <div className="text-xs leading-tight"><span className="font-bold text-black/90 block">Photos</span><span className="text-black/60">{pkg.deliverables.photos}</span></div>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-[#C83B68] shrink-0" />
+                            <div className="text-xs leading-tight"><span className="font-bold text-black/90 block">Film</span><span className="text-black/60">{pkg.deliverables.films}</span></div>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-[#C83B68] shrink-0" />
+                            <div className="text-xs leading-tight"><span className="font-bold text-black/90 block">Delivery</span><span className="text-black/60">{pkg.deliverables.deliveryTime}</span></div>
+                          </div>
+                        </div>
+                        <div>
+                          <button type="button" onClick={() => toggleInclusions(pkg.id)} className="text-xs font-bold text-[#C83B68] hover:underline flex items-center gap-1 cursor-pointer">
+                            <span>{isExpanded ? 'Hide Inclusions' : `View All Inclusions (${pkg.inclusions.length})`}</span>
+                          </button>
+                          <ul className="mt-2.5 space-y-2 border-t border-[#D8F0EC] pt-3 text-xs sm:text-sm text-black/80">
+                            {(isExpanded ? pkg.inclusions : pkg.inclusions.slice(0, 4)).map((inc, iIdx) => (
+                              <li key={iIdx} className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#C83B68] shrink-0 mt-0.5" /><span>{inc}</span></li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="pt-3 border-t border-[#D8F0EC]">
+                          <button
+                            type="button"
+                            onClick={() => requireAuth(`to view photographer details and inquire about "${pkg.title}"`, () => { setInquiryPackage(pkg); setInquirySuccess(false); })}
+                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-full bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] hover:brightness-105 text-white font-extrabold text-sm shadow-md active:scale-95 transition-all cursor-pointer"
+                          >
+                            <Send className="w-4 h-4" />
+                            <span>Inquire Package</span>
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  )
+                })}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5 lg:gap-6">
+              {filteredPackages.map((pkg) => {
+                const canEditPkg = Boolean(isAdmin || (isPhotoVendor && pkg.vendorId === profile?.id))
+                return (
+                  <div
+                    key={pkg.id}
+                    onClick={() => handleOpenPackage(pkg.id)}
+                    className="bg-white rounded-2xl overflow-hidden border border-gray-200/80 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer active:scale-[0.98] group hover:-translate-y-1 relative"
+                  >
+                    {canEditPkg && (
+                      <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1">
+                        <button type="button" onClick={(e) => { e.stopPropagation(); handleOpenEditModal(pkg); }} title="Edit Package" className="p-1.5 rounded-full bg-white/95 hover:bg-white text-[#C83B68] shadow-sm border border-gray-200 transition-transform active:scale-90"><Edit2 className="w-3 h-3" /></button>
+                        <button type="button" onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${pkg.title}"?`)) deletePackage(pkg.id); }} title="Delete Package" className="p-1.5 rounded-full bg-white/95 hover:bg-white text-red-600 shadow-sm border border-gray-200 transition-transform active:scale-90"><Trash2 className="w-3 h-3" /></button>
+                      </div>
+                    )}
+                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+                      <img src={pkg.image} alt={pkg.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                      <button type="button" aria-label="Save package" onClick={(e) => e.stopPropagation()} className="absolute top-2.5 right-2.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center text-amber-500 shadow-sm border border-amber-100/60 active:scale-90 transition-transform">
+                        <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
+                      </button>
+                    </div>
+                    <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between gap-1.5">
+                      <div className="space-y-1">
+                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#B8710B] block truncate">{pkg.vendorName || pkg.categoryLabel}</span>
+                        <h3 className="text-xs sm:text-sm font-bold text-gray-900 leading-snug line-clamp-2">{pkg.title}</h3>
+                        <div className="flex items-center gap-1 pt-0.5">
+                          <div className="flex items-center">{[...Array(5)].map((_, i) => (<Star key={i} className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-gray-200 text-gray-300" />))}</div>
+                          <span className="text-[10px] sm:text-xs text-gray-400 font-medium">(0)</span>
+                        </div>
+                      </div>
+                      <div className="pt-1.5">
+                        <span className="inline-block px-2.5 py-0.5 rounded-md bg-[#FFF5E6] text-[#B8710B] text-[10px] sm:text-xs font-bold border border-[#FFE0B2]">{pkg.price || 'Price on Request'}</span>
                       </div>
                     </div>
-                  </article>
+                  </div>
                 )
               })}
             </div>
           )}
         </div>
 
-        {/* INQUIRY MODAL */}
+{/* INQUIRY MODAL */}
         {inquiryPackage && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"

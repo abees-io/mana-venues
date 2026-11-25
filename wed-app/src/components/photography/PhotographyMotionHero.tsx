@@ -5,7 +5,6 @@ import {
   Smartphone,
   Layers,
   ChevronRight,
-  CheckCircle2,
   ArrowRight,
   ArrowLeft,
 } from 'lucide-react'
@@ -188,185 +187,144 @@ export default function PhotographyMotionHero({
           </div>
         </div>
 
-        {/* 3D FLOATING EDITORIAL SHOWCASE STAGE */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {/* Left: 3-Card Depth Deck Animation */}
-          <div className="lg:col-span-7 flex flex-col items-center justify-center">
-            <div
-              className="relative w-full h-[320px] sm:h-[390px] md:h-[430px] flex items-center justify-center select-none overflow-hidden touch-pan-y"
-              style={{ perspective: '1200px' }}
-            >
-              {PHOTOGRAPHY_TYPES.map((type, idx) => {
-                // Calculate relative position around activeIndex
-                const total = PHOTOGRAPHY_TYPES.length
-                let diff = (idx - activeIndex) % total
-                if (diff > total / 2) diff -= total
-                if (diff < -total / 2) diff += total
+        {/* 3D FLOATING EDITORIAL SHOWCASE STAGE (Centered, clean without long description) */}
+        <div className="flex flex-col items-center justify-center max-w-4xl mx-auto">
+          <div
+            className="relative w-full h-[300px] sm:h-[380px] md:h-[420px] flex items-center justify-center select-none overflow-hidden touch-pan-y"
+            style={{ perspective: '1200px' }}
+          >
+            {PHOTOGRAPHY_TYPES.map((type, idx) => {
+              // Calculate relative position around activeIndex
+              const total = PHOTOGRAPHY_TYPES.length
+              let diff = (idx - activeIndex) % total
+              if (diff > total / 2) diff -= total
+              if (diff < -total / 2) diff += total
 
-                const isCenter = diff === 0
-                const isLeft = diff === -1
-                const isRight = diff === 1
+              const isCenter = diff === 0
+              const isLeft = diff === -1
+              const isRight = diff === 1
 
-                let transformStyle = ''
-                let zIndex = 10
-                let opacity = 0.5
-                let pointerEvents: 'auto' | 'none' = 'auto'
+              let transformStyle = ''
+              let zIndex = 10
+              let opacity = 0.5
+              let pointerEvents: 'auto' | 'none' = 'auto'
 
-                if (isCenter) {
-                  transformStyle = 'translateX(0%) scale(1) translateZ(0) rotateY(0deg)'
-                  zIndex = 30
-                  opacity = 1
-                } else if (isLeft) {
-                  transformStyle = 'translateX(-34%) scale(0.86) translateZ(-70px) rotateY(10deg)'
-                  zIndex = 20
-                  opacity = 0.55
-                } else if (isRight) {
-                  transformStyle = 'translateX(34%) scale(0.86) translateZ(-70px) rotateY(-10deg)'
-                  zIndex = 20
-                  opacity = 0.55
-                } else {
-                  transformStyle = 'translateX(0%) scale(0.7) translateZ(-160px)'
-                  zIndex = 10
-                  opacity = 0
-                  pointerEvents = 'none'
-                }
+              if (isCenter) {
+                transformStyle = 'translateX(0%) scale(1) translateZ(0) rotateY(0deg)'
+                zIndex = 30
+                opacity = 1
+              } else if (isLeft) {
+                transformStyle = 'translateX(-34%) scale(0.86) translateZ(-70px) rotateY(10deg)'
+                zIndex = 20
+                opacity = 0.55
+              } else if (isRight) {
+                transformStyle = 'translateX(34%) scale(0.86) translateZ(-70px) rotateY(-10deg)'
+                zIndex = 20
+                opacity = 0.55
+              } else {
+                transformStyle = 'translateX(0%) scale(0.7) translateZ(-160px)'
+                zIndex = 10
+                opacity = 0
+                pointerEvents = 'none'
+              }
 
-                return (
-                  <div
-                    key={type.id}
-                    onClick={() => handleSelectType(idx)}
-                    className={`absolute top-0 w-[84%] sm:w-[76%] md:w-[68%] max-w-[440px] aspect-[16/11] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-2xl hover:opacity-100 ${
-                      isCenter ? 'ring-2 ring-[#C83B68]/30 shadow-[0_24px_50px_rgba(200,59,104,0.18)]' : ''
-                    }`}
-                    style={{
-                      transform: transformStyle,
-                      zIndex,
-                      opacity,
-                      pointerEvents,
-                      WebkitTapHighlightColor: 'transparent',
-                      WebkitBackfaceVisibility: 'hidden',
-                      backfaceVisibility: 'hidden',
-                    }}
-                  >
-                    {/* Cover Photograph */}
-                    <img
-                      src={type.image}
-                      alt={type.title}
-                      className="w-full h-full object-cover object-center pointer-events-none select-none transition-transform duration-700 group-hover:scale-105"
-                    />
+              return (
+                <div
+                  key={type.id}
+                  onClick={() => handleSelectType(idx)}
+                  className={`absolute top-0 w-[84%] sm:w-[76%] md:w-[64%] max-w-[440px] aspect-[16/11] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-2xl hover:opacity-100 ${
+                    isCenter ? 'ring-2 ring-[#C83B68]/30 shadow-[0_24px_50px_rgba(200,59,104,0.18)]' : ''
+                  }`}
+                  style={{
+                    transform: transformStyle,
+                    zIndex,
+                    opacity,
+                    pointerEvents,
+                    WebkitTapHighlightColor: 'transparent',
+                    WebkitBackfaceVisibility: 'hidden',
+                    backfaceVisibility: 'hidden',
+                  }}
+                >
+                  {/* Cover Photograph */}
+                  <img
+                    src={type.image}
+                    alt={type.title}
+                    className="w-full h-full object-cover object-center pointer-events-none select-none transition-transform duration-700 group-hover:scale-105"
+                  />
 
-                    {/* Gradient Scrim */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10 pointer-events-none" />
+                  {/* Gradient Scrim */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10 pointer-events-none" />
 
-                    {/* Top Left Badge */}
-                    <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] sm:text-xs font-semibold text-white border border-white/20 shadow-sm pointer-events-none">
-                      <span>{type.badge}</span>
+                  {/* Top Left Badge */}
+                  <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] sm:text-xs font-semibold text-white border border-white/20 shadow-sm pointer-events-none">
+                    <span>{type.badge}</span>
+                  </div>
+
+                  {/* Top Right Starting Price */}
+                  <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-gradient-to-r from-[#E05A85] to-[#C83B68] text-white text-xs font-extrabold shadow-sm pointer-events-none">
+                    <span>{type.startingPrice}</span>
+                  </div>
+
+                  {/* Bottom Content on Card */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-left pointer-events-none space-y-1 text-white">
+                    <div className="flex items-center gap-1.5 text-xs text-[#F0F9F8] font-medium">
+                      <type.icon className="w-3.5 h-3.5 text-[#F3A2BE]" />
+                      <span>{type.title}</span>
                     </div>
 
-                    {/* Top Right Starting Price */}
-                    <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-gradient-to-r from-[#E05A85] to-[#C83B68] text-white text-xs font-extrabold shadow-sm pointer-events-none">
-                      <span>{type.startingPrice}</span>
-                    </div>
-
-                    {/* Bottom Content on Card */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-left pointer-events-none space-y-1 text-white">
-                      <div className="flex items-center gap-1.5 text-xs text-[#F0F9F8] font-medium">
-                        <type.icon className="w-3.5 h-3.5 text-[#F3A2BE]" />
-                        <span>{type.title}</span>
-                      </div>
-
-                      <h3
-                        className="text-base sm:text-xl font-bold tracking-wide leading-tight line-clamp-1 drop-shadow-sm"
-                        style={{ fontFamily: "'Cinzel', serif" }}
-                      >
-                        {type.subtitle}
-                      </h3>
-
-                      <div className="pt-1 flex items-center justify-between text-[11px] text-white/85">
-                        <span>{type.deliverableSummary}</span>
-                        {isCenter && (
-                          <span className="text-[#F3A2BE] font-bold inline-flex items-center gap-1">
-                            <span>Viewing Details</span>
-                            <ArrowRight className="w-3 h-3" />
-                          </span>
-                        )}
-                      </div>
+                    <div className="pt-1 flex items-center justify-between text-[11px] text-white/85">
+                      <span>{type.deliverableSummary}</span>
+                      {isCenter && (
+                        <span className="text-[#F3A2BE] font-bold inline-flex items-center gap-1">
+                          <span>Explore</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </span>
+                      )}
                     </div>
                   </div>
-                )
-              })}
-            </div>
-
-            {/* Hint & Direct Step Dots */}
-            <div className="flex items-center gap-2 mt-4">
-              {PHOTOGRAPHY_TYPES.map((type, idx) => (
-                <button
-                  key={type.id}
-                  type="button"
-                  onClick={() => handleSelectType(idx)}
-                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${idx === activeIndex
-                      ? 'w-8 bg-gradient-to-r from-[#C83B68] to-[#E05A85]'
-                      : 'w-2 bg-[#D8F0EC] hover:bg-[#C83B68]/50'
-                    }`}
-                  aria-label={`Switch to ${type.title}`}
-                />
-              ))}
-            </div>
+                </div>
+              )
+            })}
           </div>
 
-          {/* Right: Active Category Detailed Overview & Highlights */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
-            <div className="space-y-3.5">
-              <h2
-                className="text-2xl sm:text-3xl font-extrabold text-[#5A172D] tracking-wide leading-tight"
-                style={{ fontFamily: "'Cinzel', serif" }}
-              >
-                {active.subtitle}
-              </h2>
-
-              <p className="text-xs sm:text-sm text-black/80 font-medium leading-relaxed">
-                {active.description}
-              </p>
-
-              {/* Signature Inclusions */}
-              <div className="space-y-2 pt-1">
-                <p className="text-xs font-extrabold uppercase tracking-wider text-[#5A172D]">
-                  Signature Inclusions
-                </p>
-                <ul className="space-y-1.5">
-                  {active.keyPoints.map((point, pIdx) => (
-                    <li key={pIdx} className="flex items-start gap-2 text-xs text-black/85 font-medium">
-                      <CheckCircle2 className="w-4 h-4 text-[#C83B68] shrink-0 mt-0.5" />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* CTAs */}
-            <div className="pt-2 flex flex-wrap items-center gap-3">
+          {/* Direct Step Dots */}
+          <div className="flex items-center gap-2 mt-2">
+            {PHOTOGRAPHY_TYPES.map((type, idx) => (
               <button
+                key={type.id}
                 type="button"
-                onClick={() => {
-                  onSelectCategory(active.id)
-                  onExplorePackages()
-                }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] hover:brightness-105 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-[#C83B68]/30 active:scale-95 transition-all cursor-pointer"
-              >
-                <span>View {active.title.split(' ')[0]} Packages</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
+                onClick={() => handleSelectType(idx)}
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${idx === activeIndex
+                    ? 'w-8 bg-gradient-to-r from-[#C83B68] to-[#E05A85]'
+                    : 'w-2 bg-[#D8F0EC] hover:bg-[#C83B68]/50'
+                  }`}
+                aria-label={`Switch to ${type.title}`}
+              />
+            ))}
+          </div>
 
-              <button
-                type="button"
-                onClick={() => onSelectCategory('all')}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white hover:bg-[#F0F9F8] text-[#7E1F3E] font-bold text-xs sm:text-sm border border-[#D8F0EC] shadow-xs active:scale-95 transition-all cursor-pointer"
-              >
-                <Layers className="w-3.5 h-3.5 text-[#C83B68]" />
-                <span>Show All Packages</span>
-              </button>
-            </div>
+          {/* Centered CTAs */}
+          <div className="pt-5 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                onSelectCategory(active.id)
+                onExplorePackages()
+              }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] hover:brightness-105 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-[#C83B68]/30 active:scale-95 transition-all cursor-pointer"
+            >
+              <span>View {active.title.split(' ')[0]} Packages</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onSelectCategory('all')}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white hover:bg-[#F0F9F8] text-[#7E1F3E] font-bold text-xs sm:text-sm border border-[#D8F0EC] shadow-xs active:scale-95 transition-all cursor-pointer"
+            >
+              <Layers className="w-3.5 h-3.5 text-[#C83B68]" />
+              <span>Show All Packages</span>
+            </button>
           </div>
         </div>
       </div>
