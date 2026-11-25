@@ -6,7 +6,7 @@ import { useCityStore } from '../../store/cityStore'
 import { useCities, KERALA_DISTRICTS_CITIES } from '../../hooks/useCities'
 import type { City } from '../../lib/types'
 
-const CONFIRM_KEY = 'mana_city_session_confirmed_v1'
+const CONFIRM_KEY = 'mana_city_confirmed_v1'
 
 export function CitySelectGateModal() {
   const { selectedCity, setCity } = useCityStore()
@@ -14,7 +14,7 @@ export function CitySelectGateModal() {
 
   const [hasConfirmed, setHasConfirmed] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      return Boolean(useCityStore.getState().selectedCity) && sessionStorage.getItem(CONFIRM_KEY) === 'true'
+      return Boolean(useCityStore.getState().selectedCity) && localStorage.getItem(CONFIRM_KEY) === 'true'
     }
     return false
   })
@@ -131,7 +131,7 @@ export function CitySelectGateModal() {
     })
     try {
       localStorage.setItem('mana_preferred_city', city.slug)
-      sessionStorage.setItem(CONFIRM_KEY, 'true')
+      localStorage.setItem(CONFIRM_KEY, 'true')
     } catch {
       // ignore
     }
