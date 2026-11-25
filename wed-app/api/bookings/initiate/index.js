@@ -1,12 +1,13 @@
 import Razorpay from 'razorpay'
 import { supabaseAdmin } from '../../_lib/supabaseAdmin.js'
+import { verifySupabaseUser } from '../../_lib/auth.js'
 import { expandDateRangeIST } from '../../_lib/dateUtils.js'
 
 /**
  * Checkout Hold Route:
+ * - Verifies Supabase JWT session token via `supabaseAdmin.auth.getUser(token)`
  * - Locks requested date(s) for 15 minutes via atomic Postgres RPC `hold_booking_dates`
- * - If unavailable, returns 409 Conflict with collision details
- * - If locked, creates Razorpay Order and returns order_id
+ * - Never trusts client-supplied user_id; binds authenticated `user.id`
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,13 +15,17 @@ export default async function handler(req, res) {
   }
 
   try {
+    const { user, error: authError } = await verifySupabaseUser(req)
+    if (authError || !user) {
+      return res.status(401).json({ error: authError || 'Unauthorized' })
+    }
+
     const {
       vendorId,
       dates, // Array of 'YYYY-MM-DD' or startDate & endDate
       startDate,
       endDate,
       advanceAmount,
-      customerDetails,
       auditoriumTitle,
     } = req.body || {}
 
@@ -79,6 +84,7 @@ export default async function handler(req, res) {
         receipt: `rcpt_${tempBookingId.slice(0, 16)}`,
         notes: {
           booking_id: tempBookingId,
+          customer_id: user.id,
           vendor_id: vendorId,
           dates: requestedDates.join(','),
           auditoriumTitle: auditoriumTitle || 'Mana Venue',

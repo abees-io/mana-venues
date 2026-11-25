@@ -101,9 +101,16 @@ export async function uploadDataUrlToCloud(
 
   // 1. Try /api/upload endpoint first (works on Vercel and local dev server)
   try {
+    const { data: sessionData } = await supabase.auth.getSession()
+    const accessToken = sessionData?.session?.access_token
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`
+    }
+
     const res = await fetch('/api/upload', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         dataUrl: payloadDataUrl,
         folder,

@@ -1,10 +1,11 @@
 import ical from 'ical-generator'
-import { supabaseAdmin } from '../../_lib/supabaseAdmin.js'
+import { supabaseAdmin } from '../_lib/supabaseAdmin.js'
+import { verifySupabaseUser, verifyVendorOwnership } from '../_lib/auth.js'
 
 /**
  * Outbound iCal Feed Route:
- * Accessible at `/api/calendar/[vendorId].ics` (or query `?vendorId=...`).
- * Returns a valid iCalendar feed with all confirmed 'booked' dates labeled 'Mana Wedding Booking'.
+ * - Verifies Supabase JWT session token and vendor ownership (prevents IDOR)
+ * - Returns a valid iCalendar feed with confirmed 'booked' dates
  */
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -12,11 +13,21 @@ export default async function handler(req, res) {
   }
 
   try {
+    const { user, role, error: authError } = await verifySupabaseUser(req)
+    if (authError || !user) {
+      return res.status(401).json({ error: authError || 'Unauthorized' })
+    }
+
     const { vendorId } = req.query
     const cleanVendorId = (vendorId || '').replace(/\.ics$/i, '').trim()
 
     if (!cleanVendorId) {
       return res.status(400).send('Missing vendor ID')
+    }
+
+    const ownsTarget = await verifyVendorOwnership(user, role, cleanVendorId)
+    if (!ownsTarget) {
+      return res.status(403).json({ error: 'Forbidden: You do not own this vendor calendar' })
     }
 
     // 1. Fetch venue details for feed metadata
@@ -60,7 +71,7 @@ export default async function handler(req, res) {
         end: endDate,
         allDay: true,
         summary: 'Mana Wedding Booking',
-        description: `Confirmed Wedding Booking at ${venueTitle}. Reference: ${row.booking_id || row.id}`,
+        description: `Confirmed Wedding Booking at ${venueTitle}.`,
         location: venueTitle,
         status: 'CONFIRMED',
         created: row.created_at ? new Date(row.created_at) : new Date(),

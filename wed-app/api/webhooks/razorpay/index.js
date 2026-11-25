@@ -16,15 +16,26 @@ export default async function handler(req, res) {
     const signature = req.headers['x-razorpay-signature']
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET
 
-    // 1. Verify Webhook Signature if secret configured
-    if (webhookSecret && signature) {
+    // 1. Verify Webhook Signature (mandatory in production; requires RAZORPAY_WEBHOOK_SECRET)
+    if (!webhookSecret) {
+      if (process.env.NODE_ENV === 'production') {
+        console.error('RAZORPAY_WEBHOOK_SECRET is not configured on server')
+        return res.status(500).json({ error: 'Webhook gateway misconfigured' })
+      }
+      console.warn('Warning: RAZORPAY_WEBHOOK_SECRET not set in dev; bypassing signature check')
+    } else {
+      if (!signature || typeof signature !== 'string') {
+        return res.status(401).json({ error: 'Missing X-Razorpay-Signature header' })
+      }
       const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body)
       const expectedSignature = crypto
         .createHmac('sha256', webhookSecret)
         .update(rawBody)
         .digest('hex')
 
-      if (expectedSignature !== signature) {
+      const sigBuf = Buffer.from(signature, 'utf8')
+      const expBuf = Buffer.from(expectedSignature, 'utf8')
+      if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
         console.error('Razorpay signature verification failed')
         return res.status(400).json({ error: 'Invalid signature' })
       }

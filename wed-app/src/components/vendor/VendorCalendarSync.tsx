@@ -196,10 +196,17 @@ export default function VendorCalendarSync({
 
       if (updateError) throw updateError
 
-      // 2. Trigger Inbound Sync API
+      // 2. Trigger Inbound Sync API with Bearer token
+      const { data: sessionData } = await supabase.auth.getSession()
+      const accessToken = sessionData?.session?.access_token
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`
+      }
+
       const response = await fetch(`/api/sync-ical?vendorId=${vendorId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ vendorId }),
       })
 

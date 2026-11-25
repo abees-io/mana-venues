@@ -1,11 +1,34 @@
 import ical from 'node-ical'
-import { supabaseAdmin } from '../../_lib/supabaseAdmin.js'
-import { expandDateRangeIST, formatISTDate } from '../../_lib/dateUtils.js'
+import { supabaseAdmin } from '../_lib/supabaseAdmin.js'
+import { extractBearerToken, verifySupabaseUser, verifyVendorOwnership } from '../_lib/auth.js'
+import { expandDateRangeIST } from '../_lib/dateUtils.js'
+
+function isSafeHttpsUrl(rawUrl) {
+  try {
+    const normalized = rawUrl.trim().replace(/^webcal:\/\//i, 'https://')
+    const parsed = new URL(normalized)
+    if (parsed.protocol !== 'https:') return null
+    const host = parsed.hostname.toLowerCase()
+    if (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === '0.0.0.0' ||
+      host.startsWith('169.254.') ||
+      host.startsWith('10.') ||
+      host.startsWith('192.168.')
+    ) {
+      return null
+    }
+    return parsed.toString()
+  } catch {
+    return null
+  }
+}
 
 /**
  * Inbound iCal Sync Handler:
- * Supports cron synchronization (secured with CRON_SECRET) as well as
- * vendor on-demand synchronization ("Save & Test Sync").
+ * - Supports cron synchronization (secured with CRON_SECRET)
+ * - Supports vendor on-demand synchronization verified via Supabase JWT + ownership check
  */
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
@@ -13,18 +36,27 @@ export default async function handler(req, res) {
   }
 
   try {
-    const authHeader = req.headers.authorization || ''
     const cronSecret = process.env.CRON_SECRET
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim()
-
-    // Determine target vendor if supplied
+    const token = extractBearerToken(req)
     const queryVendorId = req.query?.vendorId || req.body?.vendorId
 
     const isCronAuthorized = Boolean(cronSecret && token === cronSecret)
-    const isVendorAuthorized = Boolean(queryVendorId) // Vendor on-demand trigger
 
-    if (!isCronAuthorized && !isVendorAuthorized) {
-      return res.status(401).json({ error: 'Unauthorized: Missing valid CRON_SECRET or vendor authorization' })
+    if (!isCronAuthorized) {
+      const { user, role, error: authError } = await verifySupabaseUser(req)
+      if (authError || !user) {
+        return res.status(401).json({ error: authError || 'Unauthorized: Missing valid CRON_SECRET or session token' })
+      }
+      if (!queryVendorId) {
+        if (role !== 'admin') {
+          return res.status(403).json({ error: 'Forbidden: vendorId required for non-admin sync' })
+        }
+      } else {
+        const ownsTarget = await verifyVendorOwnership(user, role, queryVendorId)
+        if (!ownsTarget) {
+          return res.status(403).json({ error: 'Forbidden: You do not own this venue or calendar' })
+        }
+      }
     }
 
     // 1. Fetch listings/auditoriums with a configured ical_import_url
@@ -49,8 +81,16 @@ export default async function handler(req, res) {
       const rawUrl = venue.ical_import_url?.trim()
       if (!rawUrl) continue
 
-      // Convert webcal:// to https://
-      const httpsUrl = rawUrl.replace(/^webcal:\/\//i, 'https://')
+      // Enforce strict HTTPS iCal URL (converts webcal:// to https://, blocks http:// & private IPs)
+      const httpsUrl = isSafeHttpsUrl(rawUrl)
+      if (!httpsUrl) {
+        syncResults.push({
+          vendorId: venue.id,
+          title: venue.title,
+          error: 'Rejected non-HTTPS or unsafe iCal URL',
+        })
+        continue
+      }
 
       try {
         // Fetch and parse the iCal feed

@@ -210,7 +210,7 @@ export default function PackagesPage() {
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
   const isPlannerVendor =
     profile?.role === 'vendor' &&
-    (profile?.vendor_type === 'wedding_planner' || profile?.vendor_type === 'destination_wedding')
+    (!profile?.vendor_type || profile?.vendor_type === 'wedding_planner' || profile?.vendor_type === 'destination_wedding')
   const canManagePackages = Boolean(isAdmin || isPlannerVendor)
   const pageRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
