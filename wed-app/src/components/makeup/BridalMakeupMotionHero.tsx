@@ -4,8 +4,6 @@ import {
   Sparkles,
   Crown,
   ChevronRight,
-  CheckCircle2,
-  Layers,
   Edit3,
   ArrowLeft,
 } from 'lucide-react'
@@ -107,8 +105,6 @@ export default function BridalMakeupMotionHero({
   const { user, profile } = useAuth()
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin'
 
-  const active = MAKEUP_STYLES[activeIndex]
-
   const handleSelectType = (idx: number) => {
     setActiveIndex(idx)
     onSelectCategory(MAKEUP_STYLES[idx].id)
@@ -207,14 +203,12 @@ export default function BridalMakeupMotionHero({
           </div>
         </div>
 
-        {/* 3D VANITY MIRROR COMPACT DECK ANIMATION */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {/* Left: 3D Vanity Mirror Deck */}
-          <div className="lg:col-span-7 flex flex-col items-center justify-center">
-            <div
-              className="relative w-full h-[320px] sm:h-[390px] md:h-[430px] flex items-center justify-center select-none overflow-hidden touch-pan-y"
-              style={{ perspective: '1200px' }}
-            >
+        {/* 3D VANITY MIRROR COMPACT DECK ANIMATION (Centered on Desktop) */}
+        <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center">
+          <div
+            className="relative w-full h-[320px] sm:h-[390px] md:h-[430px] flex items-center justify-center select-none overflow-hidden touch-pan-y"
+            style={{ perspective: '1200px' }}
+          >
               {MAKEUP_STYLES.map((type, idx) => {
                 const total = MAKEUP_STYLES.length
                 let diff = (idx - activeIndex) % total
@@ -319,7 +313,13 @@ export default function BridalMakeupMotionHero({
                       <div className="pt-1 flex items-center justify-between text-[11px] text-white/85">
                         <span>{type.deliverableSummary}</span>
                         {isCenter && (
-                          <span className="text-[#F3A2BE] font-bold inline-flex items-center gap-1">
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onExplorePackages?.()
+                            }}
+                            className="text-[#F3A2BE] font-bold inline-flex items-center gap-1 cursor-pointer pointer-events-auto"
+                          >
                             <span>Explore Kits</span>
                             <ChevronRight className="w-3 h-3" />
                           </span>
@@ -347,68 +347,6 @@ export default function BridalMakeupMotionHero({
                 />
               ))}
             </div>
-          </div>
-
-          {/* Right: Active Category Overview */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
-            <div className="space-y-3.5">
-              {active.subtitle && (
-                <h2
-                  className="text-2xl sm:text-3xl font-extrabold text-[#5A172D] tracking-wide leading-tight"
-                  style={{ fontFamily: "'Cinzel', serif" }}
-                >
-                  {active.subtitle}
-                </h2>
-              )}
-
-              {active.description && (
-                <p className="text-xs sm:text-sm text-black/80 font-medium leading-relaxed">
-                  {active.description}
-                </p>
-              )}
-
-              {/* Signature Inclusions */}
-              {active.keyPoints && active.keyPoints.length > 0 && (
-                <div className="space-y-2 pt-1">
-                  <p className="text-xs font-extrabold uppercase tracking-wider text-[#5A172D]">
-                    Signature Beauty Inclusions
-                  </p>
-                  <ul className="space-y-1.5">
-                    {active.keyPoints.map((point, pIdx) => (
-                      <li key={pIdx} className="flex items-start gap-2 text-xs text-black/85 font-medium">
-                        <CheckCircle2 className="w-4 h-4 text-[#C83B68] shrink-0 mt-0.5" />
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-
-            {/* CTAs */}
-            <div className="pt-2 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  onSelectCategory(active.id)
-                  onExplorePackages()
-                }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] hover:brightness-105 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-[#C83B68]/30 active:scale-95 transition-all cursor-pointer"
-              >
-                <span>View {active.title.split(' ')[0]} Packages</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onSelectCategory('all')}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white hover:bg-[#FFF2F6] text-[#7E1F3E] font-bold text-xs sm:text-sm border border-[#D8F0EC] shadow-xs active:scale-95 transition-all cursor-pointer"
-              >
-                <Layers className="w-3.5 h-3.5 text-[#C83B68]" />
-                <span>Show All Packages</span>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </section>

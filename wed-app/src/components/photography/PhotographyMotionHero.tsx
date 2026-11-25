@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import {
   Heart,
   Smartphone,
-  Layers,
-  ChevronRight,
-  CheckCircle2,
   ArrowRight,
   ArrowLeft,
 } from 'lucide-react'
@@ -95,8 +92,6 @@ export default function PhotographyMotionHero({
   const [activeIndex, setActiveIndex] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
   const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  const active = PHOTOGRAPHY_TYPES[activeIndex]
 
   const handleSelectType = (idx: number) => {
     setActiveIndex(idx)
@@ -270,7 +265,13 @@ export default function PhotographyMotionHero({
                     <div className="pt-1 flex items-center justify-between text-[11px] text-white/85">
                       <span>{type.deliverableSummary}</span>
                       {isCenter && (
-                        <span className="text-[#F3A2BE] font-bold inline-flex items-center gap-1">
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onExplorePackages?.()
+                          }}
+                          className="text-[#F3A2BE] font-bold inline-flex items-center gap-1 cursor-pointer pointer-events-auto"
+                        >
                           <span>Explore</span>
                           <ArrowRight className="w-3 h-3" />
                         </span>
@@ -296,67 +297,6 @@ export default function PhotographyMotionHero({
                 aria-label={`Switch to ${type.title}`}
               />
             ))}
-          </div>
-        </div>
-
-        {/* Right: Active Category Detailed Overview & Highlights */}
-        <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
-          <div className="space-y-3.5">
-            {active.subtitle && (
-              <h2
-                className="text-2xl sm:text-3xl font-extrabold text-[#5A172D] tracking-wide leading-tight"
-                style={{ fontFamily: "'Cinzel', serif" }}
-              >
-                {active.subtitle}
-              </h2>
-            )}
-
-            {active.description && (
-              <p className="text-xs sm:text-sm text-black/80 font-medium leading-relaxed">
-                {active.description}
-              </p>
-            )}
-
-            {/* Signature Inclusions */}
-            {active.keyPoints && active.keyPoints.length > 0 && (
-              <div className="space-y-2 pt-1">
-                <p className="text-xs font-extrabold uppercase tracking-wider text-[#5A172D]">
-                  Signature Inclusions
-                </p>
-                <ul className="space-y-1.5">
-                  {active.keyPoints.map((point, pIdx) => (
-                    <li key={pIdx} className="flex items-start gap-2 text-xs text-black/85 font-medium">
-                      <CheckCircle2 className="w-4 h-4 text-[#C83B68] shrink-0 mt-0.5" />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* CTAs */}
-          <div className="pt-2 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                onSelectCategory(active.id)
-                onExplorePackages()
-              }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] hover:brightness-105 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-[#C83B68]/30 active:scale-95 transition-all cursor-pointer"
-            >
-              <span>View {active.title.split(' ')[0]} Packages</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onSelectCategory('all')}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white hover:bg-[#F0F9F8] text-[#7E1F3E] font-bold text-xs sm:text-sm border border-[#D8F0EC] shadow-xs active:scale-95 transition-all cursor-pointer"
-            >
-              <Layers className="w-3.5 h-3.5 text-[#C83B68]" />
-              <span>Show All Packages</span>
-            </button>
           </div>
         </div>
       </div>
