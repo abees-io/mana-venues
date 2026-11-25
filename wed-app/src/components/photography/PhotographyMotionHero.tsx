@@ -5,6 +5,7 @@ import {
   Smartphone,
   Layers,
   ChevronRight,
+  CheckCircle2,
   ArrowRight,
   ArrowLeft,
 } from 'lucide-react'
@@ -30,20 +31,15 @@ const PHOTOGRAPHY_TYPES: PhotographyTypeMeta[] = [
   {
     id: 'wedding',
     title: 'Wedding Photography',
-    subtitle: 'Ceremony Grandeur, Muhurtham & Sacred Rituals',
+    subtitle: '',
     icon: Heart,
     image: '/photo-wedding.jpg',
     badge: 'Ceremony & Grandeur',
     badgeColor: 'from-[#C83B68] via-[#E05A85] to-[#C83B68]',
     startingPrice: 'Price on Demand',
-    description:
-      'Immersive multi-day coverage honoring timeless heritage: the sacred Muhurtham ceremonies, Haldi laughter, Sangeet choreography, and grand evening receptions.',
+    description: '',
     gearSpec: 'Sony FX3 Cinema • 4K Drone • 10-bit S-Log3 • Prime Glass',
-    keyPoints: [
-      '4-member master team + licensed aerial drone cinematography',
-      'Italian flush-mount luxury handcrafted photo album (80 pages)',
-      '20-25 min cinematic 4K wedding film + viral teaser trailer',
-    ],
+    keyPoints: [],
     deliverableSummary: '1,200+ Photos • 8 Reels • Full 4K Film',
   },
   {
@@ -175,8 +171,8 @@ export default function PhotographyMotionHero({
                   type="button"
                   onClick={() => handleSelectType(idx)}
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 shadow-xs cursor-pointer active:scale-95 ${isCurrent
-                      ? 'bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] text-white shadow-md shadow-[#C83B68]/30 scale-105'
-                      : 'bg-white hover:bg-[#F0F9F8] text-[#5A172D] border border-[#D8F0EC]'
+                    ? 'bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] text-white shadow-md shadow-[#C83B68]/30 scale-105'
+                    : 'bg-white hover:bg-[#F0F9F8] text-[#5A172D] border border-[#D8F0EC]'
                     }`}
                 >
                   <Icon className={`w-3.5 h-3.5 ${isCurrent ? 'text-white' : 'text-[#C83B68]'}`} />
@@ -232,9 +228,8 @@ export default function PhotographyMotionHero({
                 <div
                   key={type.id}
                   onClick={() => handleSelectType(idx)}
-                  className={`absolute top-0 w-[84%] sm:w-[76%] md:w-[64%] max-w-[440px] aspect-[16/11] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-2xl hover:opacity-100 ${
-                    isCenter ? 'ring-2 ring-[#C83B68]/30 shadow-[0_24px_50px_rgba(200,59,104,0.18)]' : ''
-                  }`}
+                  className={`absolute top-0 w-[84%] sm:w-[76%] md:w-[64%] max-w-[440px] aspect-[16/11] rounded-3xl overflow-hidden cursor-pointer select-none transition-[transform,opacity] duration-500 ease-out will-change-[transform,opacity] transform-gpu border border-[#D8F0EC] shadow-2xl hover:opacity-100 ${isCenter ? 'ring-2 ring-[#C83B68]/30 shadow-[0_24px_50px_rgba(200,59,104,0.18)]' : ''
+                    }`}
                   style={{
                     transform: transformStyle,
                     zIndex,
@@ -287,24 +282,62 @@ export default function PhotographyMotionHero({
             })}
           </div>
 
-          {/* Direct Step Dots */}
-          <div className="flex items-center gap-2 mt-2">
+          {/* Hint & Direct Step Dots */}
+          <div className="flex items-center gap-2 mt-4">
             {PHOTOGRAPHY_TYPES.map((type, idx) => (
               <button
                 key={type.id}
                 type="button"
                 onClick={() => handleSelectType(idx)}
-                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${idx === activeIndex
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                  idx === activeIndex
                     ? 'w-8 bg-gradient-to-r from-[#C83B68] to-[#E05A85]'
                     : 'w-2 bg-[#D8F0EC] hover:bg-[#C83B68]/50'
-                  }`}
+                }`}
                 aria-label={`Switch to ${type.title}`}
               />
             ))}
           </div>
+        </div>
 
-          {/* Centered CTAs */}
-          <div className="pt-5 flex flex-wrap items-center justify-center gap-3">
+        {/* Right: Active Category Detailed Overview & Highlights */}
+        <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
+          <div className="space-y-3.5">
+            {active.subtitle && (
+              <h2
+                className="text-2xl sm:text-3xl font-extrabold text-[#5A172D] tracking-wide leading-tight"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                {active.subtitle}
+              </h2>
+            )}
+
+            {active.description && (
+              <p className="text-xs sm:text-sm text-black/80 font-medium leading-relaxed">
+                {active.description}
+              </p>
+            )}
+
+            {/* Signature Inclusions */}
+            {active.keyPoints && active.keyPoints.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <p className="text-xs font-extrabold uppercase tracking-wider text-[#5A172D]">
+                  Signature Inclusions
+                </p>
+                <ul className="space-y-1.5">
+                  {active.keyPoints.map((point, pIdx) => (
+                    <li key={pIdx} className="flex items-start gap-2 text-xs text-black/85 font-medium">
+                      <CheckCircle2 className="w-4 h-4 text-[#C83B68] shrink-0 mt-0.5" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* CTAs */}
+          <div className="pt-2 flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={() => {

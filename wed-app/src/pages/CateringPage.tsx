@@ -7,18 +7,31 @@ import {
   Clock,
   Users,
   CheckCircle2,
-  Send,
   X,
-  SlidersHorizontal,
   Plus,
   Edit2,
   Trash2,
   Edit3,
   AlertCircle,
+  Heart,
   Star,
   ChevronLeft,
-  Heart,
+  MapPin,
+  Calendar,
+  Info,
 } from 'lucide-react'
+
+const MIN_LEAD_DAYS = 23
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date)
+  result.setDate(result.getDate() + days)
+  return result
+}
+function getIST_YYYY_MM_DD(d: Date): string {
+  const istOffset = 5.5 * 60 * 60 * 1000
+  const istTime = new Date(d.getTime() + istOffset)
+  return istTime.toISOString().split('T')[0]
+}
 import Layout from '../components/layout/Layout'
 import CateringMotionHero from '../components/catering/CateringMotionHero'
 import {
@@ -55,17 +68,10 @@ export default function CateringPage() {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null)
+  const [pincodes, setPincodes] = useState<Record<string, string>>({})
   const [inquiryPackage, setInquiryPackage] = useState<CateringPackage | null>(null)
   const [inquirySuccess, setInquirySuccess] = useState(false)
   const [inquiryError, setInquiryError] = useState<string | null>(null)
-  const [expandedInclusions, setExpandedInclusions] = useState<Record<string, boolean>>({})
-
-  const handleOpenPackage = (pkgId: string) => {
-    requireAuth('to view full catering package details and inquire', () => {
-      setSelectedPackageId(pkgId)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    })
-  }
 
   // Admin Modals
   const [isEditHeroModalOpen, setIsEditHeroModalOpen] = useState(false)
@@ -133,13 +139,6 @@ export default function CateringPage() {
       pkg.kitchenSpec.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
-
-  const toggleInclusions = (pkgId: string) => {
-    setExpandedInclusions((prev) => ({
-      ...prev,
-      [pkgId]: !prev[pkgId],
-    }))
-  }
 
   // Open Add Package Modal
   const handleOpenAddModal = () => {
@@ -260,6 +259,348 @@ export default function CateringPage() {
     setIsEditHeroModalOpen(false)
   }
 
+  const handleOpenPackage = (pkgId: string) => {
+    requireAuth('to view exclusive wedding package details, pricing, and booking dates', () => {
+      setSelectedPackageId(pkgId)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  }
+
+  // Guard selectedPackageId so unauthenticated users cannot view packages without signing in
+  useEffect(() => {
+    if (selectedPackageId && !user) {
+      const pendingPkgId = selectedPackageId
+      setSelectedPackageId(null)
+      requireAuth('to view exclusive wedding package details, pricing, and booking dates', () => {
+        setSelectedPackageId(pendingPkgId)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
+    }
+  }, [selectedPackageId, user, requireAuth])
+
+  const renderPackageCard = (pkg: CateringPackage) => {
+    return (
+      <div
+        key={pkg.id}
+        onClick={() => handleOpenPackage(pkg.id)}
+        className="bg-white rounded-2xl overflow-hidden border border-gray-200/80 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer active:scale-[0.98] group hover:-translate-y-1"
+      >
+        {/* Top Image & Wishlist Button */}
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+          <img
+            src={pkg.image}
+            alt={pkg.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+          <button
+            type="button"
+            aria-label="Save package"
+            onClick={(e) => {
+              e.stopPropagation()
+            }}
+            className="absolute top-2.5 right-2.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center text-amber-500 shadow-sm border border-amber-100/60 active:scale-90 transition-transform"
+          >
+            <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
+          </button>
+        </div>
+
+        {/* Card Details matching Destination Wedding style */}
+        <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between gap-1.5">
+          <div className="space-y-1">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#B8710B] block truncate">
+              {pkg.vendorName || pkg.categoryLabel || 'CATERING'}
+            </span>
+            <h3 className="text-xs sm:text-sm font-bold text-gray-900 leading-snug line-clamp-2">
+              {pkg.title}
+            </h3>
+            {/* 5-star rating + (0) */}
+            <div className="flex items-center gap-1 pt-0.5">
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-gray-200 text-gray-300" />
+                ))}
+              </div>
+              <span className="text-[10px] sm:text-xs text-gray-400 font-medium">(0)</span>
+            </div>
+          </div>
+
+          {/* Price on Request Pill Badge */}
+          <div className="pt-1.5">
+            <span className="inline-block px-2.5 py-0.5 rounded-md bg-[#FFF5E6] text-[#B8710B] text-[10px] sm:text-xs font-bold border border-[#FFE0B2]">
+              {pkg.price || 'Price on Request'}
+            </span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const renderPackageArticle = (pkg: CateringPackage) => {
+    const canEditPkg = Boolean(isAdmin || (isCateringVendor && pkg.vendorId === profile?.id))
+
+    return (
+      <article
+        key={pkg.id}
+        id={`package-${pkg.id}`}
+        className="package-card-pop group rounded-2xl overflow-hidden bg-white backdrop-blur-md border border-[#D8F0EC] shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col will-change-[transform,opacity] scroll-mt-24"
+      >
+        <div className="flex flex-col lg:flex-row">
+          {/* Left: Photo & Kitchen Spec */}
+          <div className="w-full lg:w-[48%] shrink-0 p-5 sm:p-6 lg:p-7 space-y-3">
+            <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-black/10 border border-[#D8F0EC]">
+              <img
+                src={pkg.image}
+                alt={pkg.title}
+                className="w-full h-full object-cover"
+              />
+              {/* Category Badge */}
+              <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#D8F0EC] text-[11px] font-bold text-[#7E1F3E] shadow-2xs">
+                <span>{pkg.categoryLabel}</span>
+              </div>
+
+              {/* Admin Edit/Delete */}
+              {canEditPkg && (
+                <div
+                  className="absolute top-3 right-3 flex items-center gap-1.5 z-10"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEditModal(pkg)}
+                    aria-label={`Edit ${pkg.title}`}
+                    className="p-2 rounded-full bg-white/90 backdrop-blur-md text-[#C83B68] hover:bg-white border border-[#D8F0EC] shadow-md transition-colors"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(`Delete "${pkg.title}"?`)) {
+                        deletePackage(pkg.id)
+                        setSelectedPackageId(null)
+                      }
+                    }}
+                    aria-label={`Delete ${pkg.title}`}
+                    className="p-2 rounded-full bg-white/90 backdrop-blur-md text-red-500 hover:bg-red-50 border border-red-200 shadow-md transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Kitchen Specification Callout */}
+            {pkg.kitchenSpec && (
+              <div className="p-3 rounded-xl bg-[#FFF9ED] border border-amber-200/70 text-xs font-mono text-[#5A172D]">
+                <span className="font-bold text-amber-700 block text-[10px] uppercase tracking-wider mb-0.5">
+                  KITCHEN & LOGISTICS SPECIFICATION
+                </span>
+                <span className="font-semibold">{pkg.kitchenSpec}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right: Package Details */}
+          <div className="flex-1 p-5 sm:p-6 lg:p-7 flex flex-col justify-between space-y-4">
+            <div className="space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#B8710B] block">
+                {pkg.vendorName || pkg.categoryLabel || 'CATERING'}
+              </span>
+
+              <h1
+                className="text-2xl sm:text-3xl font-extrabold text-[#1A1A1A] leading-tight"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                {pkg.title}
+              </h1>
+
+              {/* 5-star rating + (0) */}
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-gray-200 text-gray-300" />
+                  ))}
+                </div>
+                <span className="text-xs text-gray-400 font-medium">(0)</span>
+              </div>
+
+              {/* Price Badge */}
+              <div className="pt-1">
+                <span className="inline-block px-3 py-1 rounded-md bg-[#FFF5E6] text-[#B8710B] text-xs sm:text-sm font-bold border border-[#FFE0B2]">
+                  {pkg.price || 'Price on Request'}
+                </span>
+              </div>
+
+              {/* Tagline / Description */}
+              <p className="text-xs sm:text-sm text-gray-700 leading-relaxed font-medium">
+                {pkg.tagline}
+              </p>
+
+              {/* Deliverables Matrix */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                    <Soup className="w-3.5 h-3.5 text-[#C83B68]" />
+                    <span>Courses</span>
+                  </div>
+                  <p className="text-xs font-bold text-gray-900 mt-1">{pkg.deliverables.courses}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                    <Flame className="w-3.5 h-3.5 text-[#C83B68]" />
+                    <span>Live Counters</span>
+                  </div>
+                  <p className="text-xs font-bold text-gray-900 mt-1">{pkg.deliverables.liveStalls}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                    <UtensilsCrossed className="w-3.5 h-3.5 text-[#C83B68]" />
+                    <span>Desserts</span>
+                  </div>
+                  <p className="text-xs font-bold text-gray-900 mt-1">{pkg.deliverables.desserts}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                    <Users className="w-3.5 h-3.5 text-[#C83B68]" />
+                    <span>Crew</span>
+                  </div>
+                  <p className="text-xs font-bold text-gray-900 mt-1 truncate">{pkg.deliverables.serviceCrew}</p>
+                </div>
+              </div>
+
+              {/* Duration & Guest Count */}
+              <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-gray-700 font-medium">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-100">
+                  <Clock className="w-3.5 h-3.5 text-[#C83B68]" />
+                  <span>{pkg.duration}</span>
+                </span>
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-100">
+                  <Users className="w-3.5 h-3.5 text-[#C83B68]" />
+                  <span>{pkg.guestCount}</span>
+                </span>
+              </div>
+
+              {/* Inclusions */}
+              {pkg.inclusions && pkg.inclusions.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-700 block">
+                    CURATED MENU INCLUSIONS
+                  </span>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {pkg.inclusions.map((inc, iIdx) => (
+                      <li key={iIdx} className="flex items-start gap-2 text-xs text-gray-700 font-medium">
+                        <CheckCircle2 className="w-4 h-4 text-[#C83B68] shrink-0 mt-0.5" />
+                        <span>{inc}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* AVAILABILITY BOX matching Destination Wedding */}
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 space-y-3.5 shadow-2xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block">
+                AVAILABILITY
+              </span>
+
+              {/* Location Input */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Location</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={pincodes[pkg.id] ?? '682001'}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setPincodes((prev) => ({ ...prev, [pkg.id]: val }))
+                    }}
+                    placeholder="Enter pincode or city..."
+                    className="w-full pl-9 pr-8 py-2 text-xs bg-gray-50/70 border border-gray-200 rounded-lg text-gray-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C83B68]/30 transition-all"
+                  />
+                  <MapPin className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  {(pincodes[pkg.id] ?? '682001') && (
+                    <button
+                      type="button"
+                      onClick={() => setPincodes((prev) => ({ ...prev, [pkg.id]: '' }))}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Event Date Input */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Event Date</label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={eventDate || getIST_YYYY_MM_DD(addDays(new Date(), MIN_LEAD_DAYS))}
+                    min={getIST_YYYY_MM_DD(addDays(new Date(), MIN_LEAD_DAYS))}
+                    onChange={(e) => setEventDate(e.target.value)}
+                    className="w-full pl-3 pr-9 py-2 text-xs bg-gray-50/70 border border-gray-200 rounded-lg text-gray-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C83B68]/30 transition-all cursor-pointer"
+                  />
+                  <Calendar className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+                <p className="mt-1.5 text-[11px] font-medium text-rose-500">
+                  Booking must be made at least 23 days in advance. Earliest available date is{' '}
+                  {getIST_YYYY_MM_DD(addDays(new Date(), MIN_LEAD_DAYS))}.
+                </p>
+              </div>
+            </div>
+
+            {/* CANCELLATION POLICY BOX */}
+            <div className="rounded-2xl border-l-4 border-l-amber-500 border border-amber-200 bg-amber-50/40 p-4 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-amber-700 text-xs font-bold uppercase tracking-wider">
+                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                <span>CANCELLATION POLICY</span>
+              </div>
+              <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc marker:text-amber-500">
+                <li>50% refund available for cancellations made at least 7 days prior to the event date.</li>
+                <li>No refund will be provided for cancellations made within 7 days of event date.</li>
+              </ul>
+              <p className="text-[11px] text-gray-500 italic pt-0.5">
+                Standard processing charges may apply and are non-refundable.
+              </p>
+            </div>
+
+            {/* PAYMENT POLICY BOX */}
+            <div className="rounded-2xl border-l-4 border-l-sky-500 border border-sky-200 bg-sky-50/40 p-4 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-sky-800 text-xs font-bold uppercase tracking-wider">
+                <Info className="w-3.5 h-3.5 text-sky-600" />
+                <span>PAYMENT POLICY</span>
+              </div>
+              <ul className="text-xs text-gray-600 space-y-1 pl-4 list-disc marker:text-sky-500">
+                <li>An advance payment of 10% of the total amount is required online for confirmation.</li>
+                <li>The remaining balance will be collected at the time of catering delivery.</li>
+                <li>Remaining payments will be collected directly by {pkg.vendorName || 'Verified Partner'}.</li>
+              </ul>
+            </div>
+
+            {/* MAKE AN ENQUIRY CTA BUTTON */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  requireAuth(`to inquire about "${pkg.title}"`, () => {
+                    setInquiryPackage(pkg)
+                    setInquirySuccess(false)
+                  })
+                }}
+                className="px-8 py-3 rounded-xl bg-black text-white hover:bg-gray-800 font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 cursor-pointer"
+              >
+                Make an Enquiry
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    )
+  }
+
   const handleInquireSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setInquiryError(null)
@@ -302,85 +643,79 @@ export default function CateringPage() {
           id="catering-packages"
           className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-8 sm:py-14 scroll-mt-20"
         >
-          {/* Filter Bar & Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 sm:mb-8">
-            <div>
-              <h2
-                className="text-2xl sm:text-3xl font-bold text-[#7E1F3E] tracking-wide"
-                style={{ fontFamily: "'Cinzel', serif" }}
-              >
-                Catering & Dining Packages
-              </h2>
-              <p className="text-xs sm:text-sm text-black/70 font-medium mt-1">
-                Authentic banana-leaf Sadya, luxury multi-cuisine buffets, and theatrical live food counters.
-              </p>
-            </div>
+          {/* Header & Filter Bar (Shown when !selectedPackageId) */}
+          {!selectedPackageId && (
+            <div className="mb-6 space-y-4">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                  <h2
+                    className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1A1A1A] tracking-tight text-left drop-shadow-xs"
+                    style={{ fontFamily: "'Cinzel', serif" }}
+                  >
+                    Catering & Dining Packages
+                  </h2>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">
+                    Authentic banana-leaf Sadya, luxury multi-cuisine buffets, and live food counters
+                  </p>
+                </div>
 
-            {/* Search Input & Admin Add Button */}
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              <div className="w-full md:w-64">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search sadya, buffet, live chaat..."
-                  className="w-full px-4 py-2 text-xs sm:text-sm bg-white border border-[#D8F0EC] rounded-full text-black placeholder-black/50 focus:outline-none focus:ring-2 focus:ring-[#C83B68]/30 shadow-2xs"
-                />
+                {/* Search Input & Admin Add Button */}
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                  <div className="w-full md:w-64">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search sadya, buffet, live chaat..."
+                      className="w-full px-4 py-2 text-xs sm:text-sm bg-white border border-gray-200 rounded-full text-black placeholder-black/50 focus:outline-none focus:ring-2 focus:ring-[#C83B68]/30 shadow-2xs"
+                    />
+                  </div>
+
+                  {canManageCatering && (
+                    <button
+                      type="button"
+                      onClick={handleOpenAddModal}
+                      className="inline-flex items-center gap-1 px-3.5 py-2 rounded-full bg-[#C83B68] hover:bg-[#A82B54] text-white font-bold text-xs shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Add Feast</span>
+                      <span className="sm:hidden">Add</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Admin / Catering Vendor: Add New Feast Button */}
-              {canManageCatering && (
-                <button
-                  type="button"
-                  onClick={handleOpenAddModal}
-                  className="inline-flex items-center gap-1 px-3.5 py-2 rounded-full bg-[#C83B68] hover:bg-[#A82B54] text-white font-bold text-xs shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Add Feast</span>
-                  <span className="sm:hidden">Add</span>
-                </button>
-              )}
+              {/* Packages found counter + Category Pills matching Destination Packages */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3.5 sm:p-4 rounded-2xl bg-white border border-gray-200/90 shadow-2xs">
+                <span className="text-xs sm:text-sm text-gray-700 font-medium">
+                  <strong className="text-gray-900 font-bold">{filteredPackages.length}</strong> packages found
+                </span>
+                <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+                  {[
+                    { id: 'all', label: 'All Menus' },
+                    { id: 'sadya', label: 'Royal Sadya' },
+                    { id: 'buffet', label: 'Grand Buffet' },
+                    { id: 'live', label: 'Live Fiesta' },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => handleCategoryFilter(tab.id as CateringCategory | 'all')}
+                      className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer shrink-0 ${
+                        selectedCategory === tab.id
+                          ? 'bg-[#B8710B] text-white shadow-xs font-bold'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Category Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-6 sm:mb-8 pb-2 border-b border-[#D8F0EC]">
-            {[
-              { id: 'all', label: 'All Menus', icon: SlidersHorizontal },
-              { id: 'sadya', label: 'Traditional Royal Sadya', icon: Soup },
-              { id: 'buffet', label: 'Grand Multi-Cuisine Buffet', icon: UtensilsCrossed },
-              { id: 'live', label: 'Live Counters & Fiesta', icon: Flame },
-            ].map((tab) => {
-              const isSelected = selectedCategory === tab.id
-              const Icon = tab.icon
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => handleCategoryFilter(tab.id as CateringCategory | 'all')}
-                  className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all shadow-2xs active:scale-95 cursor-pointer ${
-                    isSelected
-                      ? 'bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] text-white shadow-xs'
-                      : 'bg-white hover:bg-[#FFF9ED] text-[#5A172D] border border-[#D8F0EC]'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{tab.label}</span>
-                  <span
-                    className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full ${
-                      isSelected ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {tab.id === 'all'
-                      ? packages.length
-                      : packages.filter((p) => p.category === tab.id).length}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-
-          {/* 2-Column Mobile Grid of Packages */}
+          {/* Packages Display (Cards Grid when !selectedPackageId, or Full Detailed Article when selected) */}
           {filteredPackages.length === 0 ? (
             <div className="text-center py-16 px-4 bg-white rounded-3xl border border-[#D8F0EC] shadow-sm max-w-md mx-auto space-y-3">
               <UtensilsCrossed className="w-12 h-12 text-[#C83B68] mx-auto opacity-70" />
@@ -394,127 +729,47 @@ export default function CateringPage() {
                   setSelectedCategory('all')
                   setSearchQuery('')
                 }}
-                className="px-4 py-2 rounded-full bg-[#C83B68] text-white font-bold text-xs"
+                className="px-4 py-2 rounded-full bg-[#C83B68] text-white font-bold text-xs cursor-pointer"
               >
                 Reset Filters
               </button>
             </div>
-          ) : selectedPackageId ? (
-            <div className="space-y-4">
-              <button
-                type="button"
-                onClick={() => setSelectedPackageId(null)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-800 hover:text-black shadow-2xs transition-all active:scale-95 cursor-pointer"
-              >
-                <ChevronLeft className="w-4 h-4 text-[#B8710B]" />
-                <span>Back to all packages</span>
-              </button>
-
-              {filteredPackages
-                .filter((p) => p.id === selectedPackageId)
-                .map((pkg) => {
-                  const isExpanded = Boolean(expandedInclusions[pkg.id])
-                  const canEditPkg = Boolean(isAdmin || (isCateringVendor && pkg.vendorId === profile?.id))
-                  return (
-                    <article
-                      key={pkg.id}
-                      className="group relative rounded-3xl overflow-hidden bg-white border border-[#D8F0EC] shadow-md flex flex-col max-w-4xl mx-auto"
-                    >
-                      {canEditPkg && (
-                        <div className="absolute top-3 left-3 z-30 flex items-center gap-1">
-                          <button type="button" onClick={(e) => { e.stopPropagation(); handleOpenEditModal(pkg); }} title="Edit Package" className="p-2 rounded-full bg-white/90 hover:bg-white text-[#C83B68] shadow-md border border-[#D8F0EC] transition-transform active:scale-90"><Edit2 className="w-3.5 h-3.5" /></button>
-                          <button type="button" onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${pkg.title}"?`)) { deletePackage(pkg.id); setSelectedPackageId(null); } }} title="Delete Package" className="p-2 rounded-full bg-white/90 hover:bg-white text-red-600 shadow-md border border-[#D8F0EC] transition-transform active:scale-90"><Trash2 className="w-3.5 h-3.5" /></button>
-                        </div>
-                      )}
-                      <div className="relative aspect-[16/9] max-h-[380px] overflow-hidden bg-black/10">
-                        <img src={pkg.image} alt={pkg.title} className="w-full h-full object-cover object-center" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
-                        <div className={`absolute top-3 ${canEditPkg ? 'left-20' : 'left-3'} px-3 py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#D8F0EC] text-xs font-bold text-[#7E1F3E] shadow-2xs`}>{pkg.categoryLabel}</div>
-                        <div className="absolute top-3 right-3 px-3.5 py-1 rounded-full bg-gradient-to-r from-[#E05A85] to-[#C83B68] text-white text-xs font-black shadow-xs">{pkg.price}</div>
-                        <div className="absolute bottom-4 left-4 right-4 text-white flex items-center gap-4 text-xs font-medium pointer-events-none">
-                          <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-[#F3A2BE]" /><span>{pkg.duration}</span></span>
-                          <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-[#F3A2BE]" /><span>{pkg.guestCount}</span></span>
-                        </div>
-                      </div>
-                      <div className="p-5 sm:p-7 space-y-5">
-                        <div className="space-y-2">
-                          <h3 className="text-xl sm:text-2xl font-bold text-[#5A172D] leading-tight" style={{ fontFamily: "'Cinzel', serif" }}>{pkg.title}</h3>
-                          <p className="text-xs sm:text-sm text-black/75 font-medium leading-relaxed">{pkg.tagline}</p>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                          <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center gap-2"><Soup className="w-4 h-4 text-[#C83B68] shrink-0" /><div className="text-xs leading-tight"><span className="font-bold text-black/90 block">Courses</span><span className="text-black/60">{pkg.deliverables.courses}</span></div></div>
-                          <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center gap-2"><Flame className="w-4 h-4 text-[#C83B68] shrink-0" /><div className="text-xs leading-tight"><span className="font-bold text-black/90 block">Live Stations</span><span className="text-black/60">{pkg.deliverables.liveStalls}</span></div></div>
-                          <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center gap-2"><UtensilsCrossed className="w-4 h-4 text-[#C83B68] shrink-0" /><div className="text-xs leading-tight"><span className="font-bold text-black/90 block">Dessert Bar</span><span className="text-black/60">{pkg.deliverables.desserts}</span></div></div>
-                          <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center gap-2"><Users className="w-4 h-4 text-[#C83B68] shrink-0" /><div className="text-xs leading-tight"><span className="font-bold text-black/90 block">Service Crew</span><span className="text-black/60">{pkg.deliverables.serviceCrew}</span></div></div>
-                        </div>
-                        <div>
-                          <button type="button" onClick={() => toggleInclusions(pkg.id)} className="text-xs font-bold text-[#C83B68] hover:underline flex items-center gap-1 cursor-pointer">
-                            <span>{isExpanded ? 'Hide Menu' : `View Full Menu Inclusions (${pkg.inclusions.length})`}</span>
-                          </button>
-                          <ul className="mt-2.5 space-y-2 border-t border-[#D8F0EC] pt-3 text-xs sm:text-sm text-black/80">
-                            {(isExpanded ? pkg.inclusions : pkg.inclusions.slice(0, 4)).map((inc, iIdx) => (
-                              <li key={iIdx} className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#C83B68] shrink-0 mt-0.5" /><span>{inc}</span></li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="pt-3 border-t border-[#D8F0EC]">
-                          <button
-                            type="button"
-                            onClick={() => requireAuth(`to view catering details and inquire about "${pkg.title}"`, () => { setInquiryPackage(pkg); setInquirySuccess(false); })}
-                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-full bg-gradient-to-r from-[#C83B68] via-[#E05A85] to-[#C83B68] hover:brightness-105 text-white font-extrabold text-sm shadow-md active:scale-95 transition-all cursor-pointer"
-                          >
-                            <Send className="w-4 h-4" />
-                            <span>Inquire Package</span>
-                          </button>
-                        </div>
-                      </div>
-                    </article>
-                  )
-                })}
-            </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5 lg:gap-6">
-              {filteredPackages.map((pkg) => {
-                const canEditPkg = Boolean(isAdmin || (isCateringVendor && pkg.vendorId === profile?.id))
-                return (
-                  <div
-                    key={pkg.id}
-                    onClick={() => handleOpenPackage(pkg.id)}
-                    className="bg-white rounded-2xl overflow-hidden border border-gray-200/80 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer active:scale-[0.98] group hover:-translate-y-1 relative"
-                  >
-                    {canEditPkg && (
-                      <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1">
-                        <button type="button" onClick={(e) => { e.stopPropagation(); handleOpenEditModal(pkg); }} title="Edit Package" className="p-1.5 rounded-full bg-white/95 hover:bg-white text-[#C83B68] shadow-sm border border-gray-200 transition-transform active:scale-90"><Edit2 className="w-3 h-3" /></button>
-                        <button type="button" onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${pkg.title}"?`)) deletePackage(pkg.id); }} title="Delete Package" className="p-1.5 rounded-full bg-white/95 hover:bg-white text-red-600 shadow-sm border border-gray-200 transition-transform active:scale-90"><Trash2 className="w-3 h-3" /></button>
-                      </div>
-                    )}
-                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
-                      <img src={pkg.image} alt={pkg.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                      <button type="button" aria-label="Save package" onClick={(e) => e.stopPropagation()} className="absolute top-2.5 right-2.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center text-amber-500 shadow-sm border border-amber-100/60 active:scale-90 transition-transform">
-                        <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
-                      </button>
-                    </div>
-                    <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between gap-1.5">
-                      <div className="space-y-1">
-                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#B8710B] block truncate">{pkg.vendorName || pkg.categoryLabel}</span>
-                        <h3 className="text-xs sm:text-sm font-bold text-gray-900 leading-snug line-clamp-2">{pkg.title}</h3>
-                        <div className="flex items-center gap-1 pt-0.5">
-                          <div className="flex items-center">{[...Array(5)].map((_, i) => (<Star key={i} className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-gray-200 text-gray-300" />))}</div>
-                          <span className="text-[10px] sm:text-xs text-gray-400 font-medium">(0)</span>
-                        </div>
-                      </div>
-                      <div className="pt-1.5">
-                        <span className="inline-block px-2.5 py-0.5 rounded-md bg-[#FFF5E6] text-[#B8710B] text-[10px] sm:text-xs font-bold border border-[#FFE0B2]">{pkg.price || 'Price on Request'}</span>
-                      </div>
-                    </div>
+            <>
+              {!selectedPackageId ? (
+                <>
+                  {/* Desktop: Aligned Packages Grid */}
+                  <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredPackages.map((pkg) => renderPackageCard(pkg))}
                   </div>
-                )
-              })}
-            </div>
+
+                  {/* Mobile: 2-Column Small Cards Grid */}
+                  <div className="grid grid-cols-2 gap-3.5 lg:hidden">
+                    {filteredPackages.map((pkg) => renderPackageCard(pkg))}
+                  </div>
+                </>
+              ) : (
+                /* Detail View with Back Button */
+                <div className="space-y-4">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPackageId(null)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-800 hover:text-black shadow-2xs transition-all active:scale-95 cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-[#B8710B]" />
+                    <span>Back to all packages</span>
+                  </button>
+
+                  {filteredPackages
+                    .filter((p) => p.id === selectedPackageId)
+                    .map((pkg) => renderPackageArticle(pkg))}
+                </div>
+              )}
+            </>
           )}
         </div>
 
-{/* INQUIRY MODAL */}
+        {/* INQUIRY MODAL */}
         {inquiryPackage && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
