@@ -473,6 +473,28 @@ export default function PackagesPage() {
     }, 250)
   }
 
+  const packageMatchesBackdropFilter = (pkg: WeddingPackage, filter: string): boolean => {
+    if (filter === 'All') return true
+    if (filter === 'Destination Weddings') {
+      return (
+        pkg.backdrop.toLowerCase() === 'destination weddings' ||
+        ['coast', 'hills', 'backwaters'].includes(pkg.backdrop.toLowerCase()) ||
+        pkg.title.toLowerCase().includes('destination') ||
+        pkg.description.toLowerCase().includes('destination')
+      )
+    }
+    if (filter === 'Event Management') {
+      return (
+        pkg.backdrop.toLowerCase() === 'event management' ||
+        pkg.backdrop.toLowerCase() === 'heritage' ||
+        pkg.title.toLowerCase().includes('event') ||
+        pkg.description.toLowerCase().includes('event') ||
+        pkg.partnerPlanner.toLowerCase().includes('event')
+      )
+    }
+    return pkg.backdrop.toLowerCase() === filter.toLowerCase()
+  }
+
   const handleOpenPackage = (pkgId: string) => {
     requireAuth('to view exclusive wedding package details, pricing, and booking dates', () => {
       const idx = filteredPackages.findIndex((p) => p.id === pkgId)
@@ -480,11 +502,7 @@ export default function PackagesPage() {
         setActivePackageIndex(idx)
       }
       const pkg = packages.find((p) => p.id === pkgId)
-      if (
-        pkg &&
-        selectedBackdrop !== 'All' &&
-        pkg.backdrop.toLowerCase() !== selectedBackdrop.toLowerCase()
-      ) {
+      if (pkg && selectedBackdrop !== 'All' && !packageMatchesBackdropFilter(pkg, selectedBackdrop)) {
         setSelectedBackdrop('All')
       }
       if (searchFilter) {
@@ -511,11 +529,10 @@ export default function PackagesPage() {
     }
   }, [selectedPackageId, user, requireAuth])
 
-  // Filter packages based on selected city, backdrop, planner, and search
+  // Filter packages based on selected city, category, planner, and search
   const filteredPackages = packages.filter((pkg) => {
     const matchesCity = packageMatchesCity(pkg, selectedCity)
-    const matchesBackdrop =
-      selectedBackdrop === 'All' || pkg.backdrop.toLowerCase() === selectedBackdrop.toLowerCase()
+    const matchesBackdrop = packageMatchesBackdropFilter(pkg, selectedBackdrop)
     const matchesPlanner =
       selectedPlannerFilter === 'All' ||
       pkg.partnerPlanner.toLowerCase().includes(selectedPlannerFilter.toLowerCase())
@@ -1056,8 +1073,7 @@ export default function PackagesPage() {
             <Link to="/" className="hover:text-[#C83B68] transition-colors font-medium">Home</Link>
             <span className="text-gray-300">/</span>
             <Link
-              to="/packages"
-              onClick={() => setSelectedPackageId(null)}
+              to="/categories"
               className="hover:text-[#C83B68] transition-colors font-medium"
             >
               Services
@@ -1065,22 +1081,20 @@ export default function PackagesPage() {
             <span className="text-gray-300">/</span>
             <span
               onClick={() => setSelectedPackageId(null)}
-              className="text-gray-600 font-medium cursor-pointer hover:text-[#C83B68]"
+              className={
+                selectedPackageId
+                  ? 'text-gray-600 font-medium cursor-pointer hover:text-[#C83B68]'
+                  : 'text-[#5A172D] font-bold'
+              }
             >
               Event Management
             </span>
-            {selectedPackageId ? (
+            {selectedPackageId && (
               <>
                 <span className="text-gray-300">/</span>
                 <span className="text-[#5A172D] font-bold truncate max-w-[260px] sm:max-w-md">
-                  {displayedPackages.find((p) => p.id === selectedPackageId)?.title}
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="text-gray-300">/</span>
-                <span className="text-[#5A172D] font-bold truncate max-w-[260px] sm:max-w-md">
-                  {displayedPackages[activePackageIndex]?.title || 'Signature Wedding Experience'}
+                  {displayedPackages.find((p) => p.id === selectedPackageId)?.title ||
+                    packages.find((p) => p.id === selectedPackageId)?.title}
                 </span>
               </>
             )}
@@ -1366,9 +1380,9 @@ export default function PackagesPage() {
                   <strong className="text-gray-900 font-bold">{filteredPackages.length}</strong> packages found
                 </span>
                 <div className="flex items-center gap-2">
-                  {/* Backdrop Pill Filters (Desktop only) */}
+                  {/* Category Pill Filters (Desktop only) */}
                   <div className="hidden sm:flex items-center gap-1.5 overflow-x-auto py-0.5">
-                    {['All', 'Backwaters', 'Coast', 'Hills', 'Heritage'].map((tab) => (
+                    {['All', 'Destination Weddings', 'Event Management'].map((tab) => (
                       <button
                         key={tab}
                         type="button"
@@ -1769,13 +1783,13 @@ export default function PackagesPage() {
                 </button>
               </div>
 
-              {/* Backdrop / Landscape Filter */}
+              {/* Category Filter */}
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                  Destination Backdrop
+                  Category
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {['All', 'Backwaters', 'Coast', 'Hills', 'Heritage'].map((tab) => (
+                  {['All', 'Destination Weddings', 'Event Management'].map((tab) => (
                     <button
                       key={tab}
                       type="button"
@@ -1786,7 +1800,7 @@ export default function PackagesPage() {
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      {tab === 'All' ? 'All Backdrops' : tab}
+                      {tab === 'All' ? 'All' : tab}
                     </button>
                   ))}
                 </div>
