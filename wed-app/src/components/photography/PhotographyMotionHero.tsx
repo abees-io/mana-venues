@@ -289,15 +289,14 @@ export default function PhotographyMotionHero({
                 key={type.id}
                 type="button"
                 onClick={() => handleSelectType(idx)}
-                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                  idx === activeIndex
-                    ? 'w-8 bg-gradient-to-r from-[#C83B68] to-[#E05A85]'
-                    : 'w-2 bg-[#D8F0EC] hover:bg-[#C83B68]/50'
-                }`}
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${idx === activeIndex
+                  ? 'w-8 bg-gradient-to-r from-[#C83B68] to-[#E05A85]'
+                  : 'w-2 bg-[#D8F0EC] hover:bg-[#C83B68]/50'
+                  }`}
                 aria-label={`Switch to ${type.title}`}
               />
             ))}
-            </div>
+          </div>
         </div>
 
         {/* Right: Active Category Detailed Overview & Highlights */}

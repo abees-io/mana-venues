@@ -33,21 +33,16 @@ export const MAKEUP_STYLES: MakeupTypeMeta[] = [
   {
     id: 'hd_bridal',
     title: 'HD Bridal Makeup',
-    subtitle: 'Ceremony Muhurtham, Temple Jewelry & Saree Pleating',
+    subtitle: '',
     icon: Crown,
     image: '/makeup-bridal.jpg',
     badge: 'Muhurtham & Sacred Heritage',
     badgeColor: 'from-[#C83B68] via-[#E05A85] to-[#C83B68]',
     startingPrice: 'From ₹22,000',
-    description:
-      'Sweat-proof 18-hour High Definition perfection honoring timeless bridal traditions with temple jewelry setting, jasmine veni braid arrangement, and precision silk saree drape.',
+    description: '',
     brandKit: 'Charlotte Tilbury • MAC Pro • Huda Beauty • Dior Backstage',
     swatches: ['#800020', '#C83B68', '#E6A15C', '#D4AF37'],
-    keyPoints: [
-      'Sweat-proof, tear-proof 18-hour HD foundation base with 24K gold skin hydration',
-      'Elaborate South Indian jasmine veni bridal braid with traditional netti chutti setting',
-      'Pin-tight Kanchipuram silk saree pre-pleating, iron press & zero-crease draping',
-    ],
+    keyPoints: [],
     deliverableSummary: '18h HD Base • Saree Drape • 3 Touchups',
   },
   {
@@ -312,12 +307,14 @@ export default function BridalMakeupMotionHero({
                         <span>{type.title}</span>
                       </div>
 
-                      <h3
-                        className="text-base sm:text-xl font-bold tracking-wide leading-tight line-clamp-1 drop-shadow-sm"
-                        style={{ fontFamily: "'Cinzel', serif" }}
-                      >
-                        {type.subtitle}
-                      </h3>
+                      {type.subtitle && (
+                        <h3
+                          className="text-base sm:text-xl font-bold tracking-wide leading-tight line-clamp-1 drop-shadow-sm"
+                          style={{ fontFamily: "'Cinzel', serif" }}
+                        >
+                          {type.subtitle}
+                        </h3>
+                      )}
 
                       <div className="pt-1 flex items-center justify-between text-[11px] text-white/85">
                         <span>{type.deliverableSummary}</span>
@@ -355,31 +352,37 @@ export default function BridalMakeupMotionHero({
           {/* Right: Active Category Overview */}
           <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
             <div className="space-y-3.5">
-              <h2
-                className="text-2xl sm:text-3xl font-extrabold text-[#5A172D] tracking-wide leading-tight"
-                style={{ fontFamily: "'Cinzel', serif" }}
-              >
-                {active.subtitle}
-              </h2>
+              {active.subtitle && (
+                <h2
+                  className="text-2xl sm:text-3xl font-extrabold text-[#5A172D] tracking-wide leading-tight"
+                  style={{ fontFamily: "'Cinzel', serif" }}
+                >
+                  {active.subtitle}
+                </h2>
+              )}
 
-              <p className="text-xs sm:text-sm text-black/80 font-medium leading-relaxed">
-                {active.description}
-              </p>
+              {active.description && (
+                <p className="text-xs sm:text-sm text-black/80 font-medium leading-relaxed">
+                  {active.description}
+                </p>
+              )}
 
               {/* Signature Inclusions */}
-              <div className="space-y-2 pt-1">
-                <p className="text-xs font-extrabold uppercase tracking-wider text-[#5A172D]">
-                  Signature Beauty Inclusions
-                </p>
-                <ul className="space-y-1.5">
-                  {active.keyPoints.map((point, pIdx) => (
-                    <li key={pIdx} className="flex items-start gap-2 text-xs text-black/85 font-medium">
-                      <CheckCircle2 className="w-4 h-4 text-[#C83B68] shrink-0 mt-0.5" />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {active.keyPoints && active.keyPoints.length > 0 && (
+                <div className="space-y-2 pt-1">
+                  <p className="text-xs font-extrabold uppercase tracking-wider text-[#5A172D]">
+                    Signature Beauty Inclusions
+                  </p>
+                  <ul className="space-y-1.5">
+                    {active.keyPoints.map((point, pIdx) => (
+                      <li key={pIdx} className="flex items-start gap-2 text-xs text-black/85 font-medium">
+                        <CheckCircle2 className="w-4 h-4 text-[#C83B68] shrink-0 mt-0.5" />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* CTAs */}

@@ -34,21 +34,16 @@ export const CATERING_FEASTS: CateringTypeMeta[] = [
   {
     id: 'sadya',
     title: 'Traditional Royal Sadya',
-    subtitle: 'Authentic 28-Course Kerala Feast on Fresh Plantain Leaf',
+    subtitle: '',
     icon: Soup,
     image: '/catering-sadya.jpg',
     badge: 'Heritage Kerala Feast',
     badgeColor: 'from-[#0F766E] via-[#14B8A6] to-[#0D9488]',
     startingPrice: 'From ₹420 / Plate',
-    description:
-      'Revering timeless royal banquets: 28 sacred curries prepared in pure brass urulis, melted fragrant ghee, crispy sharkara varatti, and 4 varieties of piping hot slow-cooked payasams.',
+    description: '',
     kitchenSpec: '100% Traditional Brass Urulis • Pure Golden Ghee • Organic Spices',
     platterDetails: ['Avial & Olan', 'Palada Pradhaman', 'Parippu & Ghee', 'Fresh Banana Leaf'],
-    keyPoints: [
-      'Authentic 28-course feast cooked by master heritage Namboothiri chefs',
-      '4 signature slow-cooked payasams: Palada, Parippu, Wheat & Ada Pradhaman',
-      'Full traditional kasavu-clad hospitality serving team with seamless banana leaf pacing',
-    ],
+    keyPoints: [],
     deliverableSummary: '28 Traditional Dishes • 4 Payasams • Plantain Leaf',
   },
   {
@@ -313,12 +308,14 @@ export default function CateringMotionHero({
                         <span>{type.title}</span>
                       </div>
 
-                      <h3
-                        className="text-base sm:text-xl font-bold tracking-wide leading-tight line-clamp-1 drop-shadow-sm"
-                        style={{ fontFamily: "'Cinzel', serif" }}
-                      >
-                        {type.subtitle}
-                      </h3>
+                      {type.subtitle && (
+                        <h3
+                          className="text-base sm:text-xl font-bold tracking-wide leading-tight line-clamp-1 drop-shadow-sm"
+                          style={{ fontFamily: "'Cinzel', serif" }}
+                        >
+                          {type.subtitle}
+                        </h3>
+                      )}
 
                       <div className="pt-1 flex items-center justify-between text-[11px] text-white/85">
                         <span>{type.deliverableSummary}</span>
@@ -356,31 +353,37 @@ export default function CateringMotionHero({
           {/* Right: Active Category Overview */}
           <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
             <div className="space-y-3.5">
-              <h2
-                className="text-2xl sm:text-3xl font-extrabold text-[#5A172D] tracking-wide leading-tight"
-                style={{ fontFamily: "'Cinzel', serif" }}
-              >
-                {active.subtitle}
-              </h2>
+              {active.subtitle && (
+                <h2
+                  className="text-2xl sm:text-3xl font-extrabold text-[#5A172D] tracking-wide leading-tight"
+                  style={{ fontFamily: "'Cinzel', serif" }}
+                >
+                  {active.subtitle}
+                </h2>
+              )}
 
-              <p className="text-xs sm:text-sm text-black/80 font-medium leading-relaxed">
-                {active.description}
-              </p>
+              {active.description && (
+                <p className="text-xs sm:text-sm text-black/80 font-medium leading-relaxed">
+                  {active.description}
+                </p>
+              )}
 
               {/* Signature Inclusions */}
-              <div className="space-y-2 pt-1">
-                <p className="text-xs font-extrabold uppercase tracking-wider text-[#5A172D]">
-                  Signature Culinary Highlights
-                </p>
-                <ul className="space-y-1.5">
-                  {active.keyPoints.map((point, pIdx) => (
-                    <li key={pIdx} className="flex items-start gap-2 text-xs text-black/85 font-medium">
-                      <CheckCircle2 className="w-4 h-4 text-[#C83B68] shrink-0 mt-0.5" />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {active.keyPoints && active.keyPoints.length > 0 && (
+                <div className="space-y-2 pt-1">
+                  <p className="text-xs font-extrabold uppercase tracking-wider text-[#5A172D]">
+                    Signature Culinary Highlights
+                  </p>
+                  <ul className="space-y-1.5">
+                    {active.keyPoints.map((point, pIdx) => (
+                      <li key={pIdx} className="flex items-start gap-2 text-xs text-black/85 font-medium">
+                        <CheckCircle2 className="w-4 h-4 text-[#C83B68] shrink-0 mt-0.5" />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* CTAs */}
