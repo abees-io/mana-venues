@@ -277,10 +277,13 @@ const pushHistory = (past: WeddingPackage[][], current: WeddingPackage[]) =>
 async function pushPackagesToCloud(packages: WeddingPackage[]) {
   try {
     const payload = JSON.stringify(packages)
-    await supabase
+    const { error } = await supabase
       .from('auditoriums')
       .update({ description: payload } as any)
       .eq('slug', 'mana_system_packages_config')
+    if (error) {
+      console.warn('Failed to sync packages to Supabase:', error.message)
+    }
   } catch (err) {
     console.warn('Failed to sync packages to Supabase:', err)
   }

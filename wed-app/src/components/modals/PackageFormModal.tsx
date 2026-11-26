@@ -1,7 +1,26 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, Upload, Plus, Trash2, Loader2, Image as ImageIcon, Star, Crop as CropIcon } from 'lucide-react'
+import {
+  X,
+  Upload,
+  Plus,
+  Trash2,
+  Loader2,
+  Image as ImageIcon,
+  Star,
+  Crop as CropIcon,
+  Film,
+  Smartphone,
+  Monitor,
+  Sparkles,
+} from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 import { uploadOrConvertMultiplePhotos } from '../../lib/imageUtils'
-import { usePackagesStore, type WeddingPackage } from '../../store/packagesStore'
+import {
+  usePackagesStore,
+  type WeddingPackage,
+  type PackageReel,
+  type ReelAspectRatio,
+} from '../../store/packagesStore'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCities, KERALA_DISTRICTS_CITIES } from '../../hooks/useCities'
 import { formatSelectedCitiesLocation } from '../../lib/cityMatch'
@@ -32,6 +51,7 @@ export default function PackageFormModal({
   const addPackage = usePackagesStore((s) => s.addPackage)
   const updatePackage = usePackagesStore((s) => s.updatePackage)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const videoInputRef = useRef<HTMLInputElement>(null)
 
   const [title, setTitle] = useState('')
   const [tagline, setTagline] = useState('')
@@ -50,6 +70,14 @@ export default function PackageFormModal({
   const [isUploading, setIsUploading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [croppingImageIndex, setCroppingImageIndex] = useState<number | null>(null)
+
+  // Instagram-style Reel / Video state
+  const [reelVideoUrl, setReelVideoUrl] = useState('')
+  const [reelTitle, setReelTitle] = useState('')
+  const [reelLocation, setReelLocation] = useState('')
+  const [reelAspectRatio, setReelAspectRatio] = useState<ReelAspectRatio>('9:16')
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false)
+  const [existingReels, setExistingReels] = useState<PackageReel[]>([])
 
   useEffect(() => {
     if (!isOpen) return
@@ -82,6 +110,20 @@ export default function PackageFormModal({
             ? [initialPackage.image]
             : []
       )
+      const primaryReel = initialPackage.reels?.[0]
+      if (primaryReel) {
+        setReelVideoUrl(primaryReel.videoUrl || '')
+        setReelTitle(primaryReel.title || '')
+        setReelLocation(primaryReel.location || '')
+        setReelAspectRatio(primaryReel.aspectRatio || '9:16')
+        setExistingReels(initialPackage.reels || [])
+      } else {
+        setReelVideoUrl('')
+        setReelTitle('')
+        setReelLocation('')
+        setReelAspectRatio('9:16')
+        setExistingReels([])
+      }
     } else {
       setTitle('')
       setTagline('')
@@ -98,6 +140,11 @@ export default function PackageFormModal({
       setInstagramUrl('https://instagram.com/manaweddings')
       setWhatsappNumber('919847012345')
       setImages(['/dest-wedding-1.jpg'])
+      setReelVideoUrl('')
+      setReelTitle('')
+      setReelLocation('')
+      setReelAspectRatio('9:16')
+      setExistingReels([])
     }
     setImageUrlInput('')
     setErrorMsg(null)
@@ -118,6 +165,50 @@ export default function PackageFormModal({
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const handleVideoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingVideo(true)
+    setErrorMsg(null)
+    try {
+      const cleanName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+      const { error: uploadErr } = await supabase.storage
+        .from('auditorium-photos')
+        .upload(`reels/${cleanName}`, file, {
+          upsert: true,
+          contentType: file.type || 'video/mp4',
+        })
+
+      if (!uploadErr) {
+        const { data: urlData } = supabase.storage
+          .from('auditorium-photos')
+          .getPublicUrl(`reels/${cleanName}`)
+        if (urlData?.publicUrl) {
+          setReelVideoUrl(urlData.publicUrl)
+          return
+        }
+      }
+
+      if (file.size <= 6 * 1024 * 1024) {
+        const reader = new FileReader()
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            setReelVideoUrl(reader.result)
+          }
+        }
+        reader.readAsDataURL(file)
+      } else {
+        setReelVideoUrl(URL.createObjectURL(file))
+      }
+    } catch {
+      setErrorMsg('Could not process video file. Please try pasting a video URL or using 5s demo reel.')
+    } finally {
+      setIsUploadingVideo(false)
+      if (videoInputRef.current) videoInputRef.current.value = ''
     }
   }
 
@@ -172,7 +263,23 @@ export default function PackageFormModal({
       .map((line) => line.trim())
       .filter(Boolean)
 
-    const payload: Omit<WeddingPackage, 'id' | 'reels'> = {
+    let finalReels: PackageReel[] = []
+    if (reelVideoUrl.trim()) {
+      const primaryReel: PackageReel = {
+        id: existingReels[0]?.id || `reel-${Date.now().toString(36)}`,
+        title: reelTitle.trim() || `${cleanTitle} Highlight`,
+        location: reelLocation.trim() || cleanLocation,
+        videoUrl: reelVideoUrl.trim(),
+        posterUrl: finalImages[0] || '/dest-wedding-1.jpg',
+        aspectRatio: reelAspectRatio,
+        size: existingReels[0]?.size || 'md',
+      }
+      finalReels = [primaryReel, ...existingReels.slice(1)]
+    } else if (existingReels.length > 0) {
+      finalReels = existingReels
+    }
+
+    const payload: Omit<WeddingPackage, 'id'> = {
       title: cleanTitle.slice(0, 120),
       tagline: tagline.trim().slice(0, 160) || `${backdrop} destination wedding experience`,
       backdrop,
@@ -189,6 +296,7 @@ export default function PackageFormModal({
       instagramUrl: instagramUrl.trim(),
       whatsappNumber: whatsappNumber.trim(),
       vendorId: initialPackage?.vendorId || (profile?.role === 'vendor' ? profile.id : undefined),
+      reels: finalReels,
     }
 
     if (initialPackage) {
@@ -506,6 +614,246 @@ export default function PackageFormModal({
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* Instagram-Style Reel & Video Section */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#121B18] via-brand-dark to-black border border-emerald-800/60 space-y-4 shadow-inner">
+            {/* Header with Aspect Ratio Toggle */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-emerald-800/40">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] flex items-center justify-center text-white shadow-md">
+                  <Film className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">
+                    Package Video / Reel
+                  </span>
+                  <p className="text-[11px] text-emerald-300/70">
+                    Upload a video reel to showcase your wedding experience in action
+                  </p>
+                </div>
+              </div>
+
+              {/* Aspect Ratio Switcher (9:16 vs 16:9) */}
+              <div className="flex items-center gap-1.5 bg-black/60 p-1 rounded-xl border border-emerald-700/40">
+                <button
+                  type="button"
+                  onClick={() => setReelAspectRatio('9:16')}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    reelAspectRatio === '9:16'
+                      ? 'bg-gradient-to-r from-[#DD2A7B] to-[#8134AF] text-white shadow-sm'
+                      : 'text-emerald-200/80 hover:text-white hover:bg-white/5'
+                  }`}
+                  title="9:16 Vertical Reel (Instagram / TikTok format)"
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <span>9:16 Reel</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReelAspectRatio('16:9')}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    reelAspectRatio === '16:9'
+                      ? 'bg-gradient-to-r from-[#DD2A7B] to-[#8134AF] text-white shadow-sm'
+                      : 'text-emerald-200/80 hover:text-white hover:bg-white/5'
+                  }`}
+                  title="16:9 Cinematic Landscape format"
+                >
+                  <Monitor className="w-3.5 h-3.5" />
+                  <span>16:9 Wide</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Hidden Video File Input */}
+            <input
+              ref={videoInputRef}
+              type="file"
+              accept="video/mp4,video/webm,video/quicktime,video/*"
+              onChange={handleVideoFileUpload}
+              className="hidden"
+            />
+
+            {/* Active Reel Preview or Empty State Dropzone */}
+            {reelVideoUrl ? (
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-3.5 rounded-xl bg-black/50 border border-emerald-800/50">
+                {/* Reel Card Phone / Screen Preview */}
+                <div
+                  className={`relative shrink-0 rounded-xl overflow-hidden bg-black border border-white/20 shadow-xl group ${
+                    reelAspectRatio === '9:16'
+                      ? 'w-[140px] sm:w-[150px] aspect-[9/16]'
+                      : 'w-full max-w-[240px] aspect-video'
+                  }`}
+                >
+                  {reelVideoUrl === 'dummy-5s' ? (
+                    <div className="relative w-full h-full flex flex-col justify-between p-2.5 bg-gradient-to-b from-black/40 via-transparent to-black/80">
+                      <img
+                        src={images[0] || '/dest-wedding-1.jpg'}
+                        alt="Reel Cover"
+                        className="absolute inset-0 w-full h-full object-cover opacity-85"
+                      />
+                      <div className="relative z-10 flex items-center justify-between">
+                        <span className="px-1.5 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-[9px] font-bold text-white flex items-center gap-1 border border-white/10">
+                          <Sparkles className="w-2.5 h-2.5 text-amber-300" /> 5s Demo
+                        </span>
+                        <span className="text-[9px] font-bold text-white/90 bg-white/20 px-1.5 py-0.5 rounded-full backdrop-blur-xs">
+                          {reelAspectRatio}
+                        </span>
+                      </div>
+                      <div className="relative z-10 space-y-0.5 bg-black/50 backdrop-blur-xs p-1.5 rounded-lg border border-white/10">
+                        <p className="text-[10px] font-bold text-white drop-shadow-md truncate">
+                          {reelTitle || `${title || 'Package'} Highlight`}
+                        </p>
+                        <p className="text-[8px] text-emerald-200 drop-shadow truncate">
+                          @{partnerPlanner} • {reelLocation || location || 'Kerala'}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative w-full h-full">
+                      <video
+                        src={reelVideoUrl}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80 pointer-events-none p-2 flex flex-col justify-between">
+                        <span className="self-end text-[9px] font-bold text-white bg-black/60 px-1.5 py-0.5 rounded-full border border-white/20">
+                          {reelAspectRatio}
+                        </span>
+                        <div className="space-y-0.5 bg-black/60 backdrop-blur-xs p-1.5 rounded-lg border border-white/10">
+                          <p className="text-[10px] font-bold text-white drop-shadow truncate">
+                            {reelTitle || `${title || 'Package'} Highlight`}
+                          </p>
+                          <p className="text-[8px] text-emerald-200 drop-shadow truncate">
+                            @{partnerPlanner} • {reelLocation || location || 'Kerala'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Reel Controls & Info */}
+                <div className="flex-1 w-full space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-xs font-bold text-white">
+                        {reelVideoUrl === 'dummy-5s'
+                          ? '5-Second Demo Reel Attached'
+                          : 'Custom Video Reel Attached'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={isUploadingVideo}
+                        onClick={() => videoInputRef.current?.click()}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-900/80 hover:bg-emerald-800 text-xs font-semibold text-emerald-100 border border-emerald-700/50 transition-colors"
+                      >
+                        {isUploadingVideo ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Upload className="w-3.5 h-3.5" />
+                        )}
+                        <span>Change Video</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setReelVideoUrl('')}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900/80 text-xs font-semibold text-red-200 border border-red-800/40 transition-colors"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Remove</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-emerald-200 mb-1">
+                        Reel Caption / Overlay Title
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={100}
+                        value={reelTitle}
+                        onChange={(e) => setReelTitle(e.target.value)}
+                        placeholder={title ? `${title} Highlight` : 'e.g. Royal Sunset Mandap Reveal'}
+                        className="w-full px-2.5 py-1.5 text-xs bg-brand-dark/90 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-1 focus:ring-brand-secondary"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-emerald-200 mb-1">
+                        Reel Location Tag
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={100}
+                        value={reelLocation}
+                        onChange={(e) => setReelLocation(e.target.value)}
+                        placeholder={location || 'e.g. Kumarakom, Kochi'}
+                        className="w-full px-2.5 py-1.5 text-xs bg-brand-dark/90 border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-1 focus:ring-brand-secondary"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Empty State: Instagram Reel Upload Dropzone */
+              <div className="space-y-3">
+                <div
+                  onClick={() => videoInputRef.current?.click()}
+                  className="group relative cursor-pointer flex flex-col items-center justify-center p-6 sm:p-7 rounded-xl border-2 border-dashed border-emerald-700/50 hover:border-[#DD2A7B] bg-black/40 hover:bg-black/60 transition-all text-center"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] flex items-center justify-center text-white mb-2.5 shadow-md group-hover:scale-110 transition-transform">
+                    {isUploadingVideo ? (
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    ) : (
+                      <Upload className="w-6 h-6" />
+                    )}
+                  </div>
+                  <p className="text-xs sm:text-sm font-bold text-white group-hover:text-[#F3A2BE] transition-colors">
+                    {isUploadingVideo ? 'Uploading your video...' : 'Tap or Drag to Upload Reel Video'}
+                  </p>
+                  <p className="text-[11px] text-emerald-300/70 mt-0.5">
+                    Supports MP4, MOV, WebM • Available in{' '}
+                    <span className="font-semibold text-white">9:16 (Reel)</span> &amp;{' '}
+                    <span className="font-semibold text-white">16:9 (Cinematic)</span>
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReelVideoUrl('dummy-5s')
+                      if (!reelTitle && title) setReelTitle(`${title} Highlight`)
+                      if (!reelLocation && location) setReelLocation(location)
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-900/60 hover:bg-emerald-800 text-xs font-semibold text-brand-secondary border border-brand-secondary/30 transition-colors"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Use Instant 5s Demo Reel</span>
+                  </button>
+
+                  <div className="flex items-center gap-2 flex-1 max-w-sm">
+                    <input
+                      type="text"
+                      value={reelVideoUrl}
+                      onChange={(e) => setReelVideoUrl(e.target.value)}
+                      placeholder="Or paste direct video URL (https://...)"
+                      className="w-full px-2.5 py-1.5 text-xs bg-brand-dark border border-emerald-700/50 rounded-lg text-white placeholder-emerald-500/40 focus:outline-none focus:ring-1 focus:ring-brand-secondary"
+                    />
+                  </div>
+                </div>
               </div>
             )}
           </div>

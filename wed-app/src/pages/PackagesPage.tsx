@@ -327,6 +327,12 @@ export default function PackagesPage() {
   }, [])
 
   const packages = usePackagesStore((s) => s.packages)
+  const fetchGlobalPackages = usePackagesStore((s) => s.fetchGlobalPackages)
+
+  useEffect(() => {
+    fetchGlobalPackages()
+  }, [fetchGlobalPackages])
+
   const past = usePackagesStore((s) => s.past)
   const future = usePackagesStore((s) => s.future)
   const undo = usePackagesStore((s) => s.undo)
@@ -729,7 +735,10 @@ export default function PackagesPage() {
     )
   }
 
-  const renderPackageArticle = (pkg: WeddingPackage) => (
+  const renderPackageArticle = (pkg: WeddingPackage) => {
+    const canManageThisPackage = Boolean(isAdmin || (isPlannerVendor && pkg.vendorId === profile?.id))
+
+    return (
     <article
       key={pkg.id}
       id={`package-${pkg.id}`}
@@ -744,7 +753,7 @@ export default function PackagesPage() {
         <div className="w-full lg:w-[48%] shrink-0 p-5 sm:p-6 lg:p-7">
           <PackageImageGallery
             pkg={pkg}
-            isAdmin={Boolean(isAdmin || (isPlannerVendor && pkg.vendorId === profile?.id))}
+            isAdmin={canManageThisPackage}
             onEdit={() => {
               setEditingPackage(pkg)
               setIsPkgModalOpen(true)
@@ -952,19 +961,19 @@ export default function PackagesPage() {
       </div>
 
       {/* Bottom Row: Reels Section directly UNDER this package (Horizontally ordered on web, vertical on mobile) */}
-      {((pkg.reels && pkg.reels.length > 0) || isAdmin) && (
+      {((pkg.reels && pkg.reels.length > 0) || canManageThisPackage) && (
         <div
           onDragOver={(e) => {
-            if (isAdmin && draggedReel) e.preventDefault()
+            if (canManageThisPackage && draggedReel) e.preventDefault()
           }}
           onDrop={(e) => {
-            if (!isAdmin || !draggedReel) return
+            if (!canManageThisPackage || !draggedReel) return
             e.preventDefault()
             handleDropReel(pkg.id)
           }}
           className="p-5 sm:p-6 lg:px-7 border-t border-[#D8F0EC] bg-[#F0F9F8]/60 space-y-4"
         >
-          {isAdmin && (
+          {canManageThisPackage && (
             <div className="flex items-center justify-end gap-1.5">
               <button
                 type="button"
@@ -1006,16 +1015,16 @@ export default function PackagesPage() {
               {pkg.reels.map((reel, rIdx) => (
                 <div
                   key={reel.id}
-                  draggable={Boolean(isAdmin)}
+                  draggable={Boolean(canManageThisPackage)}
                   onDragStart={(e) => {
                     e.stopPropagation()
                     setDraggedReel({ pkgId: pkg.id, reelId: reel.id, index: rIdx })
                   }}
                   onDragOver={(e) => {
-                    if (isAdmin && draggedReel) e.preventDefault()
+                    if (canManageThisPackage && draggedReel) e.preventDefault()
                   }}
                   onDrop={(e) => {
-                    if (!isAdmin || !draggedReel) return
+                    if (!canManageThisPackage || !draggedReel) return
                     e.preventDefault()
                     e.stopPropagation()
                     handleDropReel(pkg.id, rIdx)
@@ -1026,7 +1035,7 @@ export default function PackagesPage() {
                 >
                   <ReelPlayerCard
                     reel={reel}
-                    isAdmin={Boolean(isAdmin)}
+                    isAdmin={Boolean(canManageThisPackage)}
                     canMoveLeft={rIdx > 0}
                     canMoveRight={rIdx < pkg.reels.length - 1}
                     onMoveLeft={() => reorderPackageReels(pkg.id, rIdx, rIdx - 1)}
@@ -1050,8 +1059,8 @@ export default function PackagesPage() {
               ))}
             </div>
           ) : (
-            <p className="text-xs text-emerald-300/60 italic">
-              No reels added yet. Click &quot;Add Reel&quot; to attach a 5s dummy or custom video.
+            <p className="text-xs text-emerald-700/60 italic">
+              No reels added yet. Click &quot;Add Reel&quot; to attach a video reel.
             </p>
           )}
         </div>
@@ -1062,7 +1071,7 @@ export default function PackagesPage() {
         {renderExclusiveLinks(pkg, 'flex')}
       </div>
     </article>
-  )
+  )}
 
   return (
     <Layout>
