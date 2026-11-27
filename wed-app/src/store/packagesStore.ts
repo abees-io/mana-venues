@@ -250,6 +250,7 @@ export const DEFAULT_PACKAGES: WeddingPackage[] = [
 
 interface PackagesStoreState {
   packages: WeddingPackage[]
+  deletedPackageIds?: string[]
   past: WeddingPackage[][]
   future: WeddingPackage[][]
   savedDesktopAt: string | null
@@ -273,16 +274,36 @@ interface PackagesStoreState {
 const pushHistory = (past: WeddingPackage[][], current: WeddingPackage[]) =>
   [...past.slice(-24), current]
 
-// Background push to Supabase so added/edited packages go live globally across devices
+// Background push to Supabase so added/edited/deleted packages go live globally across devices
 async function pushPackagesToCloud(packages: WeddingPackage[]) {
   try {
     const payload = JSON.stringify(packages)
-    const { error } = await supabase
+    const { data: existing } = await supabase
       .from('auditoriums')
-      .update({ description: payload } as any)
+      .select('id')
       .eq('slug', 'mana_system_packages_config')
-    if (error) {
-      console.warn('Failed to sync packages to Supabase:', error.message)
+      .maybeSingle()
+
+    if (existing) {
+      const { error } = await supabase
+        .from('auditoriums')
+        .update({ description: payload } as any)
+        .eq('slug', 'mana_system_packages_config')
+      if (error) {
+        console.warn('Failed to sync packages to Supabase:', error.message)
+      }
+    } else {
+      const { error } = await supabase
+        .from('auditoriums')
+        .insert({
+          name: 'System Packages Config',
+          slug: 'mana_system_packages_config',
+          description: payload,
+          is_active: false,
+        } as any)
+      if (error) {
+        console.warn('Failed to insert packages config to Supabase:', error.message)
+      }
     }
   } catch (err) {
     console.warn('Failed to sync packages to Supabase:', err)
@@ -293,6 +314,7 @@ export const usePackagesStore = create<PackagesStoreState>()(
   persist(
     (set) => ({
       packages: DEFAULT_PACKAGES,
+      deletedPackageIds: [],
       past: [],
       future: [],
       savedDesktopAt: null,
@@ -309,11 +331,15 @@ export const usePackagesStore = create<PackagesStoreState>()(
             const parsed = JSON.parse(data.description)
             if (Array.isArray(parsed) && parsed.length > 0) {
               set((state) => {
-                // Merge custom cloud packages with local state, keeping all newly created vendor packages
-                const cloudIds = new Set(parsed.map((p: WeddingPackage) => p.id))
-                const localOnly = state.packages.filter((p) => !cloudIds.has(p.id))
+                const deletedSet = new Set(state.deletedPackageIds || [])
+                const cloudFiltered = parsed.filter((p: WeddingPackage) => !deletedSet.has(p.id))
+                // Retain local-only packages that have not been explicitly deleted
+                const cloudIds = new Set(cloudFiltered.map((p: WeddingPackage) => p.id))
+                const localOnly = state.packages.filter(
+                  (p) => !cloudIds.has(p.id) && !deletedSet.has(p.id)
+                )
                 return {
-                  packages: [...parsed, ...localOnly],
+                  packages: [...cloudFiltered, ...localOnly],
                 }
               })
             }
@@ -420,11 +446,13 @@ export const usePackagesStore = create<PackagesStoreState>()(
       deletePackage: (id) =>
         set((state) => {
           const nextPackages = state.packages.filter((p) => p.id !== id)
+          const nextDeleted = Array.from(new Set([...(state.deletedPackageIds || []), id]))
           pushPackagesToCloud(nextPackages)
           return {
             past: pushHistory(state.past, state.packages),
             future: [],
             packages: nextPackages,
+            deletedPackageIds: nextDeleted,
           }
         }),
       addPackageReel: (packageId, reel) =>
@@ -558,6 +586,7 @@ export const usePackagesStore = create<PackagesStoreState>()(
       version: 5,
       partialize: (state) => ({
         packages: state.packages,
+        deletedPackageIds: state.deletedPackageIds || [],
         savedDesktopAt: state.savedDesktopAt,
         savedMobileAt: state.savedMobileAt,
       }),

@@ -6,6 +6,7 @@ import AuditoriumDetailPage from '../pages/AuditoriumDetailPage'
 import BookingConfirmPage from '../pages/BookingConfirmPage'
 import ProfilePage from '../pages/ProfilePage'
 import AuthPage from '../pages/AuthPage'
+import AuthCallbackPage from '../pages/AuthCallbackPage'
 import { ProtectedRoute } from '../components/ProtectedRoute'
 import { ScrollToTop } from '../components/ScrollToTop'
 
@@ -107,6 +108,14 @@ export const router = createBrowserRouter([
             <ProfilePage />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: '/auth',
+        element: <AuthPage />,
+      },
+      {
+        path: '/auth/callback',
+        element: <AuthCallbackPage />,
       },
       {
         path: '/auth/login',

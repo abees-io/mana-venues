@@ -5,6 +5,7 @@ import { Eye, EyeOff, KeyRound, ArrowLeft, CheckCircle2, MapPin } from 'lucide-r
 import Layout from '../components/layout/Layout'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import GoogleSignInButton from '../components/auth/GoogleSignInButton'
 
 interface AuthFormData {
   email: string
@@ -333,6 +334,25 @@ export default function AuthPage() {
                     ? 'Create Account'
                     : 'Sign In'}
               </button>
+
+              {/* Divider */}
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-green-800/60" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-brand-dark px-2 text-green-300/60 font-semibold tracking-wider">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+
+              {/* Google Sign-In Button */}
+              <GoogleSignInButton
+                role="customer"
+                label={viewMode === 'register' ? 'Sign up with Google' : 'Continue with Google'}
+                className="bg-white text-gray-900 hover:bg-gray-100"
+              />
             </form>
           )}
 

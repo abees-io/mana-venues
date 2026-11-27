@@ -676,15 +676,17 @@ export default function PackagesPage() {
       (pkg.images && pkg.images[0]) ||
       'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80'
 
+    const canManageThisPackage = Boolean(isAdmin || (isPlannerVendor && pkg.vendorId === profile?.id))
+
     return (
       <div
         key={pkg.id}
         onClick={() => {
           handleOpenPackage(pkg.id)
         }}
-        className="bg-white rounded-2xl overflow-hidden border border-gray-200/80 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer active:scale-[0.98] group hover:-translate-y-1"
+        className="bg-white rounded-2xl overflow-hidden border border-gray-200/80 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer active:scale-[0.98] group hover:-translate-y-1 relative"
       >
-        {/* Top Image & Wishlist Button */}
+        {/* Top Image, Admin Actions & Wishlist Button */}
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
           <img
             src={coverImg}
@@ -692,6 +694,46 @@ export default function PackagesPage() {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
+
+          {/* Admin / Vendor Management Toolbar on Card */}
+          {canManageThisPackage && (
+            <div
+              className="absolute top-2 left-2 flex items-center gap-1.5 z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setEditingPackage(pkg)
+                  setIsPkgModalOpen(true)
+                }}
+                title={`Edit ${pkg.title}`}
+                aria-label={`Edit ${pkg.title}`}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 backdrop-blur-md text-[#C83B68] hover:bg-white border border-[#D8F0EC] shadow-md transition-all flex items-center justify-center cursor-pointer active:scale-90"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (window.confirm(`Are you sure you want to delete package "${pkg.title}"? This cannot be undone.`)) {
+                    deletePackage(pkg.id)
+                    if (selectedPackageId === pkg.id) {
+                      setSelectedPackageId(null)
+                    }
+                  }
+                }}
+                title={isAdmin ? `Delete Package as Admin: "${pkg.title}"` : `Delete "${pkg.title}"`}
+                aria-label={`Delete ${pkg.title}`}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 backdrop-blur-md text-red-600 hover:bg-red-50 border border-red-200 shadow-md transition-all flex items-center justify-center cursor-pointer active:scale-90"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           <button
             type="button"
             aria-label="Save package"
@@ -744,6 +786,46 @@ export default function PackagesPage() {
       id={`package-${pkg.id}`}
       className="package-card-pop group rounded-2xl overflow-hidden bg-white backdrop-blur-md border border-[#D8F0EC] shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col will-change-[transform,opacity] scroll-mt-24"
     >
+      {/* Admin / Vendor Management Banner inside Package Details */}
+      {canManageThisPackage && (
+        <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 bg-amber-50/80 border-b border-amber-200/70 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded-md bg-amber-200/70 text-amber-900 font-bold uppercase text-[10px]">
+              {isAdmin ? 'Super Admin' : 'Vendor'}
+            </span>
+            <span className="font-medium text-amber-800">
+              Manage Package: <strong className="text-gray-900">{pkg.title}</strong>
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setEditingPackage(pkg)
+                setIsPkgModalOpen(true)
+              }}
+              className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-white border border-gray-200 text-gray-700 hover:text-black font-semibold shadow-2xs transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5 text-[#C83B68]" />
+              <span>Edit Details</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm(`Are you sure you want to permanently delete package "${pkg.title}"? This cannot be undone.`)) {
+                  deletePackage(pkg.id)
+                  setSelectedPackageId(null)
+                }
+              }}
+              className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold shadow-2xs transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete Package</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Top Row: Photo on Left + Details on Right (or Swapped by Admin) */}
       <div
         className={`flex flex-col ${pkg.reverseDesktopLayout ? 'lg:flex-row-reverse' : 'lg:flex-row'
@@ -761,6 +843,7 @@ export default function PackagesPage() {
             onDelete={() => {
               if (window.confirm(`Delete package "${pkg.title}"?`)) {
                 deletePackage(pkg.id)
+                setSelectedPackageId(null)
               }
             }}
           />

@@ -2,6 +2,10 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '../lib/types'
+import {
+  signInWithGoogle as googleSignInHelper,
+  type SignInWithGoogleOptions,
+} from '../lib/googleAuth'
 
 interface AuthContextType {
   user: User | null
@@ -15,6 +19,7 @@ interface AuthContextType {
     phone: string,
     extraData?: Record<string, unknown>
   ) => Promise<{ session: boolean }>
+  signInWithGoogle: (options?: SignInWithGoogleOptions) => Promise<void>
   signOut: () => Promise<void>
   updateProfile: (updates: {
     full_name?: string
@@ -44,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       business_name: (meta.business_name as string) || null,
       access_permissions: (meta.access_permissions as string[]) || null,
       preferred_city: (meta.preferred_city as string) || null,
-      avatar_url: (meta.avatar_url as string) || null,
+      avatar_url: (meta.avatar_url as string) || (meta.picture as string) || null,
       created_at: targetUser.created_at || new Date().toISOString(),
     }
   }
@@ -231,6 +236,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { session: !!data.session }
   }
 
+  const signInWithGoogle = async (options?: SignInWithGoogleOptions): Promise<void> => {
+    setLoading(true)
+    try {
+      const result = await googleSignInHelper(options)
+      if (result.isNative && (result.data as { user?: User })?.user) {
+        const nativeUser = (result.data as { user: User }).user
+        setUser(nativeUser)
+        await fetchProfile(nativeUser.id, nativeUser)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const signOut = async (): Promise<void> => {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
@@ -246,6 +265,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         signIn,
         signUp,
+        signInWithGoogle,
         signOut,
         updateProfile,
         refreshProfile,

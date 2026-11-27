@@ -15,6 +15,7 @@ import {
 import Layout from '../../components/layout/Layout'
 import { useAuth } from '../../contexts/AuthContext'
 import type { VendorType } from '../../lib/types'
+import GoogleSignInButton from '../../components/auth/GoogleSignInButton'
 import {
   checkRateLimit,
   recordRateLimitAttempt,
@@ -553,6 +554,24 @@ export default function VendorAuthPage() {
                   {rateLimitLockSeconds > 0 ? `Please wait ${rateLimitLockSeconds}s to retry` : isSubmitting ? 'Signing in...' : 'Sign In to Vendor Portal'}
                 </button>
               </div>
+
+              {/* Divider */}
+              <div className="relative my-3">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200" />
+                </div>
+                <div className="relative flex justify-center text-[11px] uppercase">
+                  <span className="bg-white px-2 text-gray-400 font-semibold tracking-wider">
+                    Or sign in with
+                  </span>
+                </div>
+              </div>
+
+              {/* Google Sign In */}
+              <GoogleSignInButton
+                role="vendor"
+                label="Continue with Google"
+              />
 
               <div className="pt-2 text-center text-xs text-gray-500">
                 Are you a customer?{' '}

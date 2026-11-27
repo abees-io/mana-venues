@@ -19,6 +19,7 @@ import {
 import { useLoginGate } from '../../contexts/LoginGateContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCityStore } from '../../store/cityStore'
+import GoogleSignInButton from '../auth/GoogleSignInButton'
 import {
   checkRateLimit,
   recordRateLimitAttempt,
@@ -470,6 +471,28 @@ export function LoginGateModal() {
                   </>
                 )}
               </button>
+
+              {/* Divider */}
+              <div className="relative my-3.5">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200" />
+                </div>
+                <div className="relative flex justify-center text-[11px] uppercase">
+                  <span className="bg-white px-2 text-gray-400 font-semibold tracking-wider">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+
+              {/* Google Sign-In */}
+              <GoogleSignInButton
+                role="customer"
+                label={mode === 'register' ? 'Sign up with Google' : 'Continue with Google'}
+                onSuccess={() => {
+                  if (onSuccessCallback) onSuccessCallback()
+                  handleClose()
+                }}
+              />
             </form>
 
             {/* Vendor Register Button */}

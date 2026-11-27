@@ -5,14 +5,17 @@ import {
   Loader2,
   Building2,
   CheckCircle,
+  Package,
 } from 'lucide-react'
 import { useAdminMetrics } from '../../hooks/useAdminMetrics'
 import { PlatformMetricsPanel } from '../../components/admin/PlatformMetricsPanel'
 import { AdminManageEntities } from '../../components/admin/AdminManageEntities'
+import { usePackagesStore } from '../../store/packagesStore'
 import Layout from '../../components/layout/Layout'
 
 export function AdminDashboard() {
   const { data: metrics, isLoading, isRefetching, refetch } = useAdminMetrics()
+  const packages = usePackagesStore((s) => s.packages)
 
   return (
     <Layout>
@@ -56,7 +59,7 @@ export function AdminDashboard() {
         <AdminManageEntities />
 
         {/* Quick Navigation Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <Link
             to="/admin/verification"
             className="p-5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-2xl flex items-center justify-between hover:shadow-md transition-shadow group"
@@ -79,6 +82,28 @@ export function AdminDashboard() {
             </span>
           </Link>
 
+          <Link
+            to="/packages"
+            className="p-5 bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200/60 rounded-2xl flex items-center justify-between hover:shadow-md transition-shadow group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[#C83B68] text-white flex items-center justify-center">
+                <Package className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 group-hover:text-rose-900">
+                  Packages &amp; Reels
+                </p>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  {packages.length} listed • Delete or edit packages
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-bold text-rose-700 bg-rose-200/70 px-2.5 py-1 rounded-full">
+              Manage →
+            </span>
+          </Link>
+
           <div className="p-5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200/60 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
@@ -87,7 +112,7 @@ export function AdminDashboard() {
               <div>
                 <p className="font-semibold text-gray-900">Platform Health</p>
                 <p className="text-xs text-gray-600 mt-0.5">
-                  Database & Razorpay Webhook Gateway Online
+                  Database &amp; Razorpay Gateway Online
                 </p>
               </div>
             </div>
