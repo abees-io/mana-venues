@@ -1,7 +1,7 @@
 {
   "buildCommand": "npm --prefix wed-app run build",
   "outputDirectory": "wed-app/dist",
-  "installCommand": "npm --prefix wed-app install",
+  "installCommand": "npm --prefix wed-app install --legacy-peer-deps",
   "rewrites": [
     {
       "source": "/(.*)",
